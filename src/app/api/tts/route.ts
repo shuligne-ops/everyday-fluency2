@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const voiceId = process.env.ELEVENLABS_VOICE_ID || 'Da9VfudgKUvFOKayCiue'
 
   const response = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_22050_32`,
     {
       method: 'POST',
       headers: {
@@ -18,13 +18,11 @@ export async function POST(req: NextRequest) {
         'xi-api-key': process.env.ELEVENLABS_API_KEY!,
       },
       body: JSON.stringify({
-        text: text.substring(0, 2000),
-        model_id: 'eleven_turbo_v2_5',
+        text: text.substring(0, 1000),
+        model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75,
-          style: 0.0,
-          use_speaker_boost: false,
         },
       }),
     }
@@ -41,7 +39,6 @@ export async function POST(req: NextRequest) {
   return new Response(audioBuffer, {
     headers: {
       'Content-Type': 'audio/mpeg',
-      'Cache-Control': 'public, max-age=86400',
     },
   })
 }
