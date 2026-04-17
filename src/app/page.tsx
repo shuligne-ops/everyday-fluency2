@@ -10,7 +10,7 @@ type Lesson = {
   lesson_number: number
   title_fr: string
   title_ru: string
-  content: any
+  content?: any
 }
 
 type Message = {
