@@ -4,13 +4,21 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import ReactMarkdown from 'react-markdown'
 
+type LessonSummary = {
+  id: number
+  level: string
+  lesson_number: number
+  title_fr: string
+  title_ru: string
+}
+
 type Lesson = {
   id: number
   level: string
   lesson_number: number
   title_fr: string
   title_ru: string
-  content?: any
+  content: any
 }
 
 type Message = {
@@ -28,7 +36,7 @@ function normalizeMarkdown(text: string): string {
 
 export default function Home() {
   const [selectedLevel, setSelectedLevel] = useState<string>('A1')
-  const [lessons, setLessons] = useState<Lesson[]>([])
+  const [lessons, setLessons] = useState<LessonSummary[]>([])
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
