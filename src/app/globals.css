@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --france-blue: #002395;
+  --france-red: #ED2939;
+  --france-cream: #FFF8F0;
+  --france-warm: #F5E6D3;
+  --france-dark: #1a1a2e;
+  --france-gold: #C9A96E;
+}
+
+body {
+  background-color: var(--france-cream);
+  color: var(--france-dark);
+}
+
+/* Chat bubbles */
+.bubble-assistant {
+  background-color: #f0f0f0;
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 16px;
+  max-width: 85%;
+}
+
+.bubble-user {
+  background-color: var(--france-blue);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  padding: 12px 16px;
+  max-width: 85%;
+}
+
+/* Auto-expanding textarea */
+.chat-input {
+  min-height: 44px;
+  max-height: 150px;
+  resize: none;
+  overflow-y: auto;
+  field-sizing: content;
+}
+
+/* Smooth scrolling */
+.chat-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Level selector buttons */
+.level-btn {
+  transition: all 0.2s ease;
+}
+
+.level-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 35, 149, 0.2);
+}
+
+.level-btn.active {
+  background-color: var(--france-blue);
+  color: white;
+}
