@@ -228,8 +228,8 @@ export default function Home() {
                       onClick={() => handleTTS(msg.content, i)}
                       style={{
                         position: 'absolute',
-                        right: '-44px',
-                        top: '8px',
+                        right: '8px',
+                        bottom: '8px',
                         width: '36px',
                         height: '36px',
                         borderRadius: '50%',
