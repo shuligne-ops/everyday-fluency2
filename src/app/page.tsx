@@ -131,20 +131,37 @@ export default function Home() {
   }
 
   function mic() {
-    if (recording) { recRef.current?.stop(); setRecording(false); return }
+    if (recording) {
+      recRef.current?.stop()
+      setRecording(false)
+      return
+    }
     const S = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!S) { alert('Браузер не поддерживает речь'); return }
-    const r = new S(); r.lang = 'fr-FR'; r.continuous = true; r.interimResults = true
-    let t: any
+    const r = new S()
+    r.lang = 'fr-FR'
+    r.continuous = false
+    r.interimResults = false
+    r.maxAlternatives = 1
+
     r.onresult = (e: any) => {
-      clearTimeout(t); let s = ''
-      for (let i = 0; i < e.results.length; i++) s += e.results[i][0].transcript
-      setInput(s)
-      t = setTimeout(() => { r.stop(); setRecording(false) }, 4000)
+      if (e.results.length > 0 && e.results[0].length > 0) {
+        const transcript = e.results[0][0].transcript
+        setInput(prev => prev ? prev + ' ' + transcript : transcript)
+      }
     }
-    r.onend = () => { clearTimeout(t); setRecording(false) }
-    r.onerror = () => { clearTimeout(t); setRecording(false) }
-    recRef.current = r; r.start(); setRecording(true)
+
+    r.onend = () => {
+      setRecording(false)
+    }
+
+    r.onerror = () => {
+      setRecording(false)
+    }
+
+    recRef.current = r
+    r.start()
+    setRecording(true)
   }
 
   function back() { kill(); setLesson(null); setMsgs([]) }
@@ -186,7 +203,7 @@ export default function Home() {
         ))}
         {loading && msgs[msgs.length - 1]?.role !== 'assistant' && (
           <div style={{ padding: '16px 20px', background: 'white', borderLeft: '3px solid #002395', borderRadius: '0 12px 12px 0', maxWidth: '85%' }}>
-            <span style={{ animation: 'pulse 1s infinite' }}>●●●</span>
+            <span style={{ animation: 'pulse 1s infinite' }}>...</span>
           </div>
         )}
         <div ref={endRef} />
@@ -228,11 +245,8 @@ export default function Home() {
       <div>
         {lessons.map(ls => (
           <button key={ls.id} onClick={() => open(ls.id)} style={{
-            display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', marginBottom: '8px',
-            transition: 'box-shadow 0.2s', fontFamily: 'inherit'
-          }}
-          onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)')}
-          onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}>
+            display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit'
+          }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#999' }}>{String(ls.lesson_number).padStart(2, '0')}</span>
               <div>
