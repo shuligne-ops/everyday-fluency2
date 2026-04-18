@@ -2,15 +2,20 @@ import { NextRequest } from 'next/server'
 
 function cleanForTTS(text: string): string {
   let t = text
-  t = t.replace(/[\u{1F600}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{FE00}-\u{FE0F}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{200D}]|[\u{FE0F}]/gu, '')
+  // Remove markdown
   t = t.replace(/#{1,6}\s*/g, '')
   t = t.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
   t = t.replace(/`([^`]+)`/g, '$1')
   t = t.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+  // Remove Russian text in parentheses
   t = t.replace(/\([^)]*[\u0400-\u04FF][^)]*\)/g, '')
-  t = t.replace(/[\u0400-\u04FF][^\n.!?]*[.!?\n]/g, '')
+  // Remove standalone Russian sentences
+  t = t.replace(/[\u0400-\u04FF][\u0400-\u04FF\s,.!?;:'"()-]*[.!?\n]/g, '')
+  // Remove any remaining Cyrillic words
   t = t.replace(/[\u0400-\u04FF]+/g, '')
-  t = t.replace(/[❌✅🔊⏳⏸●•·—–]/g, '')
+  // Remove common special chars TTS reads aloud
+  t = t.replace(/[*#_~`>|]/g, '')
+  // Collapse whitespace
   t = t.replace(/\s{2,}/g, ' ')
   t = t.replace(/\n{3,}/g, '\n\n')
   return t.trim()
