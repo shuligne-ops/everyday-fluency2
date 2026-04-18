@@ -9,32 +9,25 @@ Chaque leçon a 5 étapes. Tu guides l'élève à travers chaque étape dans l'o
 Présente la phrase-clé du jour. Donne la phrase en français, sa traduction en russe, une explication simple, et un exemple. Demande à l'élève s'il est prêt pour le dialogue.
 
 **Étape 2 — Premier dialogue**
-Lis le dialogue. Chaque réplique sur une ligne séparée avec un tiret (—) devant. Après le dialogue, demande à l'élève ce qu'il a compris.
+Lis le dialogue. Chaque réplique sur une ligne séparée. Mets le nom du personnage en gras suivi d'un deux-points avant chaque réplique. Après le dialogue, demande à l'élève ce qu'il a compris.
 
 **Étape 3 — Décodage**
 Pose les questions de compréhension une par une. Après chaque réponse, donne un feedback encourageant. Explique le vocabulaire clé et la note culturelle. Si l'élève répond en russe, c'est normal — encourage-le progressivement à utiliser le français.
 
 **Étape 4 — Deuxième écoute**
-Lis le même dialogue une deuxième fois. Dis à l'élève d'écouter le rythme et les intonations.
+Lis le même dialogue une deuxième fois avec les noms en gras. Dis à l'élève d'écouter le rythme et les intonations.
 
 **Étape 5 — Pratique**
 Présente le scénario de pratique. Invite l'élève à s'exprimer. Donne des retours constructifs et chaleureux.
 
-=== RÈGLE ABSOLUE SUR LES NOMS ===
-INTERDICTION TOTALE de mentionner les noms des personnages (Camille, Léo, Inès, Mathieu, Chloé, Youssef, Émilie, Antoine, Nadia, Julien, Margot, Hugo, Lucie, Théo, Awa, Romain) dans les dialogues.
+=== FORMAT DES DIALOGUES ===
+Quand tu présentes un dialogue, utilise ce format exact :
 
-Quand tu présentes un dialogue, tu écris UNIQUEMENT les répliques avec un tiret devant :
-— Bonjour, la chaise est libre ?
-— Oui, bien sûr, allez-y.
-— Merci. Il y a du monde.
+**Camille :** Bonjour, la chaise est libre ?
+**Léo :** Oui, bien sûr, allez-y.
+**Camille :** Merci. Il y a du monde.
 
-JAMAIS :
-❌ Camille : Bonjour...
-❌ Léo : Oui...
-❌ "Camille dit..."
-❌ "La première personne (Camille)..."
-
-Les noms n'existent pas dans les dialogues. Point final.
+Les noms sont en gras pour que l'élève voie qui parle. L'audio s'occupera de les retirer automatiquement.
 
 === AUTRES RÈGLES ===
 1. Parle en français avec des traductions en russe entre parenthèses quand c'est utile pour les niveaux A1-A2. Pour B1+, utilise principalement le français.
@@ -44,31 +37,13 @@ Les noms n'existent pas dans les dialogues. Point final.
 5. Si l'élève fait une erreur, corrige avec douceur.
 6. N'utilise JAMAIS le mot "times" (bug connu).`
 
-function stripNames(lines: string[]): string[] {
-  const names = /^(Camille|Léo|Léo|Inès|Mathieu|Chloé|Youssef|Émilie|Antoine|Nadia|Julien|Margot|Hugo|Lucie|Théo|Awa|Romain)\s*:\s*/i
-  return lines.map(line => line.replace(names, '').trim())
-}
-
-function cleanLessonContent(content: any): any {
-  const cleaned = JSON.parse(JSON.stringify(content))
-  if (cleaned.step2?.dialogue_with_names) {
-    cleaned.step2.dialogue = stripNames(cleaned.step2.dialogue_with_names)
-    delete cleaned.step2.dialogue_with_names
-  }
-  if (cleaned.step4?.dialogue_no_names) {
-    cleaned.step4.dialogue = stripNames(cleaned.step4.dialogue_no_names)
-    delete cleaned.step4.dialogue_no_names
-  }
-  return cleaned
-}
-
 export async function POST(req: NextRequest) {
   const { lesson, lessonTitle, lessonLevel, lessonNumber, messages } = await req.json()
-  const cleanedLesson = cleanLessonContent(lesson)
+
   const apiMessages = [
     {
       role: 'user' as const,
-      content: `Voici le contenu de la leçon ${lessonLevel}-${String(lessonNumber).padStart(2, '0')} "${lessonTitle}":\n\n${JSON.stringify(cleanedLesson, null, 2)}\n\nCommence la leçon avec l'Étape 1 — la phrase-clé du jour. RAPPEL : dans les dialogues, JAMAIS de noms de personnages, uniquement des tirets (—) devant chaque réplique.`,
+      content: `Voici le contenu de la leçon ${lessonLevel}-${String(lessonNumber).padStart(2, '0')} "${lessonTitle}":\n\n${JSON.stringify(lesson, null, 2)}\n\nCommence la leçon avec l'Étape 1 — la phrase-clé du jour.`,
     },
     ...messages,
   ]
@@ -90,8 +65,7 @@ export async function POST(req: NextRequest) {
   })
 
   if (!response.ok) {
-    const error = await response.text()
-    console.error('Anthropic API error:', error)
+    console.error('Anthropic API error:', await response.text())
     return new Response('API Error', { status: 500 })
   }
 
