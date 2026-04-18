@@ -28,319 +28,216 @@ type Message = {
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
-function normalizeMarkdown(text: string): string {
-  return text.replace(/\*\*\s+/g, '**').replace(/\s+\*\*/g, '**')
+function normalizeMd(t: string) {
+  return t.replace(/\*\*\s+/g, '**').replace(/\s+\*\*/g, '**')
 }
 
-// Global audio element - survives React re-renders
-let globalAudio: HTMLAudioElement | null = null
+let gAudio: HTMLAudioElement | null = null
+let gAudioIdx = -1
 
 export default function Home() {
-  const [selectedLevel, setSelectedLevel] = useState<string>('A1')
+  const [level, setLevel] = useState('A1')
   const [lessons, setLessons] = useState<LessonSummary[]>([])
-  const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [inputText, setInputText] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [ttsState, setTtsState] = useState<'idle' | 'loading' | 'playing'>('idle')
-  const [playingIdx, setPlayingIdx] = useState<number>(-1)
-
-  const chatEndRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const recognitionRef = useRef<any>(null)
-
-  useEffect(() => {
-    async function fetchLessons() {
-      const { data } = await supabase
-        .from('lessons')
-        .select('id, level, lesson_number, title_fr, title_ru')
-        .eq('level', selectedLevel)
-        .order('lesson_number')
-      if (data) setLessons(data as LessonSummary[])
-    }
-    fetchLessons()
-  }, [selectedLevel])
+  const [lesson, setLesson] = useState<Lesson | null>(null)
+  const [msgs, setMsgs] = useState<Message[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [tts, setTts] = useState<'idle' | 'load' | 'play'>('idle')
+  const [ttsIdx, setTtsIdx] = useState(-1)
+  const endRef = useRef<HTMLDivElement>(null)
+  const taRef = useRef<HTMLTextAreaElement>(null)
+  const recRef = useRef<any>(null)
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    supabase.from('lessons').select('id,level,lesson_number,title_fr,title_ru')
+      .eq('level', level).order('lesson_number')
+      .then(({ data }) => { if (data) setLessons(data as LessonSummary[]) })
+  }, [level])
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '48px'
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + 'px'
+    if (taRef.current) {
+      taRef.current.style.height = '48px'
+      taRef.current.style.height = Math.min(taRef.current.scrollHeight, 160) + 'px'
     }
-  }, [inputText])
+  }, [input])
 
-  async function startLesson(lessonId: number) {
-    const { data } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('id', lessonId)
-      .single()
-    if (data) {
-      setCurrentLesson(data as Lesson)
-      setMessages([])
-      killAudio()
-      await sendToAPI(data as Lesson, [])
-    }
+  async function open(id: number) {
+    const { data } = await supabase.from('lessons').select('*').eq('id', id).single()
+    if (!data) return
+    setLesson(data as Lesson)
+    setMsgs([])
+    kill()
+    await chat(data as Lesson, [])
   }
 
-  async function sendToAPI(lesson: Lesson, history: Message[], userMsg?: string) {
-    setIsLoading(true)
-    const msgs = userMsg ? [...history, { role: 'user' as const, content: userMsg }] : history
-    if (userMsg) { setMessages(msgs); setInputText('') }
+  async function chat(l: Lesson, h: Message[], u?: string) {
+    setLoading(true)
+    const m = u ? [...h, { role: 'user' as const, content: u }] : h
+    if (u) { setMsgs(m); setInput('') }
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lesson: lesson.content,
-          lessonTitle: lesson.title_fr,
-          lessonLevel: lesson.level,
-          lessonNumber: lesson.lesson_number,
-          messages: msgs,
-        }),
+      const r = await fetch('/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lesson: l.content, lessonTitle: l.title_fr, lessonLevel: l.level, lessonNumber: l.lesson_number, messages: m })
       })
-      if (!res.ok) throw new Error('API error')
-      const reader = res.body?.getReader()
-      const decoder = new TextDecoder()
-      let text = ''
-      setMessages([...msgs, { role: 'assistant', content: '' }])
-      while (reader) {
-        const { done, value } = await reader.read()
+      if (!r.ok) throw 0
+      const rd = r.body?.getReader(), dc = new TextDecoder()
+      let txt = ''
+      setMsgs([...m, { role: 'assistant', content: '' }])
+      while (rd) {
+        const { done, value } = await rd.read()
         if (done) break
-        text += decoder.decode(value, { stream: true })
-        setMessages([...msgs, { role: 'assistant', content: text }])
+        txt += dc.decode(value, { stream: true })
+        setMsgs([...m, { role: 'assistant', content: txt }])
       }
-    } catch {
-      setMessages([...msgs, { role: 'assistant', content: 'Ошибка подключения. Попробуйте ещё раз.' }])
+    } catch { setMsgs([...m, { role: 'assistant', content: 'Ошибка. Попробуйте ещё раз.' }]) }
+    setLoading(false)
+  }
+
+  function send() {
+    if (!input.trim() || !lesson || loading) return
+    chat(lesson, msgs, input.trim())
+  }
+
+  function onKey(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
+  }
+
+  function kill() {
+    if (gAudio) { gAudio.pause(); gAudio.src = ''; gAudio = null }
+    gAudioIdx = -1; setTts('idle'); setTtsIdx(-1)
+  }
+
+  async function speak(text: string, idx: number) {
+    if (gAudioIdx === idx && gAudio) {
+      if (tts === 'play') { gAudio.pause(); setTts('idle'); return }
+      if (tts === 'idle') { gAudio.play(); setTts('play'); return }
     }
-    setIsLoading(false)
-  }
-
-  function handleSend() {
-    if (!inputText.trim() || !currentLesson || isLoading) return
-    sendToAPI(currentLesson, messages, inputText.trim())
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
-  }
-
-  function killAudio() {
-    if (globalAudio) {
-      globalAudio.pause()
-      globalAudio.src = ''
-      globalAudio = null
-    }
-    setTtsState('idle')
-    setPlayingIdx(-1)
-  }
-
-  async function handleTTS(text: string, idx: number) {
-    // Same message playing — toggle pause/play
-    if (playingIdx === idx && globalAudio) {
-      if (ttsState === 'playing') {
-        globalAudio.pause()
-        setTtsState('idle')
-        return
-      }
-      if (ttsState === 'idle' && globalAudio.src) {
-        globalAudio.play()
-        setTtsState('playing')
-        return
-      }
-    }
-
-    killAudio()
-    setTtsState('loading')
-    setPlayingIdx(idx)
-
+    kill(); setTts('load'); setTtsIdx(idx); gAudioIdx = idx
     try {
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+      const r = await fetch('/api/tts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
       })
-      if (!res.ok) throw new Error('TTS fail')
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const audio = new Audio(url)
-      globalAudio = audio
-      audio.onended = () => killAudio()
-      audio.onerror = () => killAudio()
-      audio.play()
-      setTtsState('playing')
-    } catch {
-      killAudio()
-    }
+      if (!r.ok) throw 0
+      const b = await r.blob(), u = URL.createObjectURL(b), a = new Audio(u)
+      gAudio = a
+      a.onended = () => kill()
+      a.onerror = () => kill()
+      a.play(); setTts('play')
+    } catch { kill() }
   }
 
-  function toggleRecording() {
-    if (isRecording) { recognitionRef.current?.stop(); setIsRecording(false); return }
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) { alert('Браузер не поддерживает распознавание речи'); return }
-    const rec = new SR()
-    rec.lang = 'fr-FR'
-    rec.continuous = true
-    rec.interimResults = true
-    let timer: any
-    rec.onresult = (e: any) => {
-      clearTimeout(timer)
-      let t = ''
-      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript
-      setInputText(t)
-      timer = setTimeout(() => { rec.stop(); setIsRecording(false) }, 4000)
+  function mic() {
+    if (recording) { recRef.current?.stop(); setRecording(false); return }
+    const S = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!S) { alert('Браузер не поддерживает речь'); return }
+    const r = new S(); r.lang = 'fr-FR'; r.continuous = true; r.interimResults = true
+    let t: any
+    r.onresult = (e: any) => {
+      clearTimeout(t); let s = ''
+      for (let i = 0; i < e.results.length; i++) s += e.results[i][0].transcript
+      setInput(s)
+      t = setTimeout(() => { r.stop(); setRecording(false) }, 4000)
     }
-    rec.onend = () => { clearTimeout(timer); setIsRecording(false) }
-    rec.onerror = () => { clearTimeout(timer); setIsRecording(false) }
-    recognitionRef.current = rec
-    rec.start()
-    setIsRecording(true)
+    r.onend = () => { clearTimeout(t); setRecording(false) }
+    r.onerror = () => { clearTimeout(t); setRecording(false) }
+    recRef.current = r; r.start(); setRecording(true)
   }
 
-  function backToLessons() { killAudio(); setCurrentLesson(null); setMessages([]) }
+  function back() { kill(); setLesson(null); setMsgs([]) }
 
-  // ===== LESSON VIEW =====
-  if (currentLesson) {
-    return (
-      <div className="flex flex-col h-screen max-w-3xl mx-auto">
-        <header className="flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-100">
-          <button onClick={backToLessons} className="text-gray-400 hover:text-gray-600">← Retour</button>
-          <div className="flex-1 min-w-0">
-            <h2 className="font-display text-lg font-semibold truncate" style={{ color: '#1a1a2e' }}>
-              {currentLesson.level}-{String(currentLesson.lesson_number).padStart(2, '0')}: {currentLesson.title_fr}
-            </h2>
-            <p className="text-sm text-gray-400">{currentLesson.title_ru}</p>
+  if (lesson) return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ padding: '12px 16px', background: 'white', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button onClick={back} style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: '14px' }}>← Retour</button>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '18px', color: '#1a1a2e' }}>
+            {lesson.level}-{String(lesson.lesson_number).padStart(2, '0')}: {lesson.title_fr}
           </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-3">
-          {messages.map((msg, i) => (
-            <div key={i} className={msg.role === 'assistant' ? '' : 'flex justify-end'}>
-              {msg.role === 'assistant' ? (
-                <div className="chat-bubble-ai" style={{ position: 'relative' }}>
-                  <ReactMarkdown>{normalizeMarkdown(msg.content)}</ReactMarkdown>
-                  {msg.content.length > 10 && (
-                    <button
-                      onClick={() => handleTTS(msg.content, i)}
-                      style={{
-                        position: 'absolute',
-                        right: '8px',
-                        bottom: '8px',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '18px',
-                        background: playingIdx === i && ttsState === 'loading' ? '#FEF3C7'
-                          : playingIdx === i && ttsState === 'playing' ? '#002395'
-                          : '#f3f4f6',
-                        color: playingIdx === i && ttsState === 'playing' ? 'white' : '#666',
-                      }}
-                    >
-                      {playingIdx === i && ttsState === 'loading' ? '⏳'
-                        : playingIdx === i && ttsState === 'playing' ? '⏸'
-                        : '🔊'}
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="chat-bubble-user"><p>{msg.content}</p></div>
-              )}
-            </div>
-          ))}
-          {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-            <div className="chat-bubble-ai">
-              <span className="animate-pulse">...</span>
-            </div>
-          )}
-          <div ref={chatEndRef} />
-        </div>
-
-        <div className="border-t border-gray-100 bg-white px-4 py-3">
-          <div className="flex items-end gap-2">
-            <textarea
-              ref={textareaRef}
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Écrivez ici..."
-              className="input-expand flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none text-sm"
-              rows={1}
-            />
-            <button
-              onClick={toggleRecording}
-              style={{
-                padding: '12px',
-                borderRadius: '50%',
-                border: 'none',
-                cursor: 'pointer',
-                background: isRecording ? '#ED2939' : '#f3f4f6',
-                color: isRecording ? 'white' : '#666',
-              }}
-            >
-              🎤
-            </button>
-            <button
-              onClick={handleSend}
-              disabled={!inputText.trim() || isLoading}
-              style={{
-                padding: '12px',
-                borderRadius: '50%',
-                border: 'none',
-                cursor: 'pointer',
-                background: '#002395',
-                color: 'white',
-                opacity: !inputText.trim() || isLoading ? 0.3 : 1,
-              }}
-            >
-              ▲
-            </button>
-          </div>
+          <div style={{ fontSize: '13px', color: '#999' }}>{lesson.title_ru}</div>
         </div>
       </div>
-    )
-  }
 
-  // ===== MAIN SCREEN =====
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
+        {msgs.map((m, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: '12px' }}>
+            {m.role === 'assistant' ? (
+              <div style={{ background: 'white', borderLeft: '3px solid #002395', borderRadius: '0 12px 12px 0', padding: '16px 20px', maxWidth: '85%', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', position: 'relative' }}>
+                <ReactMarkdown>{normalizeMd(m.content)}</ReactMarkdown>
+                {m.content.length > 10 && (
+                  <button onClick={() => speak(m.content, i)} style={{
+                    marginTop: '8px', padding: '6px 14px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontSize: '13px',
+                    background: ttsIdx === i && tts === 'load' ? '#FEF3C7' : ttsIdx === i && tts === 'play' ? '#002395' : '#f3f4f6',
+                    color: ttsIdx === i && tts === 'play' ? 'white' : '#555'
+                  }}>
+                    {ttsIdx === i && tts === 'load' ? '⏳ Загрузка...' : ttsIdx === i && tts === 'play' ? '⏸ Пауза' : '🔊 Слушать'}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={{ background: '#002395', color: 'white', borderRadius: '12px 0 0 12px', padding: '16px 20px', maxWidth: '85%' }}>
+                <p style={{ margin: 0 }}>{m.content}</p>
+              </div>
+            )}
+          </div>
+        ))}
+        {loading && msgs[msgs.length - 1]?.role !== 'assistant' && (
+          <div style={{ padding: '16px 20px', background: 'white', borderLeft: '3px solid #002395', borderRadius: '0 12px 12px 0', maxWidth: '85%' }}>
+            <span style={{ animation: 'pulse 1s infinite' }}>●●●</span>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      <div style={{ borderTop: '1px solid #eee', background: 'white', padding: '12px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+          <textarea ref={taRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey}
+            placeholder="Écrivez ici..." rows={1}
+            style={{ flex: 1, padding: '12px 16px', border: '1px solid #ddd', borderRadius: '12px', fontSize: '14px', resize: 'none', minHeight: '48px', maxHeight: '160px', overflowY: 'auto', outline: 'none', fontFamily: 'inherit' }}
+          />
+          <button onClick={mic} style={{
+            width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: '20px',
+            background: recording ? '#ED2939' : '#f3f4f6', color: recording ? 'white' : '#555'
+          }}>🎤</button>
+          <button onClick={send} disabled={!input.trim() || loading} style={{
+            width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: '18px',
+            background: '#002395', color: 'white', opacity: !input.trim() || loading ? 0.3 : 1
+          }}>▲</button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
-    <div className="min-h-screen max-w-3xl mx-auto px-4 py-8">
-      <div className="text-center mb-10">
-        <h1 className="font-display text-4xl font-bold mb-2" style={{ color: '#1a1a2e' }}>Français au Quotidien</h1>
-        <p className="text-gray-500 text-lg">Разговорный французский каждый день</p>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 16px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 700, color: '#1a1a2e', marginBottom: '8px' }}>Français au Quotidien</h1>
+        <p style={{ color: '#888', fontSize: '18px' }}>Разговорный французский каждый день</p>
       </div>
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
-        {LEVELS.map((level) => (
-          <button
-            key={level}
-            onClick={() => setSelectedLevel(level)}
-            className={`level-btn px-5 py-2 rounded-full text-sm font-semibold ${
-              selectedLevel === level ? 'active' : 'bg-white text-gray-600'
-            }`}
-          >
-            {level}
-          </button>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
+        {LEVELS.map(l => (
+          <button key={l} onClick={() => setLevel(l)} style={{
+            padding: '8px 20px', borderRadius: '20px', border: level === l ? '2px solid #002395' : '2px solid transparent', cursor: 'pointer', fontWeight: 600, fontSize: '14px',
+            background: level === l ? '#002395' : 'white', color: level === l ? 'white' : '#555'
+          }}>{l}</button>
         ))}
       </div>
-      <div className="space-y-2">
-        {lessons.map((lesson) => (
-          <button
-            key={lesson.id}
-            onClick={() => startLesson(lesson.id)}
-            className="w-full text-left px-5 py-4 bg-white rounded-xl hover:shadow-md transition-all"
-          >
-            <div className="flex items-baseline gap-3">
-              <span className="text-xs font-mono text-gray-400">{String(lesson.lesson_number).padStart(2, '0')}</span>
+      <div>
+        {lessons.map(ls => (
+          <button key={ls.id} onClick={() => open(ls.id)} style={{
+            display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', marginBottom: '8px',
+            transition: 'box-shadow 0.2s', fontFamily: 'inherit'
+          }}
+          onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)')}
+          onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+              <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#999' }}>{String(ls.lesson_number).padStart(2, '0')}</span>
               <div>
-                <p className="font-display font-semibold" style={{ color: '#1a1a2e' }}>{lesson.title_fr}</p>
-                <p className="text-sm text-gray-400 mt-0.5">{lesson.title_ru}</p>
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#1a1a2e' }}>{ls.title_fr}</div>
+                <div style={{ fontSize: '13px', color: '#999', marginTop: '2px' }}>{ls.title_ru}</div>
               </div>
             </div>
           </button>
