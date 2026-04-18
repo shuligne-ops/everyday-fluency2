@@ -183,7 +183,7 @@ export default function Home() {
           <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: '12px' }}>
             {m.role === 'assistant' ? (
               <div style={{ background: 'white', borderLeft: '3px solid #002395', borderRadius: '0 12px 12px 0', padding: '16px 20px', maxWidth: '85%', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', position: 'relative' }}>
-                <ReactMarkdown>{normalizeMd(m.content)}</ReactMarkdown>
+                <ReactMarkdown components={{ p: ({children}) => <p style={{marginBottom:"8px"}}>{children}</p>, strong: ({children}) => <strong style={{color:"#002395"}}>{children}</strong> }}>{m.content.replace(/\n/g, "  \n")}</ReactMarkdown>
                 {m.content.length > 10 && (
                   <button onClick={() => speak(m.content, i)} style={{
                     marginTop: '8px', padding: '6px 14px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontSize: '13px',
