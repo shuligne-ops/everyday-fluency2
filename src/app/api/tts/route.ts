@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   const cleaned = cleanForTTS(text)
   if (cleaned.length < 5) return new Response('Too short', { status: 400 })
 
-  const voiceId = process.env.ELEVENLABS_VOICE_ID || 'Da9VfudgKUvFOKayCiue'
+  const voiceId = process.env.ELEVENLABS_VOICE_ID || 'a9Y3nxjUXhy3ZLsW0XXb'
   const apiKey = process.env.ELEVENLABS_API_KEY!
   const chunks = splitText(cleaned, 700)
 
