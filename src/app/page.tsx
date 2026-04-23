@@ -8,7 +8,7 @@ type LessonSummary = {
   id: number
   level: string
   lesson_number: number
-  title_fr: string
+  title_en: string
   title_ru: string
 }
 
@@ -16,7 +16,7 @@ type Lesson = {
   id: number
   level: string
   lesson_number: number
-  title_fr: string
+  title_en: string
   title_ru: string
   content: any
 }
@@ -50,7 +50,7 @@ export default function Home() {
   const recRef = useRef<any>(null)
 
   useEffect(() => {
-    supabase.from('lessons').select('id,level,lesson_number,title_fr,title_ru')
+    supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru')
       .eq('level', level).order('lesson_number')
       .then(({ data }) => { if (data) setLessons(data as LessonSummary[]) })
   }, [level])
@@ -65,7 +65,7 @@ export default function Home() {
   }, [input])
 
   async function open(id: number) {
-    const { data } = await supabase.from('lessons').select('*').eq('id', id).single()
+    const { data } = await supabase.from("lessons_v2").select('*').eq('id', id).single()
     if (!data) return
     setLesson(data as Lesson)
     setMsgs([])
@@ -80,7 +80,7 @@ export default function Home() {
     try {
       const r = await fetch('/api/chat', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lesson: l.content, lessonTitle: l.title_fr, lessonLevel: l.level, lessonNumber: l.lesson_number, messages: m })
+        body: JSON.stringify({ lesson: l.content, lessonTitle: l.title_en, lessonLevel: l.level, lessonNumber: l.lesson_number, messages: m })
       })
       if (!r.ok) throw 0
       const rd = r.body?.getReader(), dc = new TextDecoder()
@@ -139,7 +139,7 @@ export default function Home() {
     const S = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!S) { alert('Браузер не поддерживает речь'); return }
     const r = new S()
-    r.lang = 'fr-FR'
+    r.lang = 'en-US'
     r.continuous = false
     r.interimResults = false
     r.maxAlternatives = 1
@@ -169,10 +169,10 @@ export default function Home() {
   if (lesson) return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ padding: '12px 16px', background: 'white', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button onClick={back} style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: '14px' }}>← Retour</button>
+        <button onClick={back} style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: '14px' }}>← Back</button>
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '18px', color: '#1a1a2e' }}>
-            {lesson.level}-{String(lesson.lesson_number).padStart(2, '0')}: {lesson.title_fr}
+            {lesson.level}-{String(lesson.lesson_number).padStart(2, '0')}: {lesson.title_en}
           </div>
           <div style={{ fontSize: '13px', color: '#999' }}>{lesson.title_ru}</div>
         </div>
@@ -182,12 +182,12 @@ export default function Home() {
         {msgs.map((m, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: '12px' }}>
             {m.role === 'assistant' ? (
-              <div style={{ background: 'white', borderLeft: '3px solid #002395', borderRadius: '0 12px 12px 0', padding: '16px 20px', maxWidth: '85%', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', position: 'relative' }}>
-                <ReactMarkdown components={{ p: ({children}) => <p style={{marginBottom:"8px"}}>{children}</p>, strong: ({children}) => <strong style={{color:"#002395"}}>{children}</strong> }}>{m.content.replace(/\n/g, "  \n")}</ReactMarkdown>
+              <div style={{ background: 'white', borderLeft: '3px solid #f59e0b', borderRadius: '0 12px 12px 0', padding: '16px 20px', maxWidth: '85%', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', position: 'relative' }}>
+                <ReactMarkdown components={{ p: ({children}) => <p style={{marginBottom:"8px"}}>{children}</p>, strong: ({children}) => <strong style={{color:"#f59e0b"}}>{children}</strong> }}>{m.content.replace(/\n/g, "  \n")}</ReactMarkdown>
                 {m.content.length > 10 && (
                   <button onClick={() => speak(m.content, i)} style={{
                     marginTop: '8px', padding: '6px 14px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontSize: '13px',
-                    background: ttsIdx === i && tts === 'load' ? '#FEF3C7' : ttsIdx === i && tts === 'play' ? '#002395' : '#f3f4f6',
+                    background: ttsIdx === i && tts === 'load' ? '#FEF3C7' : ttsIdx === i && tts === 'play' ? '#f59e0b' : '#f3f4f6',
                     color: ttsIdx === i && tts === 'play' ? 'white' : '#555'
                   }}>
                     {ttsIdx === i && tts === 'load' ? '⏳ Загрузка...' : ttsIdx === i && tts === 'play' ? '⏸ Пауза' : '🔊 Слушать'}
@@ -195,14 +195,14 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <div style={{ background: '#002395', color: 'white', borderRadius: '12px 0 0 12px', padding: '16px 20px', maxWidth: '85%' }}>
+              <div style={{ background: '#f59e0b', color: 'white', borderRadius: '12px 0 0 12px', padding: '16px 20px', maxWidth: '85%' }}>
                 <p style={{ margin: 0 }}>{m.content}</p>
               </div>
             )}
           </div>
         ))}
         {loading && msgs[msgs.length - 1]?.role !== 'assistant' && (
-          <div style={{ padding: '16px 20px', background: 'white', borderLeft: '3px solid #002395', borderRadius: '0 12px 12px 0', maxWidth: '85%' }}>
+          <div style={{ padding: '16px 20px', background: 'white', borderLeft: '3px solid #f59e0b', borderRadius: '0 12px 12px 0', maxWidth: '85%' }}>
             <span style={{ animation: 'pulse 1s infinite' }}>...</span>
           </div>
         )}
@@ -212,7 +212,7 @@ export default function Home() {
       <div style={{ borderTop: '1px solid #eee', background: 'white', padding: '12px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
           <textarea ref={taRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey}
-            placeholder="Écrivez ici..." rows={1}
+            placeholder="Type here..." rows={1}
             style={{ flex: 1, padding: '12px 16px', border: '1px solid #ddd', borderRadius: '12px', fontSize: '14px', resize: 'none', minHeight: '48px', maxHeight: '160px', overflowY: 'auto', outline: 'none', fontFamily: 'inherit' }}
           />
           <button onClick={mic} style={{
@@ -221,7 +221,7 @@ export default function Home() {
           }}>🎤</button>
           <button onClick={send} disabled={!input.trim() || loading} style={{
             width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: '18px',
-            background: '#002395', color: 'white', opacity: !input.trim() || loading ? 0.3 : 1
+            background: '#f59e0b', color: 'white', opacity: !input.trim() || loading ? 0.3 : 1
           }}>▲</button>
         </div>
       </div>
@@ -231,14 +231,14 @@ export default function Home() {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 16px' }}>
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 700, color: '#1a1a2e', marginBottom: '8px' }}>Français au Quotidien</h1>
-        <p style={{ color: '#888', fontSize: '18px' }}>Разговорный французский каждый день</p>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 700, color: '#1a1a2e', marginBottom: '8px' }}>Everyday Fluency</h1>
+        <p style={{ color: '#888', fontSize: '18px' }}>Разговорный английский каждый день</p>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
         {LEVELS.map(l => (
           <button key={l} onClick={() => setLevel(l)} style={{
-            padding: '8px 20px', borderRadius: '20px', border: level === l ? '2px solid #002395' : '2px solid transparent', cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-            background: level === l ? '#002395' : 'white', color: level === l ? 'white' : '#555'
+            padding: '8px 20px', borderRadius: '20px', border: level === l ? '2px solid #f59e0b' : '2px solid transparent', cursor: 'pointer', fontWeight: 600, fontSize: '14px',
+            background: level === l ? '#f59e0b' : 'white', color: level === l ? 'white' : '#555'
           }}>{l}</button>
         ))}
       </div>
@@ -250,7 +250,7 @@ export default function Home() {
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#999' }}>{String(ls.lesson_number).padStart(2, '0')}</span>
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#1a1a2e' }}>{ls.title_fr}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#1a1a2e' }}>{ls.title_en}</div>
                 <div style={{ fontSize: '13px', color: '#999', marginTop: '2px' }}>{ls.title_ru}</div>
               </div>
             </div>
