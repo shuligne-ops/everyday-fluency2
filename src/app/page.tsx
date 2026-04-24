@@ -48,6 +48,9 @@ export default function Home() {
   const endRef = useRef<HTMLDivElement>(null)
   const taRef = useRef<HTMLTextAreaElement>(null)
   const recRef = useRef<any>(null)
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const finalTranscriptRef = useRef<string>('')
+  const baseInputRef = useRef<string>('')
 
   useEffect(() => {
     supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru')
@@ -130,41 +133,87 @@ export default function Home() {
     } catch { kill() }
   }
 
+  function stopMic() {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current)
+      silenceTimerRef.current = null
+    }
+    try { recRef.current?.stop() } catch {}
+    setRecording(false)
+  }
+
+  function resetSilenceTimer() {
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current)
+    silenceTimerRef.current = setTimeout(() => {
+      try { recRef.current?.stop() } catch {}
+    }, 10000)
+  }
+
   function mic() {
     if (recording) {
-      recRef.current?.stop()
-      setRecording(false)
+      stopMic()
       return
     }
     const S = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!S) { alert('Браузер не поддерживает речь'); return }
+    if (!S) { alert('Браузер не поддерживает речь. Используйте Chrome.'); return }
     const r = new S()
     r.lang = 'en-US'
-    r.continuous = false
-    r.interimResults = false
+    r.continuous = true
+    r.interimResults = true
     r.maxAlternatives = 1
 
+    baseInputRef.current = input ? input + ' ' : ''
+    finalTranscriptRef.current = ''
+
+    r.onstart = () => {
+      setRecording(true)
+      resetSilenceTimer()
+    }
+
     r.onresult = (e: any) => {
-      if (e.results.length > 0 && e.results[0].length > 0) {
-        const transcript = e.results[0][0].transcript
-        setInput(prev => prev ? prev + ' ' + transcript : transcript)
+      let interim = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript
+        if (e.results[i].isFinal) {
+          finalTranscriptRef.current += t + ' '
+        } else {
+          interim += t
+        }
       }
+      setInput(baseInputRef.current + finalTranscriptRef.current + interim)
+      resetSilenceTimer()
     }
 
     r.onend = () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current)
+        silenceTimerRef.current = null
+      }
       setRecording(false)
+      setInput((baseInputRef.current + finalTranscriptRef.current).trim())
     }
 
-    r.onerror = () => {
+    r.onerror = (e: any) => {
+      if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        console.error('Speech recognition error:', e.error)
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current)
+        silenceTimerRef.current = null
+      }
       setRecording(false)
     }
 
     recRef.current = r
-    r.start()
-    setRecording(true)
+    try {
+      r.start()
+    } catch (err) {
+      console.error('Failed to start recognition:', err)
+      setRecording(false)
+    }
   }
 
-  function back() { kill(); setLesson(null); setMsgs([]) }
+  function back() { kill(); stopMic(); setLesson(null); setMsgs([]) }
 
   if (lesson) return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
@@ -212,10 +261,10 @@ export default function Home() {
       <div style={{ borderTop: '1px solid #eee', background: 'white', padding: '12px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
           <textarea ref={taRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey}
-            placeholder="Type here..." rows={1}
-            style={{ flex: 1, padding: '12px 16px', border: '1px solid #ddd', borderRadius: '12px', fontSize: '14px', resize: 'none', minHeight: '48px', maxHeight: '160px', overflowY: 'auto', outline: 'none', fontFamily: 'inherit' }}
+            placeholder={recording ? 'Слушаю…' : 'Type here...'} rows={1}
+            style={{ flex: 1, padding: '12px 16px', border: recording ? '1px solid #ED2939' : '1px solid #ddd', borderRadius: '12px', fontSize: '14px', resize: 'none', minHeight: '48px', maxHeight: '160px', overflowY: 'auto', outline: 'none', fontFamily: 'inherit' }}
           />
-          <button onClick={mic} style={{
+          <button onClick={mic} title={recording ? 'Остановить запись' : 'Говорить'} style={{
             width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: '20px',
             background: recording ? '#ED2939' : '#f3f4f6', color: recording ? 'white' : '#555'
           }}>🎤</button>
