@@ -49,8 +49,12 @@ export default function Home() {
   const taRef = useRef<HTMLTextAreaElement>(null)
   const recRef = useRef<any>(null)
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const finalTranscriptRef = useRef<string>('')
+  // Text that was in the input field BEFORE the user started speaking
   const baseInputRef = useRef<string>('')
+  // Accumulated finalized text from this speech session (anti-duplicate)
+  const finalsRef = useRef<string>('')
+  // Highest result index we've already committed to finalsRef
+  const committedUpToRef = useRef<number>(-1)
 
   useEffect(() => {
     supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru')
@@ -162,8 +166,11 @@ export default function Home() {
     r.interimResults = true
     r.maxAlternatives = 1
 
-    baseInputRef.current = input ? input + ' ' : ''
-    finalTranscriptRef.current = ''
+    // Snapshot what's in the input BEFORE starting recognition.
+    // Anything we add comes from the user's voice this session.
+    baseInputRef.current = input ? input.trimEnd() + ' ' : ''
+    finalsRef.current = ''
+    committedUpToRef.current = -1
 
     r.onstart = () => {
       setRecording(true)
@@ -171,16 +178,33 @@ export default function Home() {
     }
 
     r.onresult = (e: any) => {
+      // ANTI-DUPLICATE (Android Chrome fix):
+      // On Android Chrome, e.results accumulates ALL results, and a previously-interim
+      // result can later flip to isFinal. If we read e.results.length > committedUpTo
+      // and append everything final we find, we get duplicates like "no no let's let's".
+      //
+      // Strategy:
+      //  1. Walk indices from e.resultIndex to end.
+      //  2. For each index > committedUpToRef: if final -> append ONCE and advance committedUpTo.
+      //  3. interim = concat of non-final transcripts from e.resultIndex to end.
+      //  4. Display = baseInput + finalsRef + interim.
+
       let interim = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript
-        if (e.results[i].isFinal) {
-          finalTranscriptRef.current += t + ' '
+        const result = e.results[i]
+        const transcript = result[0].transcript
+
+        if (result.isFinal) {
+          if (i > committedUpToRef.current) {
+            finalsRef.current += transcript.trim() + ' '
+            committedUpToRef.current = i
+          }
         } else {
-          interim += t
+          interim += transcript
         }
       }
-      setInput(baseInputRef.current + finalTranscriptRef.current + interim)
+
+      setInput(baseInputRef.current + finalsRef.current + interim)
       resetSilenceTimer()
     }
 
@@ -190,7 +214,8 @@ export default function Home() {
         silenceTimerRef.current = null
       }
       setRecording(false)
-      setInput((baseInputRef.current + finalTranscriptRef.current).trim())
+      // Final cleanup: trim trailing interim that didn't make it to final
+      setInput((baseInputRef.current + finalsRef.current).trim())
     }
 
     r.onerror = (e: any) => {
