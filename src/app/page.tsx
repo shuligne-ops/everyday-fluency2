@@ -48,13 +48,6 @@ export default function Home() {
   const endRef = useRef<HTMLDivElement>(null)
   const taRef = useRef<HTMLTextAreaElement>(null)
   const recRef = useRef<any>(null)
-  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Text that was in the input field BEFORE the user started speaking
-  const baseInputRef = useRef<string>('')
-  // Accumulated finalized text from this speech session (anti-duplicate)
-  const finalsRef = useRef<string>('')
-  // Highest result index we've already committed to finalsRef
-  const committedUpToRef = useRef<number>(-1)
 
   useEffect(() => {
     supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru')
@@ -137,108 +130,41 @@ export default function Home() {
     } catch { kill() }
   }
 
-  function stopMic() {
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current)
-      silenceTimerRef.current = null
-    }
-    try { recRef.current?.stop() } catch {}
-    setRecording(false)
-  }
-
-  function resetSilenceTimer() {
-    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current)
-    silenceTimerRef.current = setTimeout(() => {
-      try { recRef.current?.stop() } catch {}
-    }, 10000)
-  }
-
   function mic() {
     if (recording) {
-      stopMic()
+      recRef.current?.stop()
+      setRecording(false)
       return
     }
     const S = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!S) { alert('Браузер не поддерживает речь. Используйте Chrome.'); return }
+    if (!S) { alert('Браузер не поддерживает речь'); return }
     const r = new S()
     r.lang = 'en-US'
-    r.continuous = true
-    r.interimResults = true
+    r.continuous = false
+    r.interimResults = false
     r.maxAlternatives = 1
 
-    // Snapshot what's in the input BEFORE starting recognition.
-    // Anything we add comes from the user's voice this session.
-    baseInputRef.current = input ? input.trimEnd() + ' ' : ''
-    finalsRef.current = ''
-    committedUpToRef.current = -1
-
-    r.onstart = () => {
-      setRecording(true)
-      resetSilenceTimer()
-    }
-
     r.onresult = (e: any) => {
-      // ANTI-DUPLICATE (Android Chrome fix):
-      // On Android Chrome, e.results accumulates ALL results, and a previously-interim
-      // result can later flip to isFinal. If we read e.results.length > committedUpTo
-      // and append everything final we find, we get duplicates like "no no let's let's".
-      //
-      // Strategy:
-      //  1. Walk indices from e.resultIndex to end.
-      //  2. For each index > committedUpToRef: if final -> append ONCE and advance committedUpTo.
-      //  3. interim = concat of non-final transcripts from e.resultIndex to end.
-      //  4. Display = baseInput + finalsRef + interim.
-
-      let interim = ''
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const result = e.results[i]
-        const transcript = result[0].transcript
-
-        if (result.isFinal) {
-          if (i > committedUpToRef.current) {
-            finalsRef.current += transcript.trim() + ' '
-            committedUpToRef.current = i
-          }
-        } else {
-          interim += transcript
-        }
+      if (e.results.length > 0 && e.results[0].length > 0) {
+        const transcript = e.results[0][0].transcript
+        setInput(prev => prev ? prev + ' ' + transcript : transcript)
       }
-
-      setInput(baseInputRef.current + finalsRef.current + interim)
-      resetSilenceTimer()
     }
 
     r.onend = () => {
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current)
-        silenceTimerRef.current = null
-      }
       setRecording(false)
-      // Final cleanup: trim trailing interim that didn't make it to final
-      setInput((baseInputRef.current + finalsRef.current).trim())
     }
 
-    r.onerror = (e: any) => {
-      if (e.error !== 'no-speech' && e.error !== 'aborted') {
-        console.error('Speech recognition error:', e.error)
-      }
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current)
-        silenceTimerRef.current = null
-      }
+    r.onerror = () => {
       setRecording(false)
     }
 
     recRef.current = r
-    try {
-      r.start()
-    } catch (err) {
-      console.error('Failed to start recognition:', err)
-      setRecording(false)
-    }
+    r.start()
+    setRecording(true)
   }
 
-  function back() { kill(); stopMic(); setLesson(null); setMsgs([]) }
+  function back() { kill(); setLesson(null); setMsgs([]) }
 
   if (lesson) return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
@@ -286,10 +212,10 @@ export default function Home() {
       <div style={{ borderTop: '1px solid #eee', background: 'white', padding: '12px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
           <textarea ref={taRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey}
-            placeholder={recording ? 'Слушаю…' : 'Type here...'} rows={1}
-            style={{ flex: 1, padding: '12px 16px', border: recording ? '1px solid #ED2939' : '1px solid #ddd', borderRadius: '12px', fontSize: '14px', resize: 'none', minHeight: '48px', maxHeight: '160px', overflowY: 'auto', outline: 'none', fontFamily: 'inherit' }}
+            placeholder="Type here..." rows={1}
+            style={{ flex: 1, padding: '12px 16px', border: '1px solid #ddd', borderRadius: '12px', fontSize: '14px', resize: 'none', minHeight: '48px', maxHeight: '160px', overflowY: 'auto', outline: 'none', fontFamily: 'inherit' }}
           />
-          <button onClick={mic} title={recording ? 'Остановить запись' : 'Говорить'} style={{
+          <button onClick={mic} style={{
             width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', fontSize: '20px',
             background: recording ? '#ED2939' : '#f3f4f6', color: recording ? 'white' : '#555'
           }}>🎤</button>
