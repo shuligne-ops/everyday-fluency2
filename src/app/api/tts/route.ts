@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 function cleanForTTS(text: string): string {
   let t = text
   // Remove character names before dialogue lines (bold or plain)
-  t = t.replace(/\*{0,2}(Camille|L[eé]o|In[eè]s|Mathieu|Chlo[eé]|Youssef|[EÉ]milie|Antoine|Nadia|Julien|Margot|Hugo|Lucie|Th[eé]o|Awa|Romain)\*{0,2}\s*:\s*/gi, '')
+  t = t.replace(/\*{0,2}(Sophie|Marie|Ben|Luca|Priya|Jess|Carlos|Zoe|Anna|Dan|Eleanor|Maya|John|Arthur|Tom|Sarah|Emma|Mike|Kate|Oliver|Lucy|Jack|Alice|James|Mia|Noah|Lily|Leo|Ava|Sam|Ellie|Mark|Ruby|Adam|Ivy|Chris|Ella|Nina|Max|Gemma|Henry|Rose|Waiter|Waitress|Barista|Stranger|Pharmacist|Receptionist|Manager)\*{0,2}\s*:\s*/gi, '')
   // Remove markdown
   t = t.replace(/#{1,6}\s*/g, '')
   t = t.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
