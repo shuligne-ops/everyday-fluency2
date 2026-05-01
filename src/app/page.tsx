@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ReactMarkdown from 'react-markdown'
 
@@ -10,6 +11,7 @@ type LessonSummary = {
   lesson_number: number
   title_en: string
   title_ru: string
+  is_published?: boolean
 }
 
 type Lesson = {
@@ -28,14 +30,11 @@ type Message = {
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
-function normalizeMd(t: string) {
-  return t.replace(/\*\*\s+/g, '**').replace(/\s+\*\*/g, '**')
-}
-
 let gAudio: HTMLAudioElement | null = null
 let gAudioIdx = -1
 
 export default function Home() {
+  const router = useRouter()
   const [level, setLevel] = useState('A1')
   const [lessons, setLessons] = useState<LessonSummary[]>([])
   const [lesson, setLesson] = useState<Lesson | null>(null)
@@ -49,11 +48,42 @@ export default function Home() {
   const taRef = useRef<HTMLTextAreaElement>(null)
   const recRef = useRef<any>(null)
 
+  // Auth state
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
+
+  // Проверяем сессию при загрузке + слушаем изменения
   useEffect(() => {
-    supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru')
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        setUserEmail(user.email ?? null)
+        // Проверяем админ ли
+        const { data } = await supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
+        setIsAdmin(!!data)
+      }
+      setAuthChecked(true)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setUserEmail(session.user.email ?? null)
+        const { data } = await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle()
+        setIsAdmin(!!data)
+      } else {
+        setUserEmail(null)
+        setIsAdmin(false)
+      }
+    })
+
+    return () => { subscription.unsubscribe() }
+  }, [])
+
+  useEffect(() => {
+    supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru,is_published')
       .eq('level', level).order('lesson_number')
-      .then(({ data }) => { if (data) setLessons(data as LessonSummary[]) })
-  }, [level])
+      .then(({ data }) => { if (data) setLessons(data as LessonSummary[]); else setLessons([]) })
+  }, [level, userEmail, isAdmin])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
@@ -150,14 +180,8 @@ export default function Home() {
         setInput(prev => prev ? prev + ' ' + transcript : transcript)
       }
     }
-
-    r.onend = () => {
-      setRecording(false)
-    }
-
-    r.onerror = () => {
-      setRecording(false)
-    }
+    r.onend = () => { setRecording(false) }
+    r.onerror = () => { setRecording(false) }
 
     recRef.current = r
     r.start()
@@ -166,6 +190,13 @@ export default function Home() {
 
   function back() { kill(); setLesson(null); setMsgs([]) }
 
+  async function logout() {
+    await supabase.auth.signOut()
+    setLesson(null)
+    setMsgs([])
+  }
+
+  // ───────── LESSON VIEW ─────────
   if (lesson) return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ padding: '12px 16px', background: 'white', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -228,12 +259,41 @@ export default function Home() {
     </div>
   )
 
+  // ───────── HOME / LESSON LIST ─────────
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 16px' }}>
+      {/* Top bar with auth state */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', marginBottom: '24px', minHeight: '32px' }}>
+        {authChecked && userEmail ? (
+          <>
+            {isAdmin && (
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#f59e0b', background: '#FEF3C7', padding: '4px 10px', borderRadius: '12px', letterSpacing: '0.5px' }}>
+                ADMIN
+              </span>
+            )}
+            <span style={{ fontSize: '13px', color: '#888' }}>{userEmail}</span>
+            <button onClick={logout} style={{
+              background: 'none', border: '1px solid #ddd', color: '#666', cursor: 'pointer',
+              fontSize: '13px', padding: '6px 12px', borderRadius: '12px', fontFamily: 'inherit'
+            }}>
+              Выйти
+            </button>
+          </>
+        ) : authChecked ? (
+          <button onClick={() => router.push('/auth')} style={{
+            background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
+            fontSize: '13px', fontWeight: 600, padding: '8px 16px', borderRadius: '12px', fontFamily: 'inherit'
+          }}>
+            Войти
+          </button>
+        ) : null}
+      </div>
+
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 700, color: '#1a1a2e', marginBottom: '8px' }}>Everyday Fluency</h1>
         <p style={{ color: '#888', fontSize: '18px' }}>Разговорный английский каждый день</p>
       </div>
+
       <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
         {LEVELS.map(l => (
           <button key={l} onClick={() => setLevel(l)} style={{
@@ -242,20 +302,51 @@ export default function Home() {
           }}>{l}</button>
         ))}
       </div>
+
       <div>
-        {lessons.map(ls => (
-          <button key={ls.id} onClick={() => open(ls.id)} style={{
-            display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-              <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#999' }}>{String(ls.lesson_number).padStart(2, '0')}</span>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#1a1a2e' }}>{ls.title_en}</div>
-                <div style={{ fontSize: '13px', color: '#999', marginTop: '2px' }}>{ls.title_ru}</div>
+        {lessons.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
+            {level === 'A1' ? (
+              <>Уроки уровня {level} скоро появятся.</>
+            ) : !userEmail ? (
+              <>
+                <p style={{ marginBottom: '16px' }}>Уровень {level} — для подписчиков.</p>
+                <button onClick={() => router.push('/auth')} style={{
+                  background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
+                  fontSize: '14px', fontWeight: 600, padding: '10px 20px', borderRadius: '12px', fontFamily: 'inherit'
+                }}>
+                  Войти, чтобы продолжить
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ marginBottom: '8px' }}>Уровень {level} скоро откроется.</p>
+                <p style={{ fontSize: '13px' }}>Подписка на этот уровень ещё не активна.</p>
+              </>
+            )}
+          </div>
+        ) : (
+          lessons.map(ls => (
+            <button key={ls.id} onClick={() => open(ls.id)} style={{
+              display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#999' }}>{String(ls.lesson_number).padStart(2, '0')}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#1a1a2e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {ls.title_en}
+                    {isAdmin && ls.is_published === false && (
+                      <span style={{ fontSize: '10px', fontWeight: 600, color: '#999', background: '#f3f4f6', padding: '2px 8px', borderRadius: '8px', letterSpacing: '0.5px' }}>
+                        DRAFT
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#999', marginTop: '2px' }}>{ls.title_ru}</div>
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))
+        )}
       </div>
     </div>
   )
