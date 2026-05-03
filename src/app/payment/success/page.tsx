@@ -92,7 +92,7 @@ function PaymentSuccessContent() {
               <p style={{ fontSize: '15px', color: '#57534e', marginBottom: '20px' }}>Тариф: <strong>{planLabel}</strong></p>
             )}
             <p style={{ fontSize: '15px', color: '#57534e', lineHeight: 1.6, marginBottom: '24px' }}>
-              Все 180 уроков теперь открыты. Чек придёт на ваш email от Мой Налог в течение часа.
+              Сейчас открыты A1 и A2 (60 уроков). Уровни B1–C2 готовятся и будут добавляться регулярно — доступ откроется автоматически. Чек о покупке оформляется вручную и придёт на ваш email в течение суток.
             </p>
             <Link
               href="/"
