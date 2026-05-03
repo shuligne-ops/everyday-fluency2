@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { hasActiveSubscription, getUserSubscription } from '@/lib/access'
 
 type PlanKey = 'monthly' | 'annual' | 'lifetime' | 'launch_annual'
 
 export default function PricingPage() {
   const router = useRouter()
-  const supabase = createClient()
   const [userId, setUserId] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [hasSubscription, setHasSubscription] = useState(false)
@@ -31,7 +30,7 @@ export default function PricingPage() {
         }
       }
     })
-  }, [supabase])
+  }, [])
 
   async function handleSubscribe(plan: PlanKey) {
     setError(null)
