@@ -1,166 +1,269 @@
-"use client";
+'use client'
 
-import Link from "next/link";
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase'
+import { hasActiveSubscription, getUserSubscription } from '@/lib/access'
+
+type PlanKey = 'monthly' | 'annual' | 'lifetime' | 'launch_annual'
 
 export default function PricingPage() {
+  const router = useRouter()
+  const supabase = createClient()
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [hasSubscription, setHasSubscription] = useState(false)
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null)
+  const [loading, setLoading] = useState<PlanKey | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id)
+        setUserEmail(user.email ?? null)
+        const has = await hasActiveSubscription(user.id)
+        setHasSubscription(has)
+        if (has) {
+          const sub = await getUserSubscription(user.id)
+          if (sub) setCurrentPlan(sub.plan)
+        }
+      }
+    })
+  }, [supabase])
+
+  async function handleSubscribe(plan: PlanKey) {
+    setError(null)
+
+    // Незалогиненный → отправляем на /auth с возвратом
+    if (!userId) {
+      router.push(`/auth?return=/pricing&plan=${plan}`)
+      return
+    }
+
+    setLoading(plan)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token
+            ? { Authorization: `Bearer ${session.access_token}` }
+            : {}),
+        },
+        body: JSON.stringify({ plan }),
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        if (res.status === 503) {
+          setError('Платёжная система ещё не подключена. Подписка станет доступна на днях.')
+        } else if (res.status === 410) {
+          setError(result.message ?? 'Стартовое предложение закончилось.')
+        } else {
+          setError(result.message ?? 'Не удалось создать платёж. Попробуйте позже.')
+        }
+        setLoading(null)
+        return
+      }
+
+      // Редирект на страницу оплаты ЮKassa
+      window.location.href = result.confirmation_url
+    } catch (err) {
+      console.error(err)
+      setError('Ошибка соединения. Проверьте интернет и попробуйте снова.')
+      setLoading(null)
+    }
+  }
+
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "linear-gradient(160deg, #fdf8f0 0%, #f5f9f7 100%)" }}
-    >
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #fdf8f0 0%, #f5f9f7 100%)' }}>
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-stone-100 px-4 sm:px-6 py-3">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-2xl flex items-center justify-center shadow-sm"
-              style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)" }}
-            >
-              <span className="text-white font-bold text-sm tracking-tight">EF</span>
-            </div>
-            <div>
-              <h1 className="text-sm font-bold text-stone-800 leading-tight">Everyday Fluency</h1>
-              <p className="text-xs text-amber-600/80 leading-tight">English coaching session</p>
-            </div>
-          </Link>
-          <Link
-            href="/"
-            className="text-sm text-amber-700 hover:text-amber-900 font-medium"
-          >
-            ← На главную
-          </Link>
-        </div>
+      <header style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #f5f5f4', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'linear-gradient(135deg, #f59e0b, #f97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '14px' }}>EF</div>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#292524' }}>Everyday Fluency</div>
+            <div style={{ fontSize: '12px', color: '#d97706' }}>English coaching session</div>
+          </div>
+        </Link>
+        <Link href="/" style={{ fontSize: '14px', color: '#d97706', textDecoration: 'none' }}>← На главную</Link>
       </header>
 
       {/* Content */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <h1 className="text-3xl font-bold text-stone-800 mb-3">Тарифы</h1>
-        <p className="text-stone-600 mb-10">
-          Уровень A1 (30 уроков) — бесплатно. Чтобы получить доступ к A2, B1, B2, C1 и C2,
-          оформите подписку. Всего 180 уроков, разговорный английский с виртуальным
-          преподавателем Sophie.
+      <main style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 20px 60px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#292524', marginBottom: '12px' }}>Тарифы</h1>
+        <p style={{ fontSize: '16px', color: '#57534e', marginBottom: '32px', lineHeight: 1.6 }}>
+          Уровень A1 (30 уроков) — бесплатно. Чтобы получить доступ к A2, B1, B2, C1 и C2, оформите подписку.
+          Всего 180 уроков, разговорный английский с виртуальным преподавателем Sophie.
         </p>
 
-        {/* Plans */}
-        <div className="grid gap-4 mb-12">
-          {/* Monthly */}
-          <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-            <div className="flex items-baseline justify-between mb-2">
-              <h2 className="text-xl font-bold text-stone-800">Месяц</h2>
-              <div className="text-right">
-                <span className="text-3xl font-bold text-stone-800">890 ₽</span>
-                <span className="text-sm text-stone-500"> / месяц</span>
-              </div>
+        {hasSubscription && (
+          <div style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px' }}>
+            <div style={{ fontWeight: 600, color: '#166534', marginBottom: '4px' }}>✓ У вас активная подписка</div>
+            <div style={{ fontSize: '14px', color: '#15803d' }}>
+              Тариф: {currentPlan === 'monthly' ? 'Месяц' : currentPlan === 'annual' ? 'Год' : currentPlan === 'launch_annual' ? 'Стартовый годовой' : currentPlan === 'lifetime' ? 'Навсегда' : currentPlan}
             </div>
-            <p className="text-stone-600 text-sm">
-              Полный доступ ко всем уровням A2–C2. Списывается раз в месяц, можно
-              отменить в любой момент.
-            </p>
           </div>
+        )}
 
-          {/* Annual */}
-          <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 shadow-md relative">
-            <div className="absolute -top-3 right-6 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-              Выгодно
-            </div>
-            <div className="flex items-baseline justify-between mb-2">
-              <h2 className="text-xl font-bold text-stone-800">Год</h2>
-              <div className="text-right">
-                <span className="text-3xl font-bold text-stone-800">7 990 ₽</span>
-                <span className="text-sm text-stone-500"> / год</span>
-              </div>
-            </div>
-            <p className="text-stone-600 text-sm mb-2">
-              Полный доступ ко всем уровням A2–C2 на 12 месяцев. Экономия 25 % по
-              сравнению с помесячной оплатой.
-            </p>
-            <p className="text-amber-700 text-sm font-medium">
-              Стартовое предложение для первых 50 подписчиков — 4 990 ₽ за год.
-            </p>
+        {error && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px', color: '#991b1b', fontSize: '14px' }}>
+            {error}
           </div>
+        )}
 
-          {/* Lifetime */}
-          <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-            <div className="flex items-baseline justify-between mb-2">
-              <h2 className="text-xl font-bold text-stone-800">Навсегда</h2>
-              <div className="text-right">
-                <span className="text-3xl font-bold text-stone-800">19 990 ₽</span>
-                <span className="text-sm text-stone-500"> / разово</span>
-              </div>
-            </div>
-            <p className="text-stone-600 text-sm">
-              Доступ к Everyday Fluency и Français au Quotidien навсегда. Один платёж,
-              никаких списаний в будущем.
-            </p>
-          </div>
-        </div>
+        {/* Monthly */}
+        <PricingCard
+          title="Месяц"
+          price="890 ₽"
+          period="/ месяц"
+          description="Полный доступ ко всем уровням A2–C2. Списывается раз в месяц, можно отменить в любой момент."
+          isCurrentPlan={currentPlan === 'monthly'}
+          isLoading={loading === 'monthly'}
+          disabled={hasSubscription || loading !== null}
+          onClick={() => handleSubscribe('monthly')}
+        />
+
+        {/* Annual — featured */}
+        <PricingCard
+          title="Год"
+          price="7 990 ₽"
+          period="/ год"
+          description="Полный доступ ко всем уровням A2–C2 на 12 месяцев. Экономия 25 % по сравнению с помесячной оплатой."
+          subtext="Стартовое предложение для первых 50 подписчиков — 4 990 ₽ за год."
+          subtextLink={{ label: 'Воспользоваться', plan: 'launch_annual' }}
+          featured
+          isCurrentPlan={currentPlan === 'annual' || currentPlan === 'launch_annual'}
+          isLoading={loading === 'annual'}
+          disabled={hasSubscription || loading !== null}
+          onClick={() => handleSubscribe('annual')}
+          onSubtextClick={() => handleSubscribe('launch_annual')}
+          subtextLoading={loading === 'launch_annual'}
+        />
+
+        {/* Lifetime */}
+        <PricingCard
+          title="Навсегда"
+          price="19 990 ₽"
+          period="/ разово"
+          description="Доступ к Everyday Fluency и Français au Quotidien навсегда. Один платёж, никаких списаний в будущем."
+          isCurrentPlan={currentPlan === 'lifetime'}
+          isLoading={loading === 'lifetime'}
+          disabled={hasSubscription || loading !== null}
+          onClick={() => handleSubscribe('lifetime')}
+        />
 
         {/* What's included */}
-        <h2 className="text-2xl font-bold text-stone-800 mb-4">Что входит в подписку</h2>
-        <ul className="space-y-3 mb-12">
-          <li className="flex gap-3 text-stone-700">
-            <span className="text-amber-500 font-bold mt-0.5">✓</span>
-            <span>180 уроков по уровням A1–C2 (по 30 на каждом уровне)</span>
-          </li>
-          <li className="flex gap-3 text-stone-700">
-            <span className="text-amber-500 font-bold mt-0.5">✓</span>
-            <span>Голосовое общение с Sophie — преподавателем на базе ИИ</span>
-          </li>
-          <li className="flex gap-3 text-stone-700">
-            <span className="text-amber-500 font-bold mt-0.5">✓</span>
-            <span>Озвучка диалогов носителем (TTS), распознавание речи</span>
-          </li>
-          <li className="flex gap-3 text-stone-700">
-            <span className="text-amber-500 font-bold mt-0.5">✓</span>
-            <span>Прогресс по урокам и трекер выученных выражений</span>
-          </li>
-          <li className="flex gap-3 text-stone-700">
-            <span className="text-amber-500 font-bold mt-0.5">✓</span>
-            <span>Все будущие обновления и новые уроки</span>
-          </li>
+        <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#292524', marginTop: '40px', marginBottom: '16px' }}>Что входит в подписку</h2>
+        <ul style={{ listStyle: 'none', padding: 0, color: '#57534e', fontSize: '15px', lineHeight: 1.8 }}>
+          <li>✓ 180 уроков по уровням A1–C2 (по 30 на каждом уровне)</li>
+          <li>✓ Виртуальный преподаватель Sophie с памятью и характером</li>
+          <li>✓ Озвучка диалогов профессиональным голосом</li>
+          <li>✓ Распознавание речи — отвечайте голосом</li>
+          <li>✓ Трекер выученных выражений</li>
+          <li>✓ Отмена подписки в любой момент</li>
         </ul>
-
-        {/* Payment */}
-        <h2 className="text-2xl font-bold text-stone-800 mb-4">Оплата</h2>
-        <p className="text-stone-700 mb-3">
-          Оплата принимается через сервис ЮKassa: банковской картой (МИР, Visa, Mastercard),
-          через СБП, ЮMoney, SberPay и другие способы.
-        </p>
-        <p className="text-stone-700 mb-12">
-          После оплаты доступ к выбранному уровню активируется автоматически и сохраняется
-          на всё время действия подписки. На электронную почту приходит чек.
-        </p>
-
-        {/* Refund */}
-        <h2 className="text-2xl font-bold text-stone-800 mb-4">Возврат</h2>
-        <p className="text-stone-700 mb-12">
-          Возврат возможен в течение 14 дней с момента оплаты, если вы не использовали
-          сервис активно (прошли менее 5 уроков). Для возврата напишите на{" "}
-          <a
-            href="mailto:shuligne@gmail.com"
-            className="text-amber-700 hover:text-amber-900 font-medium"
-          >
-            shuligne@gmail.com
-          </a>{" "}
-          с темой «Возврат» и укажите email, на который оформлена подписка.
-        </p>
-
-        {/* Footer links */}
-        <div className="border-t border-stone-200 pt-6 text-sm text-stone-500 flex flex-wrap gap-x-6 gap-y-2">
-          <Link href="/about" className="hover:text-amber-700">
-            Реквизиты
-          </Link>
-          <Link href="/terms" className="hover:text-amber-700">
-            Условия использования
-          </Link>
-          <Link href="/privacy" className="hover:text-amber-700">
-            Политика конфиденциальности
-          </Link>
-          <Link href="/" className="hover:text-amber-700">
-            На главную
-          </Link>
-        </div>
       </main>
     </div>
-  );
+  )
+}
+
+// ----- PricingCard component -----
+
+type PricingCardProps = {
+  title: string
+  price: string
+  period: string
+  description: string
+  subtext?: string
+  subtextLink?: { label: string; plan: PlanKey }
+  featured?: boolean
+  isCurrentPlan?: boolean
+  isLoading?: boolean
+  disabled?: boolean
+  onClick: () => void
+  onSubtextClick?: () => void
+  subtextLoading?: boolean
+}
+
+function PricingCard({
+  title, price, period, description, subtext, featured,
+  isCurrentPlan, isLoading, disabled, onClick,
+  onSubtextClick, subtextLoading,
+}: PricingCardProps) {
+  return (
+    <div style={{
+      position: 'relative',
+      background: 'white',
+      borderRadius: '16px',
+      padding: '24px',
+      marginBottom: '16px',
+      border: featured ? '2px solid #f59e0b' : '1px solid #e7e5e4',
+      boxShadow: featured ? '0 4px 12px rgba(245, 158, 11, 0.15)' : '0 1px 3px rgba(0,0,0,0.04)',
+    }}>
+      {featured && (
+        <div style={{
+          position: 'absolute',
+          top: '-10px',
+          right: '20px',
+          background: '#f59e0b',
+          color: 'white',
+          fontSize: '11px',
+          fontWeight: 700,
+          padding: '4px 10px',
+          borderRadius: '8px',
+          letterSpacing: '0.5px',
+        }}>ВЫГОДНО</div>
+      )}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+        <div style={{ fontSize: '20px', fontWeight: 700, color: '#292524' }}>{title}</div>
+        <div>
+          <span style={{ fontSize: '28px', fontWeight: 700, color: '#292524' }}>{price}</span>
+          <span style={{ fontSize: '14px', color: '#a8a29e', marginLeft: '4px' }}>{period}</span>
+        </div>
+      </div>
+      <p style={{ fontSize: '14px', color: '#57534e', lineHeight: 1.6, marginBottom: '16px' }}>{description}</p>
+      {subtext && (
+        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#92400e' }}>
+          {subtext}
+          {onSubtextClick && (
+            <button
+              onClick={onSubtextClick}
+              disabled={disabled}
+              style={{
+                background: 'none', border: 'none', color: '#d97706',
+                fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer',
+                padding: 0, marginLeft: '6px', fontSize: '13px',
+              }}
+            >
+              {subtextLoading ? '...' : '→'}
+            </button>
+          )}
+        </div>
+      )}
+      <button
+        onClick={onClick}
+        disabled={disabled || isCurrentPlan}
+        style={{
+          width: '100%',
+          padding: '12px',
+          borderRadius: '12px',
+          border: 'none',
+          background: isCurrentPlan ? '#dcfce7' : (featured ? 'linear-gradient(135deg, #f59e0b, #f97316)' : '#292524'),
+          color: isCurrentPlan ? '#166534' : 'white',
+          fontSize: '15px',
+          fontWeight: 600,
+          cursor: (disabled || isCurrentPlan) ? 'not-allowed' : 'pointer',
+          opacity: (disabled && !isCurrentPlan) ? 0.5 : 1,
+          fontFamily: 'inherit',
+        }}
+      >
+        {isCurrentPlan ? '✓ Ваш текущий тариф' : (isLoading ? 'Создаю платёж...' : 'Оформить подписку')}
+      </button>
+    </div>
+  )
 }
