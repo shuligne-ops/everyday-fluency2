@@ -1,12 +1,36 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { hasActiveSubscription } from '@/lib/access'
 
+// Главный экспорт — оборачивает контент в Suspense.
+// Это требование Next.js 16: useSearchParams() должен быть внутри Suspense
+// чтобы prerender работал корректно.
 export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PaymentSuccessContent />
+    </Suspense>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div style={containerStyle}>
+      <div style={cardStyle}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#292524', marginBottom: '8px' }}>Загрузка…</h1>
+      </div>
+    </div>
+  )
+}
+
+// Основной контент — здесь useSearchParams() безопасен потому что 
+// компонент рендерится только на клиенте (внутри Suspense).
+function PaymentSuccessContent() {
   const router = useRouter()
   const search = useSearchParams()
   const [status, setStatus] = useState<'checking' | 'active' | 'pending' | 'unknown'>('checking')
@@ -50,8 +74,8 @@ export default function PaymentSuccessPage() {
   }, [attempts])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #fdf8f0 0%, #f5f9f7 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-      <div style={{ background: 'white', borderRadius: '20px', padding: '40px 32px', maxWidth: '480px', width: '100%', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+    <div style={containerStyle}>
+      <div style={cardStyle}>
         {status === 'checking' && (
           <>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
@@ -132,4 +156,24 @@ export default function PaymentSuccessPage() {
       </div>
     </div>
   )
+}
+
+// Общие стили вынесены чтобы fallback и main выглядели одинаково
+const containerStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  background: 'linear-gradient(160deg, #fdf8f0 0%, #f5f9f7 100%)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '20px',
+}
+
+const cardStyle: React.CSSProperties = {
+  background: 'white',
+  borderRadius: '20px',
+  padding: '40px 32px',
+  maxWidth: '480px',
+  width: '100%',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+  textAlign: 'center',
 }
