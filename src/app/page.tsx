@@ -345,9 +345,10 @@ export default function Home() {
                 </div>
               </div>
             </button>
-          ))
+     ))
         )}
       </div>
+      <SiteFooter />
     </div>
   )
 }
