@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { hasActiveSubscription } from '@/lib/access'
 
 export default function PaymentSuccessPage() {
   const router = useRouter()
   const search = useSearchParams()
-  const supabase = createClient()
   const [status, setStatus] = useState<'checking' | 'active' | 'pending' | 'unknown'>('checking')
   const [attempts, setAttempts] = useState(0)
 
@@ -36,13 +35,11 @@ export default function PaymentSuccessPage() {
       if (has) {
         setStatus('active')
       } else if (attempts < 5) {
-        // Webhook ещё может не успеть прийти, ждём 2 секунды и пробуем снова
         setStatus('pending')
         setTimeout(() => {
           if (!cancelled) setAttempts((a) => a + 1)
         }, 2000)
       } else {
-        // 10 секунд прошло, активации нет
         setStatus('pending')
       }
     }
