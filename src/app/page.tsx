@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
+
 type LessonSummary = {
   id: number
   level: string
@@ -37,6 +38,7 @@ export default function Home() {
   const router = useRouter()
   const [level, setLevel] = useState('A1')
   const [lessons, setLessons] = useState<LessonSummary[]>([])
+  const [lessonsLoaded, setLessonsLoaded] = useState(false)
   const [lesson, setLesson] = useState<Lesson | null>(null)
   const [msgs, setMsgs] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -48,41 +50,60 @@ export default function Home() {
   const taRef = useRef<HTMLTextAreaElement>(null)
   const recRef = useRef<any>(null)
 
-  // Auth state
+  // Auth state — догоняется в фоне, не блокирует контент
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Проверяем сессию при загрузке + слушаем изменения
+  // ───────── AUTH (фоновая, с таймаутом) ─────────
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    let cancelled = false
+
+    // getUser с принудительным таймаутом 1.5 сек.
+    // Если auth-lock завис в другой вкладке — не ждём, идём дальше как анонимы.
+    const authPromise = supabase.auth.getUser().then(({ data: { user } }) => user)
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500))
+
+    Promise.race([authPromise, timeoutPromise]).then(async (user) => {
+      if (cancelled) return
       if (user) {
         setUserEmail(user.email ?? null)
-        // Проверяем админ ли
-        const { data } = await supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
-        setIsAdmin(!!data)
+        // admins-проверка тоже не блокирует основной поток
+        supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
+          .then(({ data }) => { if (!cancelled) setIsAdmin(!!data) })
       }
       setAuthChecked(true)
+    }).catch(() => {
+      if (!cancelled) setAuthChecked(true)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (cancelled) return
       if (session?.user) {
         setUserEmail(session.user.email ?? null)
         const { data } = await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle()
-        setIsAdmin(!!data)
+        if (!cancelled) setIsAdmin(!!data)
       } else {
         setUserEmail(null)
         setIsAdmin(false)
       }
     })
 
-    return () => { subscription.unsubscribe() }
+    return () => { cancelled = true; subscription.unsubscribe() }
   }, [])
 
+  // ───────── ЗАГРУЗКА УРОКОВ (НЕ зависит от auth) ─────────
   useEffect(() => {
-    supabase.from("lessons_v2").select('id,level,lesson_number,title_en,title_ru,is_published')
-      .eq('level', level).order('lesson_number')
-      .then(({ data }) => { if (data) setLessons(data as LessonSummary[]); else setLessons([]) })
+    setLessonsLoaded(false)
+    setLessons([])
+    supabase.from('lessons_v2')
+      .select('id,level,lesson_number,title_en,title_ru,is_published')
+      .eq('level', level)
+      .order('lesson_number')
+      .then(({ data }) => {
+        setLessons((data as LessonSummary[]) ?? [])
+        setLessonsLoaded(true)
+      })
   }, [level, userEmail, isAdmin])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
@@ -95,7 +116,7 @@ export default function Home() {
   }, [input])
 
   async function open(id: number) {
-    const { data } = await supabase.from("lessons_v2").select('*').eq('id', id).single()
+    const { data } = await supabase.from('lessons_v2').select('*').eq('id', id).single()
     if (!data) return
     setLesson(data as Lesson)
     setMsgs([])
@@ -304,7 +325,19 @@ export default function Home() {
       </div>
 
       <div>
-        {lessons.length === 0 ? (
+        {!lessonsLoaded ? (
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
+            <div style={{ display: 'inline-flex', gap: '6px' }}>
+              {[0, 1, 2].map(n => (
+                <span key={n} style={{
+                  width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b',
+                  animation: 'pulse 1.4s ease-in-out infinite',
+                  animationDelay: `${n * 0.16}s`,
+                }} />
+              ))}
+            </div>
+          </div>
+        ) : lessons.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
             {level === 'A1' ? (
               <>Уроки уровня {level} скоро появятся.</>
@@ -345,7 +378,7 @@ export default function Home() {
                 </div>
               </div>
             </button>
-     ))
+          ))
         )}
       </div>
       <SiteFooter />
