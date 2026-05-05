@@ -60,7 +60,6 @@ export default function Home() {
     let cancelled = false
 
     // getUser с принудительным таймаутом 1.5 сек.
-    // Если auth-lock завис в другой вкладке — не ждём, идём дальше как анонимы.
     const authPromise = supabase.auth.getUser().then(({ data: { user } }) => user)
     const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500))
 
@@ -68,7 +67,6 @@ export default function Home() {
       if (cancelled) return
       if (user) {
         setUserEmail(user.email ?? null)
-        // admins-проверка тоже не блокирует основной поток
         supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
           .then(({ data }) => { if (!cancelled) setIsAdmin(!!data) })
       }
@@ -77,23 +75,36 @@ export default function Home() {
       if (!cancelled) setAuthChecked(true)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (cancelled) return
+      // Игнорируем TOKEN_REFRESHED и INITIAL_SESSION — они срабатывают при каждом
+      // возврате на вкладку и не несут изменения auth-состояния. Обрабатываем
+      // только реальные смены: SIGNED_IN, SIGNED_OUT, USER_UPDATED.
+      if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return
+
+      const newEmail = session?.user?.email ?? null
+      setUserEmail(prev => (prev === newEmail ? prev : newEmail))
+
       if (session?.user) {
-        setUserEmail(session.user.email ?? null)
         const { data } = await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle()
-        if (!cancelled) setIsAdmin(!!data)
+        if (!cancelled) {
+          const newAdmin = !!data
+          setIsAdmin(prev => (prev === newAdmin ? prev : newAdmin))
+        }
       } else {
-        setUserEmail(null)
-        setIsAdmin(false)
+        setIsAdmin(prev => (prev === false ? prev : false))
       }
     })
 
     return () => { cancelled = true; subscription.unsubscribe() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ───────── ЗАГРУЗКА УРОКОВ (НЕ зависит от auth) ─────────
+  // ───────── ЗАГРУЗКА УРОКОВ ПРИ СМЕНЕ УРОВНЯ ─────────
+  // Зависит только от level. RLS сама определяет видимость по JWT в заголовке
+  // запроса (supabase-клиент автоматически прикладывает свежий токен).
   useEffect(() => {
+    let cancelled = false
     setLessonsLoaded(false)
     setLessons([])
     supabase.from('lessons_v2')
@@ -101,10 +112,29 @@ export default function Home() {
       .eq('level', level)
       .order('lesson_number')
       .then(({ data }) => {
+        if (cancelled) return
         setLessons((data as LessonSummary[]) ?? [])
         setLessonsLoaded(true)
       })
-  }, [level, userEmail, isAdmin])
+    return () => { cancelled = true }
+  }, [level])
+
+  // ───────── ПЕРЕЗАГРУЗКА ПРИ СМЕНЕ ВХОДА (login/logout) ─────────
+  // Не сбрасывает lessonsLoaded — плавная замена списка без отката в loading.
+  useEffect(() => {
+    if (!authChecked) return
+    let cancelled = false
+    supabase.from('lessons_v2')
+      .select('id,level,lesson_number,title_en,title_ru,is_published')
+      .eq('level', level)
+      .order('lesson_number')
+      .then(({ data }) => {
+        if (cancelled) return
+        setLessons((data as LessonSummary[]) ?? [])
+      })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userEmail, isAdmin])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
