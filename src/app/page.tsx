@@ -34,13 +34,9 @@ const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 let gAudio: HTMLAudioElement | null = null
 let gAudioIdx = -1
 
-// === DIAG === модульный счётчик монтирований
-let __mountCounter = 0
-
-function diag(msg: string, ...args: any[]) {
-  const t = new Date().toISOString().slice(11, 23)
-  console.log(`%c[DIAG ${t}] ${msg}`, 'color:#f59e0b;font-weight:bold', ...args)
-}
+// Таймаут на запрос уроков. Если supabase молчит дольше — считаем
+// что запрос потерян и пытаемся ещё раз.
+const LESSONS_FETCH_TIMEOUT = 5000
 
 export default function Home() {
   const router = useRouter()
@@ -62,28 +58,12 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // === DIAG === instance ID
-  const instanceId = useRef(++__mountCounter)
-
-  useEffect(() => {
-    diag(`MOUNT instance #${instanceId.current}`)
-    return () => { diag(`UNMOUNT instance #${instanceId.current}`) }
-  }, [])
-
-  useEffect(() => {
-    const onVis = () => diag(`VISIBILITY → ${document.visibilityState}, instance=${instanceId.current}, lessonsLoaded=${lessonsLoaded}, lessons.length=${lessons.length}, level=${level}`)
-    document.addEventListener('visibilitychange', onVis)
-    return () => document.removeEventListener('visibilitychange', onVis)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lessonsLoaded, lessons.length, level])
-
-  useEffect(() => {
-    diag(`STATE lessonsLoaded=${lessonsLoaded}, lessons.length=${lessons.length}, instance=${instanceId.current}`)
-  }, [lessonsLoaded, lessons.length])
+  // Счётчик попыток загрузки уроков. Если запрос завис — увеличиваем
+  // счётчик, useEffect перезапускается и делает свежий запрос.
+  const [lessonsRetry, setLessonsRetry] = useState(0)
 
   // ───────── AUTH ─────────
   useEffect(() => {
-    diag(`AUTH effect started, instance=${instanceId.current}`)
     let cancelled = false
 
     const authPromise = supabase.auth.getUser().then(({ data: { user } }) => user)
@@ -91,7 +71,6 @@ export default function Home() {
 
     Promise.race([authPromise, timeoutPromise]).then(async (user) => {
       if (cancelled) return
-      diag(`AUTH getUser resolved, user=${user?.email ?? 'null'}`)
       if (user) {
         setUserEmail(user.email ?? null)
         supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
@@ -104,8 +83,11 @@ export default function Home() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (cancelled) return
-      diag(`AUTH onAuthStateChange event=${event}, hasSession=${!!session}`)
-      if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return
+      // Игнорируем все события supabase, которые срабатывают при возврате на вкладку
+      // и не несут реальных изменений входа: TOKEN_REFRESHED, INITIAL_SESSION, SIGNED_IN.
+      // SIGNED_IN supabase-js шлёт повторно при visibility change даже если юзер
+      // уже залогинен — это и было причиной зависания UI.
+      if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'SIGNED_IN') return
 
       const newEmail = session?.user?.email ?? null
       setUserEmail(prev => (prev === newEmail ? prev : newEmail))
@@ -121,56 +103,63 @@ export default function Home() {
       }
     })
 
-    return () => {
-      diag(`AUTH effect cleanup, instance=${instanceId.current}`)
-      cancelled = true
-      subscription.unsubscribe()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { cancelled = true; subscription.unsubscribe() }
   }, [])
 
-  // ───────── LESSONS load on level change ─────────
+  // ───────── ЗАГРУЗКА УРОКОВ ─────────
+  // Зависит от level и retry-счётчика. При тайм-ауте запроса инкрементим
+  // retry, useEffect перезапускается со свежим запросом.
   useEffect(() => {
-    diag(`LESSONS effect [level=${level}], instance=${instanceId.current}`)
     let cancelled = false
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+
     setLessonsLoaded(false)
     setLessons([])
-    supabase.from('lessons_v2')
-      .select('id,level,lesson_number,title_en,title_ru,is_published')
-      .eq('level', level)
-      .order('lesson_number')
-      .then(({ data, error }) => {
-        if (cancelled) {
-          diag(`LESSONS query IGNORED (cancelled) level=${level}`)
-          return
-        }
-        diag(`LESSONS query OK level=${level} count=${data?.length ?? 0} error=${error?.message ?? 'none'}`)
-        setLessons((data as LessonSummary[]) ?? [])
-        setLessonsLoaded(true)
-      })
-    return () => {
-      diag(`LESSONS effect cleanup [level=${level}]`)
-      cancelled = true
-    }
-  }, [level])
 
-  // ───────── LESSONS reload on auth change ─────────
-  useEffect(() => {
-    if (!authChecked) return
-    diag(`LESSONS [auth] effect, userEmail=${userEmail}, isAdmin=${isAdmin}`)
-    let cancelled = false
+    // Если запрос не вернулся за LESSONS_FETCH_TIMEOUT — пробуем ещё раз
+    timeoutId = setTimeout(() => {
+      if (cancelled) return
+      // Запрос завис — триггерим повторную попытку
+      setLessonsRetry(r => r + 1)
+    }, LESSONS_FETCH_TIMEOUT)
+
     supabase.from('lessons_v2')
       .select('id,level,lesson_number,title_en,title_ru,is_published')
       .eq('level', level)
       .order('lesson_number')
       .then(({ data }) => {
         if (cancelled) return
-        diag(`LESSONS [auth] query OK count=${data?.length ?? 0}`)
+        if (timeoutId) { clearTimeout(timeoutId); timeoutId = null }
         setLessons((data as LessonSummary[]) ?? [])
+        setLessonsLoaded(true)
       })
-    return () => { cancelled = true }
+
+    return () => {
+      cancelled = true
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [level, lessonsRetry])
+
+  // При смене auth-состояния сбрасываем retry, чтобы перезагрузить
+  // уроки с правильным JWT (видимость черновиков для админа и т.п.)
+  useEffect(() => {
+    if (!authChecked) return
+    setLessonsRetry(r => r + 1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail, isAdmin])
+
+  // Когда вкладка становится видимой и lessons пустой — гарантируем
+  // что свежий запрос уйдёт. Это защита от случая, когда supabase-js
+  // потерял предыдущий запрос на сетевом уровне.
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible' && !lessonsLoaded) {
+        setLessonsRetry(r => r + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [lessonsLoaded])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
