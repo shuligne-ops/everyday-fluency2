@@ -34,6 +34,14 @@ const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 let gAudio: HTMLAudioElement | null = null
 let gAudioIdx = -1
 
+// === DIAG === модульный счётчик монтирований
+let __mountCounter = 0
+
+function diag(msg: string, ...args: any[]) {
+  const t = new Date().toISOString().slice(11, 23)
+  console.log(`%c[DIAG ${t}] ${msg}`, 'color:#f59e0b;font-weight:bold', ...args)
+}
+
 export default function Home() {
   const router = useRouter()
   const [level, setLevel] = useState('A1')
@@ -50,21 +58,40 @@ export default function Home() {
   const taRef = useRef<HTMLTextAreaElement>(null)
   const recRef = useRef<any>(null)
 
-  // Auth state — догоняется в фоне, не блокирует контент
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // ───────── AUTH (фоновая, с таймаутом) ─────────
+  // === DIAG === instance ID
+  const instanceId = useRef(++__mountCounter)
+
   useEffect(() => {
+    diag(`MOUNT instance #${instanceId.current}`)
+    return () => { diag(`UNMOUNT instance #${instanceId.current}`) }
+  }, [])
+
+  useEffect(() => {
+    const onVis = () => diag(`VISIBILITY → ${document.visibilityState}, instance=${instanceId.current}, lessonsLoaded=${lessonsLoaded}, lessons.length=${lessons.length}, level=${level}`)
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonsLoaded, lessons.length, level])
+
+  useEffect(() => {
+    diag(`STATE lessonsLoaded=${lessonsLoaded}, lessons.length=${lessons.length}, instance=${instanceId.current}`)
+  }, [lessonsLoaded, lessons.length])
+
+  // ───────── AUTH ─────────
+  useEffect(() => {
+    diag(`AUTH effect started, instance=${instanceId.current}`)
     let cancelled = false
 
-    // getUser с принудительным таймаутом 1.5 сек.
     const authPromise = supabase.auth.getUser().then(({ data: { user } }) => user)
     const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500))
 
     Promise.race([authPromise, timeoutPromise]).then(async (user) => {
       if (cancelled) return
+      diag(`AUTH getUser resolved, user=${user?.email ?? 'null'}`)
       if (user) {
         setUserEmail(user.email ?? null)
         supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
@@ -77,9 +104,7 @@ export default function Home() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (cancelled) return
-      // Игнорируем TOKEN_REFRESHED и INITIAL_SESSION — они срабатывают при каждом
-      // возврате на вкладку и не несут изменения auth-состояния. Обрабатываем
-      // только реальные смены: SIGNED_IN, SIGNED_OUT, USER_UPDATED.
+      diag(`AUTH onAuthStateChange event=${event}, hasSession=${!!session}`)
       if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return
 
       const newEmail = session?.user?.email ?? null
@@ -96,14 +121,17 @@ export default function Home() {
       }
     })
 
-    return () => { cancelled = true; subscription.unsubscribe() }
+    return () => {
+      diag(`AUTH effect cleanup, instance=${instanceId.current}`)
+      cancelled = true
+      subscription.unsubscribe()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ───────── ЗАГРУЗКА УРОКОВ ПРИ СМЕНЕ УРОВНЯ ─────────
-  // Зависит только от level. RLS сама определяет видимость по JWT в заголовке
-  // запроса (supabase-клиент автоматически прикладывает свежий токен).
+  // ───────── LESSONS load on level change ─────────
   useEffect(() => {
+    diag(`LESSONS effect [level=${level}], instance=${instanceId.current}`)
     let cancelled = false
     setLessonsLoaded(false)
     setLessons([])
@@ -111,18 +139,25 @@ export default function Home() {
       .select('id,level,lesson_number,title_en,title_ru,is_published')
       .eq('level', level)
       .order('lesson_number')
-      .then(({ data }) => {
-        if (cancelled) return
+      .then(({ data, error }) => {
+        if (cancelled) {
+          diag(`LESSONS query IGNORED (cancelled) level=${level}`)
+          return
+        }
+        diag(`LESSONS query OK level=${level} count=${data?.length ?? 0} error=${error?.message ?? 'none'}`)
         setLessons((data as LessonSummary[]) ?? [])
         setLessonsLoaded(true)
       })
-    return () => { cancelled = true }
+    return () => {
+      diag(`LESSONS effect cleanup [level=${level}]`)
+      cancelled = true
+    }
   }, [level])
 
-  // ───────── ПЕРЕЗАГРУЗКА ПРИ СМЕНЕ ВХОДА (login/logout) ─────────
-  // Не сбрасывает lessonsLoaded — плавная замена списка без отката в loading.
+  // ───────── LESSONS reload on auth change ─────────
   useEffect(() => {
     if (!authChecked) return
+    diag(`LESSONS [auth] effect, userEmail=${userEmail}, isAdmin=${isAdmin}`)
     let cancelled = false
     supabase.from('lessons_v2')
       .select('id,level,lesson_number,title_en,title_ru,is_published')
@@ -130,6 +165,7 @@ export default function Home() {
       .order('lesson_number')
       .then(({ data }) => {
         if (cancelled) return
+        diag(`LESSONS [auth] query OK count=${data?.length ?? 0}`)
         setLessons((data as LessonSummary[]) ?? [])
       })
     return () => { cancelled = true }
@@ -247,7 +283,6 @@ export default function Home() {
     setMsgs([])
   }
 
-  // ───────── LESSON VIEW ─────────
   if (lesson) return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ padding: '12px 16px', background: 'white', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -310,10 +345,8 @@ export default function Home() {
     </div>
   )
 
-  // ───────── HOME / LESSON LIST ─────────
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 16px' }}>
-      {/* Top bar with auth state */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', marginBottom: '24px', minHeight: '32px' }}>
         {authChecked && userEmail ? (
           <>
