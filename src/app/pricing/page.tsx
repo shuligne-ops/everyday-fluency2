@@ -97,7 +97,8 @@ export default function PricingPage() {
         <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#292524', marginBottom: '12px' }}>Тарифы</h1>
         <p style={{ fontSize: '16px', color: '#57534e', marginBottom: '32px', lineHeight: 1.6 }}>
           Уровень A1 (30 уроков) — бесплатно, без регистрации.
-          Сейчас доступен также уровень A2 — ещё 30 уроков. Уровни B1, B2, C1 и C2 готовятся и будут открываться по мере выпуска.
+          Платная подписка открывает все остальные уровни — A2, B1, B2, C1 и C2.
+          Курс готов целиком: 180 уроков, шесть уровней CEFR, от первого «Hello» до свободного владения языком.
           Разговорный английский с виртуальным преподавателем Sophie.
         </p>
 
@@ -121,7 +122,7 @@ export default function PricingPage() {
           title="Месяц"
           price="890 ₽"
           period="/ месяц"
-          description="Доступ к A2 (открыт сейчас) и ко всем следующим уровням по мере выпуска. Списывается раз в месяц, можно отменить в любой момент."
+          description="Полный доступ ко всем уровням от A2 до C2. Списывается раз в месяц, можно отменить в любой момент."
           isCurrentPlan={currentPlan === 'monthly'}
           isLoading={loading === 'monthly'}
           disabled={hasSubscription || loading !== null}
@@ -133,7 +134,7 @@ export default function PricingPage() {
           title="Год"
           price="7 990 ₽"
           period="/ год"
-          description="Доступ к A2 (открыт сейчас) и ко всем следующим уровням по мере выпуска, на 12 месяцев. Экономия 25 % по сравнению с помесячной оплатой."
+          description="Полный доступ ко всем уровням от A2 до C2 на 12 месяцев. Экономия 25 % по сравнению с помесячной оплатой."
           subtext="Стартовое предложение для первых 50 подписчиков — 4 990 ₽ за год."
           subtextLink={{ label: 'Воспользоваться', plan: 'launch_annual' }}
           featured
@@ -150,7 +151,7 @@ export default function PricingPage() {
           title="Навсегда"
           price="19 990 ₽"
           period="/ разово"
-          description="Пожизненный доступ к Everyday Fluency — все уроки сейчас и все уровни, которые выйдут в будущем. Один платёж, никаких списаний."
+          description="Пожизненный доступ ко всему курсу — все 180 уроков, все шесть уровней. Один платёж, никаких списаний."
           isCurrentPlan={currentPlan === 'lifetime'}
           isLoading={loading === 'lifetime'}
           disabled={hasSubscription || loading !== null}
@@ -160,8 +161,7 @@ export default function PricingPage() {
         {/* What's included */}
         <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#292524', marginTop: '40px', marginBottom: '16px' }}>Что входит в подписку</h2>
         <ul style={{ listStyle: 'none', padding: 0, color: '#57534e', fontSize: '15px', lineHeight: 1.8 }}>
-          <li>✓ A1 и A2 — 60 уроков доступны сейчас</li>
-          <li>✓ B1, B2, C1, C2 — добавляются регулярно (всего 180 уроков по плану)</li>
+          <li>✓ Все 180 уроков от A1 до C2 — курс готов целиком</li>
           <li>✓ Виртуальный преподаватель Sophie с памятью и характером</li>
           <li>✓ Озвучка диалогов профессиональным голосом</li>
           <li>✓ Распознавание речи — отвечайте голосом</li>
