@@ -4,6 +4,18 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+function readAttribution(): Record<string, string> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const raw = localStorage.getItem('ef_attribution')
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return typeof parsed === 'object' && parsed !== null ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
 export default function AuthPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -24,6 +36,20 @@ export default function AuthPage() {
     setLoading(true)
     setError(null)
     try {
+      // Записываем атрибуцию ДО отправки magic link, синхронно.
+      // Таблица signup_attribution с открытыми RLS-политиками для anon на INSERT/UPDATE.
+      const attribution = readAttribution()
+      if (attribution.utm_source) {
+        await supabase.from('signup_attribution').upsert({
+          email: email.trim(),
+          utm_source: attribution.utm_source,
+          utm_medium: attribution.utm_medium,
+          utm_campaign: attribution.utm_campaign,
+          utm_content: attribution.utm_content,
+          first_seen_at: attribution.first_seen_at,
+        })
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
@@ -32,8 +58,6 @@ export default function AuthPage() {
       })
       if (error) throw error
       setSent(true)
-      // НЕ чистим localStorage — UTM нужны на главной странице
-      // после клика на magic link, чтобы записать их в user_metadata.
     } catch (err: any) {
       setError(err?.message || 'Что-то пошло не так. Попробуйте ещё раз.')
     } finally {
