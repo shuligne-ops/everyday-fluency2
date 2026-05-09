@@ -319,10 +319,49 @@ function StartContent() {
           Первые 30 уроков — бесплатно, без регистрации.
         </p>
       </section>
-    </div>
+  {/* TELEGRAM CHANNEL */}
+      <section style={{
+        maxWidth: '600px',
+        margin: '0 auto',
+        padding: '0 20px 56px',
+      }}>
+        <div style={{
+          background: 'rgba(245, 158, 11, 0.08)',
+          border: '1px solid rgba(245, 158, 11, 0.25)',
+          borderRadius: '12px',
+          padding: '20px 24px',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontSize: '14px',
+            color: '#475569',
+            marginBottom: '12px',
+            lineHeight: 1.5,
+          }}>
+            Не готовы начать сегодня? Подписывайтесь на канал —<br />
+            раз в несколько дней живая фраза или кусочек диалога.
+          </p>
+          <a
+            href="https://t.me/everyday_fluency"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              color: '#d97706',
+              fontSize: '15px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(217, 119, 6, 0.4)',
+              paddingBottom: '2px',
+            }}
+          >
+            @everyday_fluency →
+          </a>
+        </div>
+      </section>
+   </div>
   )
 }
-
 function DialogueLine({ speaker, text }: { speaker: string; text: string }) {
   return (
     <div style={{ marginBottom: '12px' }}>
