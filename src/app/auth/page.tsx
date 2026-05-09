@@ -23,7 +23,6 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Если уже залогинен — редирект на главную
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) router.push('/')
@@ -36,17 +35,16 @@ export default function AuthPage() {
     setLoading(true)
     setError(null)
     try {
-      // Записываем атрибуцию ДО отправки magic link, синхронно.
-      // Таблица signup_attribution с открытыми RLS-политиками для anon на INSERT/UPDATE.
+      // Запись атрибуции через SECURITY DEFINER функцию (обходит RLS).
       const attribution = readAttribution()
       if (attribution.utm_source) {
-        await supabase.from('signup_attribution').upsert({
-          email: email.trim(),
-          utm_source: attribution.utm_source,
-          utm_medium: attribution.utm_medium,
-          utm_campaign: attribution.utm_campaign,
-          utm_content: attribution.utm_content,
-          first_seen_at: attribution.first_seen_at,
+        await supabase.rpc('record_signup_attribution', {
+          p_email: email.trim(),
+          p_utm_source: attribution.utm_source ?? null,
+          p_utm_medium: attribution.utm_medium ?? null,
+          p_utm_campaign: attribution.utm_campaign ?? null,
+          p_utm_content: attribution.utm_content ?? null,
+          p_first_seen_at: attribution.first_seen_at ?? null,
         })
       }
 
