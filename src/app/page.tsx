@@ -105,7 +105,48 @@ export default function Home() {
 
     return () => { cancelled = true; subscription.unsubscribe() }
   }, [])
+// ───────── ATTRIBUTION (UTM из localStorage в user_metadata) ─────────
+  // После клика на magic link Supabase редиректит юзера сюда. Если у нас
+  // в localStorage сохранены UTM-метки (положили на /start) и они ещё не
+  // записаны в user_metadata — записываем и чистим localStorage.
+  useEffect(() => {
+    if (!authChecked || !userEmail) return
 
+    let cancelled = false
+
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('ef_attribution') : null
+    if (!raw) return
+
+    let attribution: Record<string, string>
+    try {
+      attribution = JSON.parse(raw)
+    } catch {
+      try { localStorage.removeItem('ef_attribution') } catch {}
+      return
+    }
+
+    if (!attribution || typeof attribution !== 'object' || !attribution.utm_source) return
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (cancelled || !user) return
+
+      // Если UTM уже записаны — не перезаписываем
+      const existing = user.user_metadata as Record<string, any> | null
+      if (existing?.utm_source) {
+        try { localStorage.removeItem('ef_attribution') } catch {}
+        return
+      }
+
+      supabase.auth.updateUser({ data: attribution }).then(({ error }) => {
+        if (cancelled) return
+        if (!error) {
+          try { localStorage.removeItem('ef_attribution') } catch {}
+        }
+      })
+    })
+
+    return () => { cancelled = true }
+  }, [authChecked, userEmail])
   // ───────── ЗАГРУЗКА УРОКОВ ─────────
   // Зависит от level и retry-счётчика. При тайм-ауте запроса инкрементим
   // retry, useEffect перезапускается со свежим запросом.
