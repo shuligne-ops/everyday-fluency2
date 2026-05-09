@@ -4,20 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-// Читает UTM из localStorage (положили туда на /start) для атрибуции регистрации к рекламной кампании.
-// Возвращает плоский объект, готовый для передачи в auth.users.raw_user_meta_data.
-function readAttribution(): Record<string, string> {
-  if (typeof window === 'undefined') return {}
-  try {
-    const raw = localStorage.getItem('ef_attribution')
-    if (!raw) return {}
-    const parsed = JSON.parse(raw)
-    return typeof parsed === 'object' && parsed !== null ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
 export default function AuthPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -38,21 +24,16 @@ export default function AuthPage() {
     setLoading(true)
     setError(null)
     try {
-      const attribution = readAttribution()
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
           emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-          // Передаём UTM в raw_user_meta_data — это позволит позже сматчить
-          // регистрацию с рекламной кампанией через SQL.
-          data: Object.keys(attribution).length > 0 ? attribution : undefined,
         },
       })
       if (error) throw error
       setSent(true)
-      // Очищаем атрибуцию: она привязана к этому signup, не должна "залипать"
-      // если на этом же устройстве зарегистрируется ещё кто-то.
-      try { localStorage.removeItem('ef_attribution') } catch {}
+      // НЕ чистим localStorage — UTM нужны на главной странице
+      // после клика на magic link, чтобы записать их в user_metadata.
     } catch (err: any) {
       setError(err?.message || 'Что-то пошло не так. Попробуйте ещё раз.')
     } finally {
