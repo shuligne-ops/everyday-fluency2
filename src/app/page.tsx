@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ReactMarkdown from 'react-markdown'
@@ -38,7 +38,7 @@ let gAudioIdx = -1
 // что запрос потерян и пытаемся ещё раз.
 const LESSONS_FETCH_TIMEOUT = 5000
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [level, setLevel] = useState('A1')
@@ -87,10 +87,6 @@ export default function Home() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (cancelled) return
-      // Игнорируем все события supabase, которые срабатывают при возврате на вкладку
-      // и не несут реальных изменений входа: TOKEN_REFRESHED, INITIAL_SESSION, SIGNED_IN.
-      // SIGNED_IN supabase-js шлёт повторно при visibility change даже если юзер
-      // уже залогинен — это и было причиной зависания UI.
       if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'SIGNED_IN') return
 
       const newEmail = session?.user?.email ?? null
@@ -111,8 +107,6 @@ export default function Home() {
   }, [])
 
   // ───────── ЗАГРУЗКА УРОКОВ ─────────
-  // Зависит от level и retry-счётчика. При тайм-ауте запроса инкрементим
-  // retry, useEffect перезапускается со свежим запросом.
   useEffect(() => {
     let cancelled = false
     let timeoutId: ReturnType<typeof setTimeout> | null = null
@@ -120,10 +114,8 @@ export default function Home() {
     setLessonsLoaded(false)
     setLessons([])
 
-    // Если запрос не вернулся за LESSONS_FETCH_TIMEOUT — пробуем ещё раз
     timeoutId = setTimeout(() => {
       if (cancelled) return
-      // Запрос завис — триггерим повторную попытку
       setLessonsRetry(r => r + 1)
     }, LESSONS_FETCH_TIMEOUT)
 
@@ -144,17 +136,12 @@ export default function Home() {
     }
   }, [level, lessonsRetry])
 
-  // При смене auth-состояния сбрасываем retry, чтобы перезагрузить
-  // уроки с правильным JWT (видимость черновиков для админа и т.п.)
   useEffect(() => {
     if (!authChecked) return
     setLessonsRetry(r => r + 1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail, isAdmin])
 
-  // Когда вкладка становится видимой и lessons пустой — гарантируем
-  // что свежий запрос уйдёт. Это защита от случая, когда supabase-js
-  // потерял предыдущий запрос на сетевом уровне.
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === 'visible' && !lessonsLoaded) {
@@ -506,5 +493,13 @@ export default function Home() {
       </div>
       <SiteFooter />
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'white' }} />}>
+      <HomeContent />
+    </Suspense>
   )
 }
