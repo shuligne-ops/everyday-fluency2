@@ -389,25 +389,73 @@ export default function Home() {
               ))}
             </div>
           </div>
-        ) : lessons.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#999' }}>
+     ) : lessons.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 24px' }}>
             {level === 'A1' ? (
-              <>Уроки уровня {level} скоро появятся.</>
+              <p style={{ color: '#999' }}>Уроки уровня {level} скоро появятся.</p>
             ) : !userEmail ? (
-              <>
-                <p style={{ marginBottom: '16px' }}>Уровень {level} — для подписчиков.</p>
+              <div style={{
+                background: 'white', border: '1px solid #f59e0b30', borderRadius: '16px',
+                padding: '32px 24px', maxWidth: '480px', margin: '0 auto',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
+              }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔓</div>
+                <h2 style={{
+                  fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
+                  color: '#1a1a2e', marginBottom: '12px'
+                }}>
+                  Уровень {level} — по подписке
+                </h2>
+                <p style={{ color: '#666', fontSize: '15px', marginBottom: '24px', lineHeight: 1.5 }}>
+                  30 уроков-диалогов с Sophie, Marie и их друзьями. Войдите, чтобы оформить подписку.
+                </p>
                 <button onClick={() => router.push('/auth')} style={{
                   background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
-                  fontSize: '14px', fontWeight: 600, padding: '10px 20px', borderRadius: '12px', fontFamily: 'inherit'
+                  fontSize: '15px', fontWeight: 700, padding: '14px 32px',
+                  borderRadius: '12px', fontFamily: 'inherit',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
                 }}>
-                  Войти, чтобы продолжить
+                  Войти и подписаться →
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                <p style={{ marginBottom: '8px' }}>Уровень {level} скоро откроется.</p>
-                <p style={{ fontSize: '13px' }}>Подписка на этот уровень ещё не активна.</p>
-              </>
+              <div style={{
+                background: 'white', border: '1px solid #f59e0b30', borderRadius: '16px',
+                padding: '32px 24px', maxWidth: '480px', margin: '0 auto',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
+              }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔓</div>
+                <h2 style={{
+                  fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
+                  color: '#1a1a2e', marginBottom: '12px'
+                }}>
+                  Откройте уровень {level}
+                </h2>
+                <p style={{ color: '#666', fontSize: '15px', marginBottom: '20px', lineHeight: 1.5 }}>
+                  30 уроков-диалогов. Sophie, Marie и их друзья в новых ситуациях:
+                  работа, дружба, эмоции, конфликты.
+                </p>
+
+                <div style={{
+                  background: '#FEF3C7', borderRadius: '10px', padding: '12px 16px',
+                  marginBottom: '20px', fontSize: '14px', color: '#92400e'
+                }}>
+                  🎁 <strong>Старт-оффер первым 50:</strong> год за 4 990 ₽ вместо 7 990 ₽
+                </div>
+
+                <button onClick={() => router.push('/pricing')} style={{
+                  background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
+                  fontSize: '15px', fontWeight: 700, padding: '14px 32px',
+                  borderRadius: '12px', fontFamily: 'inherit', width: '100%',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
+                }}>
+                  Выбрать тариф →
+                </button>
+
+                <p style={{ fontSize: '13px', color: '#999', marginTop: '14px' }}>
+                  От 890 ₽/мес · Год 7 990 ₽ · Навсегда 19 990 ₽
+                </p>
+              </div>
             )}
           </div>
         ) : (
