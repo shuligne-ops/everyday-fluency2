@@ -389,7 +389,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-     ) : lessons.length === 0 ? (
+   ) : lessons.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 24px' }}>
             {level === 'A1' ? (
               <p style={{ color: '#999' }}>Уроки уровня {level} скоро появятся.</p>
@@ -404,10 +404,10 @@ export default function Home() {
                   fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
                   color: '#1a1a2e', marginBottom: '12px'
                 }}>
-                  Уровень {level} — по подписке
+                  Все уровни от A2 до C2 — по подписке
                 </h2>
                 <p style={{ color: '#666', fontSize: '15px', marginBottom: '24px', lineHeight: 1.5 }}>
-                  30 уроков-диалогов с Sophie, Marie и их друзьями. Войдите, чтобы оформить подписку.
+                  150 уроков-диалогов. Один тариф открывает все уровни. Войдите, чтобы оформить подписку.
                 </p>
                 <button onClick={() => router.push('/auth')} style={{
                   background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
@@ -429,11 +429,11 @@ export default function Home() {
                   fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
                   color: '#1a1a2e', marginBottom: '12px'
                 }}>
-                  Откройте уровень {level}
+                  Откройте все уровни — от A2 до C2
                 </h2>
                 <p style={{ color: '#666', fontSize: '15px', marginBottom: '20px', lineHeight: 1.5 }}>
-                  30 уроков-диалогов. Sophie, Marie и их друзья в новых ситуациях:
-                  работа, дружба, эмоции, конфликты.
+                  150 уроков-диалогов. Sophie, Marie и их друзья в новых ситуациях:
+                  работа, дружба, эмоции, конфликты, путешествия, профессия.
                 </p>
 
                 <div style={{
@@ -454,6 +454,10 @@ export default function Home() {
 
                 <p style={{ fontSize: '13px', color: '#999', marginTop: '14px' }}>
                   От 890 ₽/мес · Год 7 990 ₽ · Навсегда 19 990 ₽
+                </p>
+
+                <p style={{ fontSize: '12px', color: '#bbb', marginTop: '8px', fontStyle: 'italic' }}>
+                  Один тариф открывает все 5 уровней: A2, B1, B2, C1, C2
                 </p>
               </div>
             )}
