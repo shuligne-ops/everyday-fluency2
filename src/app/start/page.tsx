@@ -1,17 +1,16 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
-// Этот лендинг — точка приземления для рекламного трафика.
-// НЕ показывает селектор уроков. Одна цель: довести до клика "Попробовать первый урок".
-// UTM-параметры из URL сохраняем в localStorage, чтобы потом сматчить с регистрацией.
+// Этот лендинг — точка приземления для рекламного трафика EF.
+// Главный аргумент: ЗВУЧАНИЕ. Школа учит читать — мы учим звучать.
+// UTM-параметры из URL сохраняем в localStorage для атрибуции.
 
 function StartContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Сохраняем UTM в localStorage для последующей атрибуции платежей к рекламной кампании
   useEffect(() => {
     const utms = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']
     const data: Record<string, string> = {}
@@ -28,8 +27,6 @@ function StartContent() {
   }, [searchParams])
 
   function startFirstLesson() {
-    // Первый урок A1 — id зависит от данных в Supabase, но ссылка на главную с автозапуском
-    // самого первого. Простой путь: редирект на главную, фронт сам подхватит дефолт A1-01.
     router.push('/?lesson=1')
   }
 
@@ -69,7 +66,8 @@ function StartContent() {
           margin: '0 0 20px',
           color: '#f5f0e0',
         }}>
-          Перестань стесняться<br/>говорить по-английски
+          Школа дала тебе чтение.<br/>
+          <span style={{ color: '#f59e0b' }}>Мы даём звук.</span>
         </h1>
 
         <p style={{
@@ -79,7 +77,7 @@ function StartContent() {
           maxWidth: '560px',
           margin: '0 auto 32px',
         }}>
-          180 уроков-диалогов с Софи и Мари. Из любого уровня — в свободную речь. 30 минут в день, без зубрёжки.
+          Курс английского, где Sophie из Лондона говорит живым голосом носителя — со связками, ритмом и реальным акцентом. Не как Google Translate. 180 уроков, 30 минут в день.
         </p>
 
         <button
@@ -97,7 +95,7 @@ function StartContent() {
             boxShadow: '0 8px 24px rgba(245, 158, 11, 0.3)',
           }}
         >
-          Попробовать первый урок →
+          Послушать первый урок →
         </button>
 
         <p style={{
@@ -109,7 +107,68 @@ function StartContent() {
         </p>
       </section>
 
-      {/* DIALOGUE PREVIEW — чтобы человек СРАЗУ увидел что это */}
+      {/* THE GAP — главный новый блок */}
+      <section style={{
+        maxWidth: '640px',
+        margin: '0 auto',
+        padding: '32px 20px',
+      }}>
+        <p style={{
+          textAlign: 'center',
+          color: '#8896aa',
+          fontSize: '13px',
+          letterSpacing: '1.5px',
+          marginBottom: '24px',
+        }}>
+          ВОТ ПОЧЕМУ ШКОЛЬНЫЙ АНГЛИЙСКИЙ НЕ РАБОТАЕТ
+        </p>
+
+        <h2 style={{
+          fontFamily: 'var(--font-display, Georgia, serif)',
+          fontSize: '24px',
+          fontWeight: 700,
+          textAlign: 'center',
+          marginBottom: '28px',
+          color: '#f5f0e0',
+          lineHeight: 1.3,
+        }}>
+          Понимаешь каждое слово в учебнике,<br/>
+          но не понимаешь ни одного в разговоре?
+        </h2>
+
+        <GapRow
+          school='"I have got to go now."'
+          schoolPhonetic="— ай хэв гот ту гоу нау —"
+          real='"I&apos;vegoddagonow."'
+          realPhonetic="айвгодагонау — одно слово, 0.7 секунды"
+        />
+        <GapRow
+          school='"What are you doing?"'
+          schoolPhonetic="— уот ар ю дуинг —"
+          real='"Whatcha doin&apos;?"'
+          realPhonetic="уача доин — один слог"
+        />
+        <GapRow
+          school='"Did you eat?"'
+          schoolPhonetic="— дид ю ит —"
+          real='"Jeet?"'
+          realPhonetic="джит — один звук"
+        />
+
+        <p style={{
+          textAlign: 'center',
+          fontSize: '15px',
+          color: '#b8c5d6',
+          marginTop: '24px',
+          fontStyle: 'italic',
+          lineHeight: 1.6,
+        }}>
+          Это называется <strong style={{ color: '#f59e0b', fontStyle: 'normal' }}>connected speech</strong> — реальная фонетика английского.<br/>
+          В школе её нет. У нас — на каждом уроке.
+        </p>
+      </section>
+
+      {/* DIALOGUE PREVIEW */}
       <section style={{
         maxWidth: '600px',
         margin: '0 auto',
@@ -122,7 +181,7 @@ function StartContent() {
           letterSpacing: '1.5px',
           marginBottom: '20px',
         }}>
-          ВОТ КАК ЭТО ВЫГЛЯДИТ
+          ВОТ КАК ЗВУЧИТ ОДИН УРОК
         </p>
 
         <div style={{
@@ -145,7 +204,7 @@ function StartContent() {
           marginTop: '16px',
           fontStyle: 'italic',
         }}>
-          Реальные диалоги. Живые ситуации. Никаких «Hello, my name is John».
+          Реальные диалоги, живой акцент, настоящая скорость. Никаких «Hello, my name is John».
         </p>
       </section>
 
@@ -163,7 +222,7 @@ function StartContent() {
           marginBottom: '32px',
           color: '#f5f0e0',
         }}>
-          Как устроен курс
+          Что внутри курса
         </h2>
 
         <div style={{
@@ -171,10 +230,10 @@ function StartContent() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '20px',
         }}>
-          <Feature icon="🎭" title="Диалоги, не правила" text="Учишься на реальных разговорах между Софи, Мари и их друзьями" />
-          <Feature icon="🎙" title="Голос и распознавание" text="Слушаешь, повторяешь, говоришь — приложение услышит и поймёт" />
-          <Feature icon="📈" title="6 уровней — 180 уроков" text="От первых фраз до свободной речи. Каждый урок — новая ситуация" />
-          <Feature icon="📱" title="Где угодно" text="Браузер на телефоне, планшете, компьютере. Без установки приложения" />
+          <Feature icon="🎙" title="Живой голос Sophie" text="Не синтезатор. Живой британский акцент со связками, ритмом и реальной скоростью" />
+          <Feature icon="🎭" title="Connected speech" text="Wanna, gonna, hafta, jeet — реальная фонетика, которой не учат в школе" />
+          <Feature icon="🗣" title="Распознавание речи" text="Говоришь — приложение слышит и понимает. Тренировка произношения в одиночку" />
+          <Feature icon="📈" title="180 уроков, 6 уровней" text="От первых фраз до свободной речи. Каждый урок — новая ситуация" />
         </div>
       </section>
 
@@ -196,7 +255,7 @@ function StartContent() {
             letterSpacing: '1.5px',
             marginBottom: '16px',
           }}>
-            ОТ АВТОРА
+            ПОЧЕМУ Я СДЕЛАЛ ЭТОТ КУРС
           </p>
           <p style={{
             fontSize: '16px',
@@ -204,11 +263,13 @@ function StartContent() {
             color: '#d6dde8',
             margin: 0,
           }}>
-            Я учил английский больше десяти лет — школа, репетиторы, учебники, приложения. Знал грамматику. А когда нужно было говорить — стоял и молчал. Языковой барьер.
+            Я учил английский больше десяти лет. Школа, репетиторы, учебники, приложения. Знал грамматику. Читал статьи без словаря.
             <br/><br/>
-            Когда я наконец заговорил — понял, что мешало всё это время: не было живой разговорной практики каждый день.
+            А когда приехал в Лондон — не понял ни одной фразы в первом разговоре. Звуки шли — слов не было. Будто язык, которому меня учили, и язык, на котором говорят, — это два разных языка.
             <br/><br/>
-            EF — это то, чего мне самому не хватало. Полгода я делал курс, который вытаскивает в речь.
+            Через несколько месяцев я понял: они и правда разные. Школа учит, <strong>как слова пишутся</strong>. А носители говорят, <strong>как они звучат вместе</strong>. И этой второй системе в России не учат — ни в школе, ни в большинстве курсов.
+            <br/><br/>
+            Everyday Fluency — это то, чего мне самому не хватало все эти годы. Курс, где ты слышишь язык таким, какой он есть. И постепенно начинаешь сам звучать так же.
           </p>
           <p style={{
             marginTop: '16px',
@@ -241,7 +302,7 @@ function StartContent() {
           color: '#8896aa',
           marginBottom: '24px',
         }}>
-          Уровень A1 — навсегда бесплатно. Дальше по подписке.
+          Уровень A1 — навсегда бесплатно. Дальше один тариф открывает все уровни A2–C2.
         </p>
 
         <div style={{
@@ -287,11 +348,19 @@ function StartContent() {
           fontFamily: 'var(--font-display, Georgia, serif)',
           fontSize: '24px',
           fontWeight: 700,
-          marginBottom: '20px',
+          marginBottom: '12px',
           color: '#f5f0e0',
         }}>
-          Начни прямо сейчас
+          Услышь, как звучит английский на самом деле
         </h2>
+        <p style={{
+          fontSize: '15px',
+          color: '#b8c5d6',
+          marginBottom: '24px',
+          lineHeight: 1.5,
+        }}>
+          Первый урок — два клика, без регистрации.
+        </p>
 
         <button
           onClick={startFirstLesson}
@@ -308,7 +377,7 @@ function StartContent() {
             boxShadow: '0 8px 24px rgba(245, 158, 11, 0.3)',
           }}
         >
-          Открыть первый урок →
+          Послушать Sophie →
         </button>
 
         <p style={{
@@ -316,10 +385,11 @@ function StartContent() {
           fontSize: '13px',
           color: '#8896aa',
         }}>
-          Первые 30 уроков — бесплатно, без регистрации.
+          30 уроков A1 — бесплатно, без регистрации.
         </p>
       </section>
-  {/* TELEGRAM CHANNEL */}
+
+      {/* TELEGRAM CHANNEL */}
       <section style={{
         maxWidth: '600px',
         margin: '0 auto',
@@ -334,12 +404,12 @@ function StartContent() {
         }}>
           <p style={{
             fontSize: '14px',
-            color: '#475569',
+            color: '#b8c5d6',
             marginBottom: '12px',
             lineHeight: 1.5,
           }}>
             Не готовы начать сегодня? Подписывайтесь на канал —<br />
-            раз в несколько дней живая фраза или кусочек диалога.
+            живая фраза, разбор звука или диалог раз в несколько дней.
           </p>
           <a
             href="https://t.me/everyday_fluency"
@@ -347,11 +417,11 @@ function StartContent() {
             rel="noopener noreferrer"
             style={{
               display: 'inline-block',
-              color: '#d97706',
+              color: '#f59e0b',
               fontSize: '15px',
               fontWeight: 700,
               textDecoration: 'none',
-              borderBottom: '1px solid rgba(217, 119, 6, 0.4)',
+              borderBottom: '1px solid rgba(245, 158, 11, 0.4)',
               paddingBottom: '2px',
             }}
           >
@@ -359,9 +429,67 @@ function StartContent() {
           </a>
         </div>
       </section>
-   </div>
+    </div>
   )
 }
+
+function GapRow({ school, schoolPhonetic, real, realPhonetic }: { school: string; schoolPhonetic: string; real: string; realPhonetic: string }) {
+  return (
+    <div style={{
+      background: 'rgba(245, 240, 224, 0.03)',
+      borderRadius: '12px',
+      padding: '16px 20px',
+      marginBottom: '14px',
+      border: '1px solid rgba(245, 240, 224, 0.06)',
+    }}>
+      <div style={{ marginBottom: '10px' }}>
+        <p style={{
+          fontSize: '12px',
+          color: '#7a869a',
+          letterSpacing: '1px',
+          marginBottom: '4px',
+        }}>
+          ШКОЛА УЧИТ ТАК
+        </p>
+        <p style={{
+          fontSize: '17px',
+          color: '#a8b5c8',
+          fontStyle: 'italic',
+          marginBottom: '2px',
+        }}>
+          {school}
+        </p>
+        <p style={{ fontSize: '13px', color: '#7a869a' }}>{schoolPhonetic}</p>
+      </div>
+      <div style={{
+        height: '1px',
+        background: 'rgba(245, 158, 11, 0.15)',
+        margin: '12px 0',
+      }} />
+      <div>
+        <p style={{
+          fontSize: '12px',
+          color: '#f59e0b',
+          letterSpacing: '1px',
+          marginBottom: '4px',
+        }}>
+          БРИТАНЕЦ ГОВОРИТ ТАК
+        </p>
+        <p style={{
+          fontSize: '20px',
+          color: '#f5f0e0',
+          fontWeight: 700,
+          fontStyle: 'italic',
+          marginBottom: '2px',
+        }}>
+          {real}
+        </p>
+        <p style={{ fontSize: '13px', color: '#fcd34d' }}>{realPhonetic}</p>
+      </div>
+    </div>
+  )
+}
+
 function DialogueLine({ speaker, text }: { speaker: string; text: string }) {
   return (
     <div style={{ marginBottom: '12px' }}>
@@ -378,7 +506,7 @@ function DialogueLine({ speaker, text }: { speaker: string; text: string }) {
         fontSize: '15px',
         fontStyle: 'italic',
       }}>
-        "{text}"
+        &quot;{text}&quot;
       </span>
     </div>
   )
