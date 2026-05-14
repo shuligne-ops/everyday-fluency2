@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
@@ -40,6 +40,7 @@ const LESSONS_FETCH_TIMEOUT = 5000
 
 export default function Home() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [level, setLevel] = useState('A1')
   const [lessons, setLessons] = useState<LessonSummary[]>([])
   const [lessonsLoaded, setLessonsLoaded] = useState(false)
@@ -57,6 +58,9 @@ export default function Home() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
+
+  // Флаг автозапуска первого урока — чтобы не запустить дважды
+  const [autostartDone, setAutostartDone] = useState(false)
 
   // Счётчик попыток загрузки уроков. Если запрос завис — увеличиваем
   // счётчик, useEffect перезапускается и делает свежий запрос.
@@ -160,6 +164,21 @@ export default function Home() {
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [lessonsLoaded])
+
+  // ───────── АВТОЗАПУСК ПЕРВОГО УРОКА ─────────
+  // Если в URL есть ?lesson=1 (приход с лендинга /start) — автоматически
+  // открываем первый урок A1. Срабатывает один раз, после загрузки списка уроков.
+  useEffect(() => {
+    if (autostartDone) return
+    if (!lessonsLoaded) return
+    if (lessons.length === 0) return
+    if (level !== 'A1') return
+    const lessonParam = searchParams.get('lesson')
+    if (lessonParam !== '1') return
+    setAutostartDone(true)
+    open(lessons[0].id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonsLoaded, lessons, level, searchParams, autostartDone])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
