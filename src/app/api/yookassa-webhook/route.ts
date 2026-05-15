@@ -50,19 +50,6 @@ export async function POST(req: NextRequest) {
 
   console.log('[webhook] received event:', event.event, event.object?.id)
 
-  // Только успешные платежи нас интересуют для активации
-  // event.event может быть: payment.succeeded, payment.canceled, payment.waiting_for_capture, refund.succeeded
-  if (event.event !== 'payment.succeeded') {
-    // Логируем и игнорируем
-    console.log('[webhook] ignoring event type:', event.event)
-    return NextResponse.json({ ok: true, ignored: true })
-  }
-
-  const payment = event.object
-  if (!payment || !payment.id) {
-    return NextResponse.json({ error: 'invalid_payment_object' }, { status: 400 })
-  }
-
   // Подключаемся к Supabase с service-role (обходим RLS для записи)
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -70,62 +57,124 @@ export async function POST(req: NextRequest) {
     { auth: { persistSession: false } }
   )
 
-  // Находим pending подписку по yookassa_payment_id
-  const { data: subscription, error: findErr } = await supabase
-    .from('user_subscriptions')
-    .select('id, user_id, plan, status, amount_paid')
-    .eq('yookassa_payment_id', payment.id)
-    .maybeSingle()
+  if (event.event === 'payment.succeeded') {
+    const payment = event.object
+    if (!payment || !payment.id) {
+      return NextResponse.json({ error: 'invalid_payment_object' }, { status: 400 })
+    }
 
-  if (findErr) {
-    console.error('[webhook] find subscription failed:', findErr)
-    return NextResponse.json({ error: 'db_error' }, { status: 500 })
-  }
+    // Находим pending подписку по yookassa_payment_id
+    const { data: subscription, error: findErr } = await supabase
+      .from('user_subscriptions')
+      .select('id, user_id, plan, status, amount_paid')
+      .eq('yookassa_payment_id', payment.id)
+      .maybeSingle()
 
-  if (!subscription) {
-    // Платёж пришёл, но подписки в БД нет. Это либо тест от ЮKassa, либо
-    // что-то пошло не так при checkout. Логируем но не падаем.
-    console.warn('[webhook] payment.id not found in subscriptions:', payment.id)
-    return NextResponse.json({ ok: true, note: 'no matching subscription' })
-  }
+    if (findErr) {
+      console.error('[webhook] find subscription failed:', findErr)
+      return NextResponse.json({ error: 'db_error' }, { status: 500 })
+    }
 
-  // Сверяем сумму (защита от подделки)
-  const expectedKopeks = subscription.amount_paid
-  const receivedRub = parseFloat(payment.amount?.value ?? '0')
-  const receivedKopeks = Math.round(receivedRub * 100)
+    if (!subscription) {
+      // Платёж пришёл, но подписки в БД нет. Это либо тест от ЮKassa, либо
+      // что-то пошло не так при checkout. Логируем но не падаем.
+      console.warn('[webhook] payment.id not found in subscriptions:', payment.id)
+      return NextResponse.json({ ok: true, note: 'no matching subscription' })
+    }
 
-  if (expectedKopeks !== receivedKopeks) {
-    console.error(
-      '[webhook] amount mismatch! expected',
-      expectedKopeks,
-      'kopeks, got',
-      receivedKopeks
+    // Сверяем сумму (защита от подделки)
+    const expectedKopeks = subscription.amount_paid
+    const receivedRub = parseFloat(payment.amount?.value ?? '0')
+    const receivedKopeks = Math.round(receivedRub * 100)
+
+    if (expectedKopeks !== receivedKopeks) {
+      console.error(
+        '[webhook] amount mismatch! expected',
+        expectedKopeks,
+        'kopeks, got',
+        receivedKopeks
+      )
+      return NextResponse.json({ error: 'amount_mismatch' }, { status: 400 })
+    }
+
+    // Активируем подписку
+    const { error: updateErr } = await supabase
+      .from('user_subscriptions')
+      .update({ status: 'active' })
+      .eq('id', subscription.id)
+
+    if (updateErr) {
+      console.error('[webhook] update subscription failed:', updateErr)
+      return NextResponse.json({ error: 'update_failed' }, { status: 500 })
+    }
+
+    console.log(
+      '[webhook] subscription activated:',
+      subscription.id,
+      'user:',
+      subscription.user_id,
+      'plan:',
+      subscription.plan
     )
-    return NextResponse.json({ error: 'amount_mismatch' }, { status: 400 })
+
+    // ЮKassa ожидает 200 OK. Если не вернуть 200 — будет ретраить 24 часа.
+    return NextResponse.json({ ok: true })
   }
 
-  // Активируем подписку
-  const { error: updateErr } = await supabase
-    .from('user_subscriptions')
-    .update({ status: 'active' })
-    .eq('id', subscription.id)
+  if (event.event === 'refund.succeeded') {
+    const refund = event.object
+    console.log('[webhook] refund.succeeded received for payment:', refund?.payment_id, 'refund:', refund?.id)
 
-  if (updateErr) {
-    console.error('[webhook] update subscription failed:', updateErr)
-    return NextResponse.json({ error: 'update_failed' }, { status: 500 })
+    if (!refund?.payment_id) {
+      return NextResponse.json({ error: 'no_payment_id' }, { status: 400 })
+    }
+
+    const { data: subscription, error: findErr } = await supabase
+      .from('user_subscriptions')
+      .select('id, user_id, status')
+      .eq('yookassa_payment_id', refund.payment_id)
+      .maybeSingle()
+
+    if (findErr) {
+      console.error('[webhook] refund: find subscription failed:', findErr)
+      return NextResponse.json({ error: 'db_error' }, { status: 500 })
+    }
+
+    if (!subscription) {
+      console.warn('[webhook] refund: subscription not found for payment:', refund.payment_id)
+      return NextResponse.json({ ok: true, found: false })
+    }
+
+    if (subscription.status === 'refunded') {
+      return NextResponse.json({ ok: true, already_refunded: true })
+    }
+
+    const { error: updateErr } = await supabase
+      .from('user_subscriptions')
+      .update({ status: 'refunded' })
+      .eq('id', subscription.id)
+
+    if (updateErr) {
+      console.error('[webhook] refund: update failed:', updateErr)
+      return NextResponse.json({ error: 'db_update_failed' }, { status: 500 })
+    }
+
+    const { error: revokeErr } = await supabase
+      .from('user_level_access')
+      .delete()
+      .eq('user_id', subscription.user_id)
+
+    if (revokeErr) {
+      console.error('[webhook] refund: failed to revoke access:', revokeErr)
+    }
+
+    console.log('[webhook] refund processed for subscription', subscription.id, 'user', subscription.user_id)
+    return NextResponse.json({ ok: true, refunded: true })
   }
 
-  console.log(
-    '[webhook] subscription activated:',
-    subscription.id,
-    'user:',
-    subscription.user_id,
-    'plan:',
-    subscription.plan
-  )
-
-  // ЮKassa ожидает 200 OK. Если не вернуть 200 — будет ретраить 24 часа.
-  return NextResponse.json({ ok: true })
+  // Логируем и игнорируем
+  console.log('[webhook] ignoring event type:', event.event)
+  return NextResponse.json({ ok: true, ignored: true })
 }
 
 // ЮKassa может проверить endpoint методом HEAD/GET
