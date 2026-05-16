@@ -98,10 +98,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Активируем подписку
-    const { error: updateErr } = await supabase
-      .from('user_subscriptions')
-      .update({ status: 'active' })
-      .eq('id', subscription.id)
+const { error: updateErr } = await supabase
+  .from('user_subscriptions')
+  .update({ status: 'active' })
+  .eq('id', subscription.id)
+  .eq('status', 'pending')
 
     if (updateErr) {
       console.error('[webhook] update subscription failed:', updateErr)
