@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { hasActiveSubscription, getUserSubscription } from '@/lib/access'
 
-type PlanKey = 'monthly' | 'annual' | 'lifetime' | 'launch_annual'
+type PlanKey = 'monthly' | 'annual' | 'launch_annual'
 
 export default function PricingPage() {
   const router = useRouter()
@@ -106,7 +106,7 @@ export default function PricingPage() {
           <div style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px' }}>
             <div style={{ fontWeight: 600, color: '#166534', marginBottom: '4px' }}>✓ У вас активная подписка</div>
             <div style={{ fontSize: '14px', color: '#15803d' }}>
-              Тариф: {currentPlan === 'monthly' ? 'Месяц' : currentPlan === 'annual' ? 'Год' : currentPlan === 'launch_annual' ? 'Стартовый годовой' : currentPlan === 'lifetime' ? 'Навсегда' : currentPlan}
+              Тариф: {currentPlan === 'monthly' ? 'Месяц' : currentPlan === 'annual' ? 'Год' : currentPlan === 'launch_annual' ? 'Стартовый годовой' : currentPlan}
             </div>
           </div>
         )}
@@ -144,18 +144,6 @@ export default function PricingPage() {
           onClick={() => handleSubscribe('annual')}
           onSubtextClick={() => handleSubscribe('launch_annual')}
           subtextLoading={loading === 'launch_annual'}
-        />
-
-        {/* Lifetime */}
-        <PricingCard
-          title="Навсегда"
-          price="19 990 ₽"
-          period="/ разово"
-          description="Пожизненный доступ ко всему курсу — все 180 уроков, все шесть уровней. Один платёж, никаких списаний."
-          isCurrentPlan={currentPlan === 'lifetime'}
-          isLoading={loading === 'lifetime'}
-          disabled={hasSubscription || loading !== null}
-          onClick={() => handleSubscribe('lifetime')}
         />
 
         {/* What's included */}

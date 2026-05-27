@@ -324,7 +324,6 @@ function StartContent() {
         }}>
           <Price label="Месяц" value="890 ₽" period="в мес" />
           <Price label="Год" value="7 990 ₽" period="экономия 25%" highlight />
-          <Price label="Навсегда" value="19 990 ₽" period="один платёж" />
         </div>
 
         <p style={{
