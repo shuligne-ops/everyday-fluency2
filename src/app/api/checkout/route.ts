@@ -19,7 +19,6 @@ const PLANS = {
   monthly: { amount_kopeks: 89000, label: 'Подписка на месяц', plan: 'monthly' as const },
   annual: { amount_kopeks: 799000, label: 'Подписка на год', plan: 'annual' as const },
   launch_annual: { amount_kopeks: 499000, label: 'Стартовая подписка на год', plan: 'launch_annual' as const },
-  lifetime: { amount_kopeks: 1999000, label: 'Доступ навсегда (EF + FAQ)', plan: 'lifetime' as const },
 }
 
 type PlanKey = keyof typeof PLANS
@@ -171,7 +170,6 @@ export async function POST(req: NextRequest) {
   // 6. Создаём pending-запись подписки (UPSERT по user_id)
   // Когда придёт webhook payment.succeeded — обновим status на 'active'
   const expiresAt = (() => {
-    if (planKey === 'lifetime') return null
     const now = new Date()
     if (planKey === 'monthly') return new Date(now.setMonth(now.getMonth() + 1)).toISOString()
     // annual или launch_annual
