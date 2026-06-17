@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       stream: true,
       system: SYSTEM_PROMPT,
@@ -76,8 +76,9 @@ export async function POST(req: NextRequest) {
   })
 
   if (!response.ok) {
-    console.error('Anthropic API error:', await response.text())
-    return new Response('API Error', { status: 500 })
+    const errorText = await response.text()
+    console.error('Anthropic API error:', response.status, errorText)
+    return new Response(`API Error: ${response.status}`, { status: 500 })
   }
 
   const encoder = new TextEncoder()
