@@ -12,6 +12,8 @@ export type Lesson = {
   is_free_teaser?: boolean
 }
 
+export const FREE_A1_LESSONS = 3
+
 export type AccessResult = {
   allowed: boolean
   reason: 'free_a1' | 'free_teaser' | 'subscription' | 'level_grant' | 'admin' | 'paywall' | 'login_required'
@@ -21,7 +23,7 @@ export type AccessResult = {
  * Главная функция: можно ли юзеру открыть этот урок?
  *
  * Правила:
- * 1. A1 — свободный доступ всем (включая незалогиненных)
+ * 1. Первые 3 урока A1 — свободный доступ всем (включая незалогиненных)
  * 2. is_free_teaser=TRUE — свободный доступ всем (включая незалогиненных)
  * 3. Остальное — нужен залогиненный юзер с активной подпиской ИЛИ грантом на уровень
  */
@@ -29,8 +31,8 @@ export async function checkLessonAccess(
   userId: string | null,
   lesson: Lesson
 ): Promise<AccessResult> {
-  // 1. A1 — всегда открыто
-  if (lesson.level === 'A1') {
+  // 1. Первые уроки A1 — всегда открыты
+  if (lesson.level === 'A1' && lesson.lesson_number <= FREE_A1_LESSONS) {
     return { allowed: true, reason: 'free_a1' }
   }
 

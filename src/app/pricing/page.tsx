@@ -96,7 +96,7 @@ export default function PricingPage() {
       <main style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 20px 60px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#292524', marginBottom: '12px' }}>Тарифы</h1>
         <p style={{ fontSize: '16px', color: '#57534e', marginBottom: '32px', lineHeight: 1.6 }}>
-          Уровень A1 (30 уроков) — бесплатно, без регистрации.
+          3 урока A1 — бесплатно, без регистрации.
           Платная подписка открывает все остальные уровни — A2, B1, B2, C1 и C2.
           Курс готов целиком: 180 уроков, шесть уровней CEFR, от первого «Hello» до свободного владения языком.
           Разговорный английский с виртуальным преподавателем Sophie.
@@ -120,7 +120,7 @@ export default function PricingPage() {
         {/* Monthly */}
         <PricingCard
           title="Месяц"
-          price="890 ₽"
+          price="1 500 ₽"
           period="/ месяц"
           description="Полный доступ ко всем уровням от A2 до C2. Списывается раз в месяц, можно отменить в любой момент."
           isCurrentPlan={currentPlan === 'monthly'}

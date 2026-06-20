@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { FREE_A1_LESSONS, hasActiveSubscription } from '@/lib/access'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
 
@@ -56,6 +57,7 @@ function HomeContent() {
   const recRef = useRef<any>(null)
 
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [hasSubscription, setHasSubscription] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
 
@@ -77,6 +79,9 @@ function HomeContent() {
       if (cancelled) return
       if (user) {
         setUserEmail(user.email ?? null)
+        hasActiveSubscription(user.id).then(has => {
+          if (!cancelled) setHasSubscription(has)
+        })
         supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
           .then(({ data }) => { if (!cancelled) setIsAdmin(!!data) })
       }
@@ -93,6 +98,9 @@ function HomeContent() {
       setUserEmail(prev => (prev === newEmail ? prev : newEmail))
 
       if (session?.user) {
+        hasActiveSubscription(session.user.id).then(has => {
+          if (!cancelled) setHasSubscription(has)
+        })
         const { data } = await supabase.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle()
         if (!cancelled) {
           const newAdmin = !!data
@@ -100,6 +108,7 @@ function HomeContent() {
         }
       } else {
         setIsAdmin(prev => (prev === false ? prev : false))
+        setHasSubscription(prev => (prev === false ? prev : false))
       }
     })
 
@@ -114,15 +123,29 @@ function HomeContent() {
     setLessonsLoaded(false)
     setLessons([])
 
+    if (!authChecked) return
+
     timeoutId = setTimeout(() => {
       if (cancelled) return
       setLessonsRetry(r => r + 1)
     }, LESSONS_FETCH_TIMEOUT)
 
-    supabase.from('lessons_v2')
+    if (authChecked && level !== 'A1' && !hasSubscription && !isAdmin) {
+      if (timeoutId) clearTimeout(timeoutId)
+      setLessonsLoaded(true)
+      return
+    }
+
+    let query = supabase.from('lessons_v2')
       .select('id,level,lesson_number,title_en,title_ru,is_published')
       .eq('level', level)
       .order('lesson_number')
+
+    if (level === 'A1' && !hasSubscription && !isAdmin) {
+      query = query.lte('lesson_number', FREE_A1_LESSONS)
+    }
+
+    query
       .then(({ data }) => {
         if (cancelled) return
         if (timeoutId) { clearTimeout(timeoutId); timeoutId = null }
@@ -134,13 +157,13 @@ function HomeContent() {
       cancelled = true
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [level, lessonsRetry])
+  }, [level, lessonsRetry, authChecked, hasSubscription, isAdmin])
 
   useEffect(() => {
     if (!authChecked) return
     setLessonsRetry(r => r + 1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userEmail, isAdmin])
+  }, [userEmail, isAdmin, hasSubscription])
 
   useEffect(() => {
     const onVis = () => {
@@ -179,10 +202,16 @@ function HomeContent() {
   async function open(id: number) {
     const { data } = await supabase.from('lessons_v2').select('*').eq('id', id).single()
     if (!data) return
-    setLesson(data as Lesson)
+    const lessonData = data as Lesson
+    const canOpen = isAdmin || hasSubscription || (lessonData.level === 'A1' && lessonData.lesson_number <= FREE_A1_LESSONS)
+    if (!canOpen) {
+      router.push(userEmail ? '/pricing' : '/auth?return=/pricing')
+      return
+    }
+    setLesson(lessonData)
     setMsgs([])
     kill()
-    await chat(data as Lesson, [])
+    await chat(lessonData, [])
   }
 
   async function chat(l: Lesson, h: Message[], u?: string) {
@@ -459,7 +488,7 @@ function HomeContent() {
                 </button>
 
                 <p style={{ fontSize: '13px', color: '#999', marginTop: '14px' }}>
-                  От 890 ₽/мес · Год 7 990 ₽
+                  От 1 500 ₽/мес · Год 7 990 ₽
                 </p>
 
                 <p style={{ fontSize: '12px', color: '#bbb', marginTop: '8px', fontStyle: 'italic' }}>

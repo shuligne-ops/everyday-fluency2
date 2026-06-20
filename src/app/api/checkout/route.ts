@@ -16,7 +16,7 @@ import { createClient } from '@supabase/supabase-js'
 // Тарифы — в копейках чтобы избежать проблем с float.
 // Если поменяешь цены — синхронизируй и здесь, и на /pricing, и в SQL CHECK.
 const PLANS = {
-  monthly: { amount_kopeks: 89000, label: 'Подписка на месяц', plan: 'monthly' as const },
+  monthly: { amount_kopeks: 150000, label: 'Подписка на месяц', plan: 'monthly' as const },
   annual: { amount_kopeks: 799000, label: 'Подписка на год', plan: 'annual' as const },
   launch_annual: { amount_kopeks: 499000, label: 'Стартовая подписка на год', plan: 'launch_annual' as const },
 }

@@ -302,7 +302,7 @@ function StartContent() {
           color: '#8896aa',
           marginBottom: '24px',
         }}>
-          Уровень A1 — навсегда бесплатно. Дальше один тариф открывает все уровни A2–C2.
+          3 урока A1 — бесплатно. Дальше один тариф открывает все уровни A1–C2.
         </p>
 
         <div style={{
@@ -322,7 +322,7 @@ function StartContent() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '12px',
         }}>
-          <Price label="Месяц" value="890 ₽" period="в мес" />
+          <Price label="Месяц" value="1 500 ₽" period="в мес" />
           <Price label="Год" value="7 990 ₽" period="экономия 25%" highlight />
         </div>
 
@@ -384,7 +384,7 @@ function StartContent() {
           fontSize: '13px',
           color: '#8896aa',
         }}>
-          30 уроков A1 — бесплатно, без регистрации.
+          3 урока A1 — бесплатно, без регистрации.
         </p>
       </section>
 
