@@ -1,0 +1,3343 @@
+{
+  "meta": {
+    "table": "lessons_v2",
+    "source": "https://nipwmdjchoibemjkvlrf.supabase.co",
+    "exported_at": "2026-06-21T14:29:49.093Z",
+    "total": 30,
+    "by_level": {
+      "A1": 30
+    }
+  },
+  "lessons": [
+    {
+      "id": 1,
+      "level": "A1",
+      "lesson_number": 1,
+      "title_en": "The Coffee Queue",
+      "title_ru": "Встреча в очереди за кофе",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Oh! Marie! Hey!",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Sophie! Long time no see!",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I know, it's been weeks. How are you?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Good, good. Busy, but good. You?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Same. I needed a coffee, so here I am.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Me too. The queue is long today.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "It always is on Mondays.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "True. Hey, do you have time? Want to sit together?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yeah, I have fifteen minutes. Let's grab a table.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Perfect.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You run into an old friend at the supermarket. You haven't seen them for a long time. Start a short conversation — greet them, ask how they are, and invite them for a coffee.",
+          "prompt_phrases": [
+            "Oh! [name]! Hey!",
+            "Long time no see!",
+            "How are you?",
+            "Want to grab a coffee?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Long time no see!",
+          "example": "— Hi Marie! Long time no see! — Hey Sophie, yeah, it's been ages!",
+          "explanation": "Очень распространённое дружеское приветствие, когда вы не видели человека какое-то время. Буквально — 'давно не видел'. Используется между друзьями и хорошими знакомыми, не в формальной обстановке.",
+          "translation": "Давно не виделись!"
+        },
+        "cultural_note": "In British and English-speaking cultures, small talk — short, friendly conversation about everyday things (weather, how busy you are, where you're going) — is very important when you meet someone. It's a way to show warmth before anything more serious. You don't need to share big news; 'busy, but good' is a perfect answer.",
+        "key_vocabulary": [
+          {
+            "note": "дружеское приветствие",
+            "word": "Long time no see",
+            "translation": "Давно не виделись"
+          },
+          {
+            "note": "'it has been' сокращено до 'it's been'",
+            "word": "It's been weeks",
+            "translation": "Прошло несколько недель"
+          },
+          {
+            "note": "короткий ответ вместо 'My situation is the same'",
+            "word": "Same",
+            "translation": "Такой же / Аналогично"
+          },
+          {
+            "note": "британский вариант; в США чаще говорят 'the line'",
+            "word": "The queue",
+            "translation": "Очередь"
+          },
+          {
+            "note": "'grab' — разговорное 'взять, ухватить'",
+            "word": "Grab a table",
+            "translation": "Занять/найти столик"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "In a coffee shop — specifically, in the queue.",
+            "question": "Where does this conversation take place?"
+          },
+          {
+            "hint": "A few weeks — Sophie says 'it's been weeks'.",
+            "question": "How long has it been since Sophie and Marie last saw each other?"
+          },
+          {
+            "hint": "Yes, she has fifteen minutes.",
+            "question": "Does Sophie have time to sit down with Marie?"
+          }
+        ]
+      },
+      "created_at": "2026-04-23T23:08:33.601236+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 3,
+      "level": "A1",
+      "lesson_number": 2,
+      "title_en": "Saturday Morning",
+      "title_ru": "Субботнее утро",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Hi Marie, it's me. What are you up to?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Just having a cuppa. You?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Same. Still in my pyjamas.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Classic Saturday.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Any plans today?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Not really. Maybe a walk in the park.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Want to come with me? I need to pop to the shops.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Yeah, alright. What time?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Give me an hour. I need a shower first.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Perfect. See you at eleven.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "It's Saturday morning. Call a friend and suggest doing something together. Ask what they're up to, share your plans, and invite them along.",
+          "prompt_phrases": [
+            "Hi! What are you up to?",
+            "I'm just [doing something].",
+            "Do you fancy [activity]?",
+            "What time works for you?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "What are you up to?",
+          "example": "— Hi! What are you up to? — Not much, just having coffee. You?",
+          "explanation": "Супер-распространённая неформальная фраза у британцев. Буквально — 'до чего ты дошёл?', но значит просто 'чем занят, какие планы?'. Используется постоянно между друзьями — по телефону, в сообщениях, при встрече.",
+          "translation": "Чем занимаешься?"
+        },
+        "cultural_note": "Tea is a genuine part of British daily life — not a cliché. Brits drink around 100 million cups a day. 'A cuppa' means a cup of tea (never coffee), usually with milk. If a Brit offers you tea, it's a sign of warmth and welcome. Refusing can seem cold — at least say 'maybe later!'",
+        "key_vocabulary": [
+          {
+            "note": "неформальное, между друзьями",
+            "word": "What are you up to?",
+            "translation": "Чем занимаешься?"
+          },
+          {
+            "note": "очень британское; 'cup of tea' в разговоре",
+            "word": "A cuppa",
+            "translation": "Чашка чая"
+          },
+          {
+            "note": "'pop' = сбегать, на минуту",
+            "word": "Pop to the shops",
+            "translation": "Быстро заскочить в магазин"
+          },
+          {
+            "note": "типичное британское согласие",
+            "word": "Alright",
+            "translation": "Хорошо / ладно"
+          },
+          {
+            "note": "часто используется вместо 'I need an hour'",
+            "word": "Give me an hour",
+            "translation": "Дай мне час"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "She's having a cup of tea — 'a cuppa'.",
+            "question": "What is Marie doing when Sophie calls?"
+          },
+          {
+            "hint": "She needs to shower first.",
+            "question": "What does Sophie need to do before meeting?"
+          },
+          {
+            "hint": "At eleven — Sophie said 'give me an hour'.",
+            "question": "What time are they meeting?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 4,
+      "level": "A1",
+      "lesson_number": 3,
+      "title_en": "At the Tesco",
+      "title_ru": "В Tesco",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Marie? Fancy seeing you here!",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Sophie! Oh, hi! I didn't see you.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Doing your shopping?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Yeah, just a few bits. You?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Same. I needed milk and bread.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Classic. That's always the list.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh, are these strawberries any good?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "They look a bit dodgy, to be honest.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Right, I'll skip them then.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Good call. See you at the tills?",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You run into a friend in a supermarket. React with surprise, make small talk about what you're both buying, and ask for advice on something.",
+          "prompt_phrases": [
+            "Fancy seeing you here!",
+            "What are you getting?",
+            "Is [product] any good?",
+            "See you at the tills!"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Fancy seeing you here!",
+          "example": "— Oh! Sophie! Fancy seeing you here! — I know, what are the odds?",
+          "explanation": "Используется, когда случайно сталкиваешься со знакомым в неожиданном месте. Дружелюбно, с лёгким удивлением. 'Fancy' здесь — старое значение 'представить себе'. Очень британская фраза.",
+          "translation": "Вот так встреча!"
+        },
+        "cultural_note": "Tesco is the biggest supermarket chain in the UK — you'll find one on nearly every high street. Brits often go shopping for 'just a few bits' rather than a big weekly shop. 'Dodgy' is an incredibly useful word: it can describe food that's past its best, a suspicious person, or a questionable area. Master it and you'll sound properly British.",
+        "key_vocabulary": [
+          {
+            "note": "дружеское удивление",
+            "word": "Fancy seeing you here",
+            "translation": "Вот так встреча"
+          },
+          {
+            "note": "несколько вещей, не большие покупки",
+            "word": "A few bits",
+            "translation": "Кое-что по мелочи"
+          },
+          {
+            "note": "очень британское; про еду = несвежий",
+            "word": "Dodgy",
+            "translation": "Сомнительный / подозрительный"
+          },
+          {
+            "note": "согласие с выбором собеседника",
+            "word": "Good call",
+            "translation": "Хорошее решение"
+          },
+          {
+            "note": "UK; в США — 'the checkout'",
+            "word": "The tills",
+            "translation": "Кассы"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "At Tesco — a British supermarket.",
+            "question": "Where are Sophie and Marie?"
+          },
+          {
+            "hint": "Milk and bread.",
+            "question": "What does Sophie need to buy?"
+          },
+          {
+            "hint": "Marie says they look 'dodgy' — not fresh or good quality.",
+            "question": "Why doesn't Sophie buy the strawberries?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 5,
+      "level": "A1",
+      "lesson_number": 4,
+      "title_en": "The Tube Platform",
+      "title_ru": "На платформе метро",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Ugh, it's packed.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Monday morning at Oxford Circus. What do you expect?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "How long till the next one?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Two minutes. Look at the board.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh, right. I never look up.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Here it comes. Brace yourself.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Please mind the gap...",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Classic. Let's squeeze on.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Which stop do you need?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Bond Street. One stop. You?",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You're on a crowded tube platform with a friend. Complain about the crowd, check how long until the next train, and say which stop you need.",
+          "prompt_phrases": [
+            "It's packed!",
+            "How long till the next one?",
+            "Which stop do you need?",
+            "Let's squeeze on."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Mind the gap",
+          "example": "— Please mind the gap between the train and the platform. — Every time. I love it.",
+          "explanation": "Знаменитое объявление в лондонском метро — его слышишь на каждой станции. 'Mind' здесь = 'be careful of'. За пределами метро фраза стала культурным символом Лондона: её печатают на футболках и сумках.",
+          "translation": "Осторожно, зазор (между поездом и платформой)"
+        },
+        "cultural_note": "The London Underground — or 'the Tube' — opened in 1863 and is the oldest metro in the world. Rush hour (7:30–9:30am and 5–7pm) is legendary: people pack in so tightly you don't need to hold on. Oxford Circus is one of the busiest stations. 'Mind the gap' has been announced since 1969 and is now one of London's most iconic phrases.",
+        "key_vocabulary": [
+          {
+            "note": "про людей в транспорте",
+            "word": "Packed",
+            "translation": "Битком набито"
+          },
+          {
+            "note": "показывает расписание поездов",
+            "word": "The board",
+            "translation": "Информационное табло"
+          },
+          {
+            "note": "перед чем-то трудным или интенсивным",
+            "word": "Brace yourself",
+            "translation": "Приготовься"
+          },
+          {
+            "note": "в переполненный транспорт",
+            "word": "Squeeze on",
+            "translation": "Втиснуться"
+          },
+          {
+            "note": "культовая фраза лондонского метро",
+            "word": "Mind the gap",
+            "translation": "Следите за зазором"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "At Oxford Circus tube station, on a Monday morning.",
+            "question": "Where are Sophie and Marie?"
+          },
+          {
+            "hint": "Two minutes — Marie points to the board.",
+            "question": "How long until the next train?"
+          },
+          {
+            "hint": "Bond Street, one stop away.",
+            "question": "Where is Marie going?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 6,
+      "level": "A1",
+      "lesson_number": 5,
+      "title_en": "Running Late",
+      "title_ru": "Опаздываю",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Marie, it's me. I'm running late.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh no. How late?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Fifteen minutes. The bus was cancelled.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Typical. Where are you now?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Still at the bus stop. I'm so sorry.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Don't worry. I'll grab a coffee and wait.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "You're a star. I'll be there as fast as I can.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Take it easy. I'm not going anywhere.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Thanks, Marie. See you in a bit.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "See you soon.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You're going to be late for a meeting with a friend. Call them, explain why, say how late you'll be, and apologise.",
+          "prompt_phrases": [
+            "I'm running late.",
+            "Sorry, [reason].",
+            "I'll be there in [time].",
+            "Thanks for waiting!"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I'm running late",
+          "example": "— Sorry, I'm running late. Can we make it ten minutes later? — No worries, see you then.",
+          "explanation": "Самый вежливый способ сказать, что ты опаздываешь. 'Running' не значит 'бежать' — это просто устойчивое выражение. Используется в сообщениях, звонках, письмах. Звучит профессионально и дружелюбно одновременно.",
+          "translation": "Я опаздываю"
+        },
+        "cultural_note": "Brits apologise constantly — and being late is one of the biggest sins. The unwritten rule: if you're more than 5 minutes late, you must text or call. Not warning someone is considered rude. When apologising, don't over-explain — a simple 'sorry, I'm running late' followed by how late you'll be is perfect. The response you'll almost always get: 'no worries!'",
+        "key_vocabulary": [
+          {
+            "note": "вежливое, нейтральное",
+            "word": "I'm running late",
+            "translation": "Я опаздываю"
+          },
+          {
+            "note": "про транспорт, встречи, события",
+            "word": "Cancelled",
+            "translation": "Отменён"
+          },
+          {
+            "note": "с лёгким раздражением или смирением",
+            "word": "Typical",
+            "translation": "Как всегда / как обычно"
+          },
+          {
+            "note": "тёплая благодарность",
+            "word": "You're a star",
+            "translation": "Ты звезда / молодец"
+          },
+          {
+            "note": "неопределённое 'скоро'",
+            "word": "In a bit",
+            "translation": "Скоро / через чуть-чуть"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Her bus was cancelled.",
+            "question": "Why is Sophie late?"
+          },
+          {
+            "hint": "Fifteen minutes.",
+            "question": "How late will she be?"
+          },
+          {
+            "hint": "She'll grab a coffee.",
+            "question": "What will Marie do while she waits?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 7,
+      "level": "A1",
+      "lesson_number": 6,
+      "title_en": "Lunch Break",
+      "title_ru": "Обеденный перерыв",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Right, I'm starving. Lunch?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Definitely. What are you fancying?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Something quick. I've got thirty minutes.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Pret? It's just round the corner.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yeah, perfect. I'll get a sandwich.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Same. Maybe soup, actually. It's chilly.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Good shout. Want to split a brownie?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Always. Why do you even ask?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Just being polite.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Save your manners for work. Let's go.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You and a friend have a lunch break at work. Decide where to go, what to order, and whether to share something.",
+          "prompt_phrases": [
+            "I'm starving!",
+            "What are you fancying?",
+            "Let's go to [place].",
+            "Want to split [food]?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I'm starving",
+          "example": "— I'm starving! What shall we get? — Pret, obviously. It's right there.",
+          "explanation": "Гипербола. Буквально 'я голодаю', но в обычной речи просто означает 'я очень голоден'. Используется постоянно. Не путать с медицинским 'starvation' — в повседневном английском это просто сильное 'hungry'.",
+          "translation": "Я умираю с голоду"
+        },
+        "cultural_note": "Pret A Manger ('Pret' for short) is the lunchtime king of London. Founded in 1986, there are now hundreds across the city — office workers live on their sandwiches, soups and coffee. 'Meal deal' lunches (sandwich + drink + snack for a set price) are a British institution. 'Good shout' is one of those phrases that instantly makes you sound like a local.",
+        "key_vocabulary": [
+          {
+            "note": "преувеличение, норма в речи",
+            "word": "I'm starving",
+            "translation": "Умираю с голоду"
+          },
+          {
+            "note": "'fancy' = хотеть / быть в настроении",
+            "word": "What are you fancying?",
+            "translation": "Что тебе хочется?"
+          },
+          {
+            "note": "дословно и переносно",
+            "word": "Round the corner",
+            "translation": "За углом, близко"
+          },
+          {
+            "note": "британское одобрение предложения",
+            "word": "Good shout",
+            "translation": "Хорошая идея"
+          },
+          {
+            "note": "еду, счёт, расходы",
+            "word": "Split",
+            "translation": "Разделить"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Thirty minutes.",
+            "question": "How much time does Sophie have?"
+          },
+          {
+            "hint": "Pret — it's just round the corner.",
+            "question": "Where are they going for lunch?"
+          },
+          {
+            "hint": "A brownie — Marie says 'always'.",
+            "question": "What are they sharing?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 8,
+      "level": "A1",
+      "lesson_number": 7,
+      "title_en": "The Rain Again",
+      "title_ru": "Опять дождь",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Oh my God. Look outside.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "It's absolutely chucking it down.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "And I forgot my brolly. Again.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "You always forget your brolly.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I know, I know. Maybe we stay here?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What, just stay in the café?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Until it stops. Another tea?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Go on then. I'm not getting soaked.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Look, it might clear up in twenty minutes.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Famous last words. I'll get the teas.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You and a friend are stuck somewhere because of rain. Complain about the weather, decide whether to wait it out, and make a plan.",
+          "prompt_phrases": [
+            "It's chucking it down!",
+            "I forgot my brolly.",
+            "Shall we wait it out?",
+            "Maybe it'll clear up."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "It's absolutely chucking it down",
+          "example": "— Should we go out? — Have you looked outside? It's absolutely chucking it down.",
+          "explanation": "Очень разговорный способ сказать, что идёт сильный дождь. 'Chuck' = бросать, поэтому небо как будто 'швыряет' воду. 'Absolutely' добавляет интенсивности. Используется только в неформальной речи — с друзьями, в семье.",
+          "translation": "Льёт как из ведра"
+        },
+        "cultural_note": "The British obsession with the weather is real — and rainy days are the national sport of complaining. London gets around 110 rainy days a year, so Brits have invented dozens of ways to describe rain: drizzle, spitting, pouring, chucking it down, bucketing, lashing. Always carry a 'brolly' — and expect to hear weather small talk at least three times a day.",
+        "key_vocabulary": [
+          {
+            "note": "очень разговорное",
+            "word": "Chucking it down",
+            "translation": "Льёт как из ведра"
+          },
+          {
+            "note": "разговорное 'umbrella'",
+            "word": "Brolly",
+            "translation": "Зонт"
+          },
+          {
+            "note": "сильнее чем 'wet'",
+            "word": "Soaked",
+            "translation": "Промокший насквозь"
+          },
+          {
+            "note": "лёгкое согласие на предложение",
+            "word": "Go on then",
+            "translation": "Ладно, давай"
+          },
+          {
+            "note": "шутливо — когда кто-то слишком оптимистичен",
+            "word": "Famous last words",
+            "translation": "Ну-ну, посмотрим"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Heavy rain — 'absolutely chucking it down'.",
+            "question": "What's the weather like?"
+          },
+          {
+            "hint": "Her umbrella — 'brolly'.",
+            "question": "What did Sophie forget?"
+          },
+          {
+            "hint": "Stay in the café and wait it out.",
+            "question": "What do they decide to do?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 9,
+      "level": "A1",
+      "lesson_number": 8,
+      "title_en": "Weekend Plans",
+      "title_ru": "Планы на выходные",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Any plans for the weekend?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Not really. A lazy one, I hope.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Same. But I might go to Borough Market on Saturday.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Ooh, nice. Getting anything special?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Just a wander, really. Maybe some cheese.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Want company?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yeah, come along! Around eleven?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Let's say half eleven. I'm slow on weekends.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Half eleven it is. London Bridge station?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Perfect. Don't be late!",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "A friend asks about your weekend plans. Suggest meeting up for an activity, agree on a time and a place.",
+          "prompt_phrases": [
+            "Any plans for the weekend?",
+            "I might [activity].",
+            "Want to come along?",
+            "Let's meet at [place] at [time]."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Any plans for the weekend?",
+          "example": "— Any plans for the weekend? — Bit of a lazy one, hopefully. You?",
+          "explanation": "Стандартный вопрос в пятницу — почти ритуал в британских офисах и между друзьями. В понедельник его зеркало: 'How was your weekend?'. Отвечать можно и подробно, и коротко ('not much, just chilling') — оба варианта норма.",
+          "translation": "Есть планы на выходные?"
+        },
+        "cultural_note": "Borough Market is London's most famous food market — near London Bridge, dating back to the 12th century. It's crowded, but for good reason: artisan cheese, fresh bread, street food from every corner of the world. Saturdays are busiest. 'Half eleven' confuses many learners — it's British for 11:30, not 10:30. In German it would mean half past ten, but in English 'half' comes after the hour.",
+        "key_vocabulary": [
+          {
+            "note": "'one' заменяет 'weekend' или 'day'",
+            "word": "A lazy one",
+            "translation": "Ленивый день/уикенд"
+          },
+          {
+            "note": "гулять, заходить в магазины, не торопясь",
+            "word": "A wander",
+            "translation": "Прогулка без цели"
+          },
+          {
+            "note": "дружеское приглашение",
+            "word": "Come along",
+            "translation": "Пошли со мной"
+          },
+          {
+            "note": "BrE; в AmE скажут 'eleven thirty'",
+            "word": "Half eleven",
+            "translation": "Пол-двенадцатого (11:30)"
+          },
+          {
+            "note": "'Half eleven it is' = подтверждение",
+            "word": "It is",
+            "translation": "Договорились"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "A lazy weekend — not much.",
+            "question": "What are Marie's weekend plans?"
+          },
+          {
+            "hint": "Borough Market.",
+            "question": "Where is Sophie going on Saturday?"
+          },
+          {
+            "hint": "Half eleven — 11:30 — at London Bridge station.",
+            "question": "What time are they meeting?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 10,
+      "level": "A1",
+      "lesson_number": 9,
+      "title_en": "The Broken Brolly",
+      "title_ru": "Сломанный зонт",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Oh no. No no no.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What? What happened?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "My brolly. Look.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh dear. That's completely broken.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "You've got to be kidding me. I bought it yesterday.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Where from?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "That cheap shop near the station.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "There's your answer. Cheap brollies last one day.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Lesson learned. Got a spare?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Come under mine. Budge up.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "Something small goes wrong while you're out with a friend (broken umbrella, spilled drink, lost glove). React, explain what happened, find a solution together.",
+          "prompt_phrases": [
+            "Oh no. Look at this.",
+            "You've got to be kidding me!",
+            "Lesson learned.",
+            "Got a spare?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "You've got to be kidding me",
+          "example": "— The bus is cancelled. — You've got to be kidding me. It's freezing!",
+          "explanation": "Реакция на плохую/абсурдную новость. Выражает смесь удивления и раздражения. 'You've got to be' = 'you must be'. Интонация обычно падающая, с лёгким смехом. Используется повсеместно в разговоре.",
+          "translation": "Ты шутишь / да вы серьёзно?"
+        },
+        "cultural_note": "Brits have a complicated relationship with umbrellas. Everyone needs one, no one can keep one. Cheap ones ('pound shop brollies') break within days. Windy London streets are especially brutal — you'll see dozens of abandoned broken umbrellas on any rainy day. 'Budge up' is a wonderfully British request to make room on a bench, sofa, or under an umbrella.",
+        "key_vocabulary": [
+          {
+            "note": "мягкое сочувствие",
+            "word": "Oh dear",
+            "translation": "Ой-ой / какая жалость"
+          },
+          {
+            "note": "удивление + раздражение",
+            "word": "You've got to be kidding me",
+            "translation": "Да вы серьёзно?"
+          },
+          {
+            "note": "причина проблемы очевидна",
+            "word": "There's your answer",
+            "translation": "Вот и ответ"
+          },
+          {
+            "note": "признание ошибки",
+            "word": "Lesson learned",
+            "translation": "Урок усвоен"
+          },
+          {
+            "note": "очень британское, неформальное",
+            "word": "Budge up",
+            "translation": "Подвинься"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "It broke — completely broken.",
+            "question": "What happened to Sophie's umbrella?"
+          },
+          {
+            "hint": "Yesterday.",
+            "question": "When did she buy it?"
+          },
+          {
+            "hint": "Share her umbrella — 'come under mine'.",
+            "question": "What does Marie suggest?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 11,
+      "level": "A1",
+      "lesson_number": 10,
+      "title_en": "Cheeky Nando's",
+      "title_ru": "По-быстрому в Nando's",
+      "content": {
+        "dialogue": [
+          {
+            "line": "I'm knackered. And hungry.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Same. Fancy a cheeky Nando's?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh, absolutely. Shall we?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Go on. There's one in Soho.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Perfect. Medium or hot?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I'm going mild today. I can't handle the spice.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Lightweight.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oi! It's been a long day.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Fair enough. Peri-peri chips, though?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Obviously. It's the law.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You're tired after work. Suggest going out for food with a friend. Pick a place, discuss what you'll order, tease each other a bit.",
+          "prompt_phrases": [
+            "I'm knackered.",
+            "Fancy a cheeky [place]?",
+            "Shall we?",
+            "Obviously. It's the law."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Shall we?",
+          "example": "— Coffee? — Shall we? I could do with a sit down.",
+          "explanation": "Короткое мягкое предложение. Заменяет полный вопрос вроде 'Shall we go?' или 'Shall we do it?'. Используется после того, как идея уже понятна из контекста. Звучит дружелюбно и необязывающе.",
+          "translation": "Пойдём? / Сделаем?"
+        },
+        "cultural_note": "Nando's is a South African-Portuguese chicken chain — but in the UK, it's something else entirely: a cultural institution. 'A cheeky Nando's' became a viral phrase around 2014 and now means an unplanned, slightly indulgent visit. The chicken comes in spice levels: plain → mild → medium → hot → extra hot. Peri-peri chips are non-negotiable. Every young Brit has an opinion about Nando's.",
+        "key_vocabulary": [
+          {
+            "note": "очень британское, разговорное",
+            "word": "Knackered",
+            "translation": "Вымотанный, без сил"
+          },
+          {
+            "note": "культовая британская фраза",
+            "word": "Cheeky Nando's",
+            "translation": "По-быстрому в Nando''s"
+          },
+          {
+            "note": "дружеская подколка",
+            "word": "Lightweight",
+            "translation": "Слабак (шутливо)"
+          },
+          {
+            "note": "принимаешь аргумент собеседника",
+            "word": "Fair enough",
+            "translation": "Ладно, справедливо"
+          },
+          {
+            "note": "шутливо про обязательность чего-то",
+            "word": "It's the law",
+            "translation": "Это закон (шутка)"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Knackered — very tired — and hungry.",
+            "question": "How are Sophie and Marie feeling?"
+          },
+          {
+            "hint": "Nando's in Soho.",
+            "question": "Where are they going?"
+          },
+          {
+            "hint": "Mild chicken — she can't handle the spice today.",
+            "question": "What is Marie ordering?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 12,
+      "level": "A1",
+      "lesson_number": 11,
+      "title_en": "The Bus Is Late",
+      "title_ru": "Автобус опаздывает",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Where is this bus?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I've been here twenty minutes.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Typical TfL.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Let me check the app.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "What does it say?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Due in... nine minutes. Again.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh, come on. It said nine minutes ten minutes ago.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Classic. Shall we just walk?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "How far is it?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Twenty minutes on foot. Worth it for the sanity.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You and a friend are waiting for a bus that isn't coming. Check the app, express frustration, and decide together what to do — keep waiting, walk, or take a different route.",
+          "prompt_phrases": [
+            "Where is this bus?",
+            "Typical TfL.",
+            "Let me check the app.",
+            "Shall we just walk?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Typical TfL",
+          "example": "— The bus hasn't come for twenty minutes. — Typical TfL. Nothing new.",
+          "explanation": "TfL = Transport for London, компания, управляющая автобусами и метро. 'Typical TfL' говорят с лёгким раздражением, когда что-то идёт не так: задержки, отмены, забастовки. Лондонцы обожают жаловаться на транспорт — это часть городской идентичности.",
+          "translation": "Как всегда в транспорте / в TfL"
+        },
+        "cultural_note": "Complaining about public transport is a core London pastime. TfL runs everything: the Tube, buses, trains, even bikes ('Santander Cycles'). The 'TfL Go' app shows live bus arrivals — but everyone knows the promised time can keep rolling back. 'Worth it for the sanity' is a phrase Londoners use to justify walking instead of waiting — long walks through central London are part of the lifestyle.",
+        "key_vocabulary": [
+          {
+            "note": "с иронией и раздражением",
+            "word": "Typical TfL",
+            "translation": "Как всегда у транспорта"
+          },
+          {
+            "note": "стандартный транспортный термин",
+            "word": "Due in",
+            "translation": "Ожидается через"
+          },
+          {
+            "note": "раздражение, нетерпение",
+            "word": "Come on",
+            "translation": "Да ладно / серьёзно?"
+          },
+          {
+            "note": "нейтрально, стандартно",
+            "word": "On foot",
+            "translation": "Пешком"
+          },
+          {
+            "note": "обосновываешь усилие",
+            "word": "Worth it",
+            "translation": "Стоит того"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Twenty minutes.",
+            "question": "How long has Marie been waiting?"
+          },
+          {
+            "hint": "The bus is due in nine minutes — but it's been saying that for a while.",
+            "question": "What does the app say?"
+          },
+          {
+            "hint": "Walk — twenty minutes on foot.",
+            "question": "What do they decide to do?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T01:39:20.032314+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 13,
+      "level": "A1",
+      "lesson_number": 12,
+      "title_en": "Sunday Roast",
+      "title_ru": "Воскресный обед",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Fancy a Sunday roast tomorrow?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh, yes please. I haven''t had one in ages.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "The Crown does a really good one.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Is that the pub on your road?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yeah, that one. How does one o''clock sound?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Perfect. Beef or chicken?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Beef, obviously.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Obviously. And Yorkshires.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Goes without saying.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I''m excited already. See you tomorrow!",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "Invite a friend for a meal at a specific place. Agree on time, food choices, and details. Use ''How does that sound?'' to check they''re happy with your plan.",
+          "prompt_phrases": [
+            "Fancy [meal] tomorrow?",
+            "The [place] does a really good one.",
+            "How does [time] sound?",
+            "Goes without saying."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "How does that sound?",
+          "example": "— The pub at one, roast, pints? How does that sound? — Sounds perfect.",
+          "explanation": "Стандартный способ предложить план и узнать мнение собеседника. Буквально — 'как это звучит?'. Используется, когда ты уже сформулировал предложение и хочешь услышать одобрение или возражение. Работает и в неформальных, и в полуформальных ситуациях.",
+          "translation": "Как тебе такое?"
+        },
+        "cultural_note": "The Sunday roast is sacred British tradition: roast meat (usually beef), roast potatoes, Yorkshire puddings, gravy, vegetables. Served in pubs between 12 and 4pm on Sundays. Pub roasts are a national obsession — people queue, book in advance, even argue over which pub does the best one. Yorkshire puddings (hollow, crispy savoury pastries) are non-negotiable. ''The Crown'' is one of the most common pub names in England.",
+        "key_vocabulary": [
+          {
+            "note": "''ages'' = целая вечность",
+            "word": "In ages",
+            "translation": "Очень давно"
+          },
+          {
+            "note": "проверить одобряет ли план",
+            "word": "How does that sound?",
+            "translation": "Как тебе?"
+          },
+          {
+            "note": "часто с лёгкой иронией",
+            "word": "Obviously",
+            "translation": "Очевидно / естественно"
+          },
+          {
+            "note": "полое тесто, классика воскресного обеда",
+            "word": "Yorkshires",
+            "translation": "Йоркширский пудинг"
+          },
+          {
+            "note": "согласие, что спорить не о чем",
+            "word": "Goes without saying",
+            "translation": "Само собой разумеется"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "A Sunday roast — a traditional British meal.",
+            "question": "What are Sophie and Marie planning?"
+          },
+          {
+            "hint": "The Crown pub, on Sophie''s road.",
+            "question": "Where are they going?"
+          },
+          {
+            "hint": "''Goes without saying'' — they''re a must-have.",
+            "question": "What does Sophie say about Yorkshires?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 14,
+      "level": "A1",
+      "lesson_number": 13,
+      "title_en": "The Birthday Plan",
+      "title_ru": "План дня рождения",
+      "content": {
+        "dialogue": [
+          {
+            "line": "So, Emma''s birthday is next Friday.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh, I forgot! What are we doing?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I was thinking dinner somewhere nice.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Good idea. Italian? She loves pasta.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Exactly what I thought. That place in Covent Garden?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Perfect. Should we book?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yeah, Friday''s busy. I''ll call them.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What about a card?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I''ll pick one up. Want to split it?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Always. You''re a star for organising.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re planning a friend''s birthday with another friend. Suggest a place, agree on details, split the responsibilities (booking, card, gift).",
+          "prompt_phrases": [
+            "I was thinking [idea].",
+            "Exactly what I thought.",
+            "I''ll [task].",
+            "Want to split it?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I was thinking...",
+          "example": "— I was thinking, maybe we could do a picnic? — Oh, that''s a nice idea!",
+          "explanation": "Мягкий способ ввести предложение или идею. Используется, когда не хочешь давить — даёшь собеседнику понять, что идея предварительная и обсуждаемая. Супер-полезная конструкция в любом разговоре, особенно когда что-то планируешь вместе.",
+          "translation": "Я тут подумала"
+        },
+        "cultural_note": "Covent Garden is one of London''s most charming areas — old market buildings, street performers, restaurants everywhere. Italian food is massively popular in the UK. When planning a birthday, Brits often split costs (card, gift, dinner bill) between friends — this is called ''going halves'' or ''splitting it''. It''s polite to offer, weird to insist on paying entirely.",
+        "key_vocabulary": [
+          {
+            "note": "мягкое предложение",
+            "word": "I was thinking...",
+            "translation": "Я тут подумала"
+          },
+          {
+            "note": "согласие с предложением",
+            "word": "Exactly what I thought",
+            "translation": "Именно об этом я и думала"
+          },
+          {
+            "note": "про рестораны, отели, билеты",
+            "word": "Should we book?",
+            "translation": "Забронируем?"
+          },
+          {
+            "note": "''pick up'' = купить по пути",
+            "word": "Pick one up",
+            "translation": "Купить / заскочить за чем-то"
+          },
+          {
+            "note": "на подарки, еду, счета",
+            "word": "Split it",
+            "translation": "Разделить (оплату)"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Emma''s — next Friday.",
+            "question": "Whose birthday is it?"
+          },
+          {
+            "hint": "An Italian restaurant in Covent Garden.",
+            "question": "Where will they go?"
+          },
+          {
+            "hint": "Sophie is calling them.",
+            "question": "Who''s booking the restaurant?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 15,
+      "level": "A1",
+      "lesson_number": 14,
+      "title_en": "I Can't Make It",
+      "title_ru": "Не получится",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Sophie, I need to tell you something.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Uh oh. What''s up?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I can''t make it to Emma''s dinner.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh no! Why?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "My cousin is in town. Only this weekend.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Ah, fair enough. When did you find out?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Just now. I feel awful.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Don''t. Family comes first. I''ll explain to Emma.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Thanks. I''ll send her a card at least.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "She''ll understand. Have a lovely weekend!",
+            "speaker": "Sophie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You need to cancel plans with a friend. Tell them honestly, give a reason, apologise briefly, and offer a way to make up for it (card, message, another date).",
+          "prompt_phrases": [
+            "I need to tell you something.",
+            "I can''t make it to [event].",
+            "I feel awful.",
+            "I''ll [something nice] at least."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I can''t make it",
+          "example": "— Coming to the party? — Sorry, I can''t make it. Got work stuff.",
+          "explanation": "Стандартная вежливая формулировка отмены. ''Make it'' здесь — идиома ''добраться, успеть''. Звучит менее резко, чем ''I can''t come''. Хорошо работает в любой ситуации — дружеской, рабочей, формальной.",
+          "translation": "Не смогу прийти"
+        },
+        "cultural_note": "Brits cancel plans with layers of apology — it''s almost an art form. The magic phrase ''I can''t make it'' softens the blow. Family obligations are the most accepted reason to bail: ''family comes first'' is almost sacred. In return, a cancelled friend is expected to respond graciously with ''don''t worry'' or ''no problem''. Holding a grudge over a cancellation is considered childish — as long as you don''t do it too often.",
+        "key_vocabulary": [
+          {
+            "note": "реакция перед плохой новостью",
+            "word": "Uh oh",
+            "translation": "Ой-ой"
+          },
+          {
+            "note": "вежливая отмена",
+            "word": "I can''t make it",
+            "translation": "Не смогу прийти"
+          },
+          {
+            "note": "принимаешь причину",
+            "word": "Fair enough",
+            "translation": "Справедливо / понятно"
+          },
+          {
+            "note": "получить новую информацию",
+            "word": "Find out",
+            "translation": "Узнать"
+          },
+          {
+            "note": "хоть что-то",
+            "word": "At least",
+            "translation": "По крайней мере"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "She can''t come to Emma''s birthday dinner.",
+            "question": "What is Marie telling Sophie?"
+          },
+          {
+            "hint": "Her cousin is visiting — only this weekend.",
+            "question": "Why can''t she come?"
+          },
+          {
+            "hint": "Understanding — ''family comes first''.",
+            "question": "How does Sophie react?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 16,
+      "level": "A1",
+      "lesson_number": 15,
+      "title_en": "The Apology",
+      "title_ru": "Извинение",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Marie, I owe you an apology.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What for?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I forgot about our coffee yesterday.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh! I was there for twenty minutes.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I''m so sorry. My head is a mess.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What happened? Are you okay?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Just work stuff. No excuse, though.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Don''t worry. Let me know next time.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Can I buy you lunch to make up for it?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Well, I won''t say no.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You forgot a plan with a friend. Apologise properly: acknowledge what you did, take responsibility, offer to make up for it.",
+          "prompt_phrases": [
+            "I owe you an apology.",
+            "I''m so sorry.",
+            "No excuse, though.",
+            "Can I [something nice] to make up for it?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I''m so sorry",
+          "example": "— I forgot your birthday. — What?! — I''m so sorry, honestly.",
+          "explanation": "Усиленное ''sorry''. ''So'' делает извинение искренним, а не формальным. Используется после ошибки, проступка, забытого обещания. Если британец говорит ''I''m so sorry'' — это не пустая вежливость, а реальное сожаление.",
+          "translation": "Мне очень жаль"
+        },
+        "cultural_note": "Brits take apologies seriously — but also don''t like it when they drag on. The ritual: acknowledge, don''t over-explain, offer to make up for it. ''I''m so sorry'' + brief reason + ''let me buy you a coffee/lunch'' is the classic formula. Over-apologising is almost worse than under-apologising — it becomes performative. The response ''don''t worry'' is the social signal that the issue is closed — dwell on it longer and you''ll make things awkward.",
+        "key_vocabulary": [
+          {
+            "note": "формальнее чем просто ''sorry''",
+            "word": "I owe you an apology",
+            "translation": "Я должен тебе извинение"
+          },
+          {
+            "note": "когда всё забываешь",
+            "word": "My head is a mess",
+            "translation": "У меня каша в голове"
+          },
+          {
+            "note": "принятие ответственности",
+            "word": "No excuse",
+            "translation": "Нет оправдания"
+          },
+          {
+            "note": "что-то сделать в обмен",
+            "word": "Make up for it",
+            "translation": "Загладить / компенсировать"
+          },
+          {
+            "note": "шутливое согласие",
+            "word": "I won''t say no",
+            "translation": "Не откажусь"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Their coffee date yesterday.",
+            "question": "What did Sophie forget?"
+          },
+          {
+            "hint": "Twenty minutes.",
+            "question": "How long did Marie wait?"
+          },
+          {
+            "hint": "By buying Marie lunch.",
+            "question": "How does Sophie offer to make up for it?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 17,
+      "level": "A1",
+      "lesson_number": 16,
+      "title_en": "A Phone Call",
+      "title_ru": "Телефонный звонок",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Hey Marie! How''s things?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh, hi! Good, yeah. Bit tired.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Are you eating properly?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Not really. I keep ordering in.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Marie! Come on.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I know, I know. Work''s mad.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Want me to come over Saturday? I''ll cook.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Would you? That would be lovely.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Of course. I''ll bring wine.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "You''re the best. Love you.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "Call a friend you haven''t spoken to in a while. Ask how they''re doing, notice if they''re stressed, offer to help in a caring way.",
+          "prompt_phrases": [
+            "How''s things?",
+            "Are you eating properly?",
+            "Want me to come over?",
+            "That would be lovely."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "How''s things?",
+          "example": "— Hey, how''s things? — Not bad, not bad. You?",
+          "explanation": "Более разговорный, тёплый вариант ''How are you?''. Буквально — ''как все вещи?''. Используется между близкими друзьями или семьёй. ''How''s things'' звучит естественно и уютно — как будто заходишь в гости.",
+          "translation": "Как у тебя дела?"
+        },
+        "cultural_note": "Phone calls between close friends in the UK are becoming rarer (most young Brits prefer texting or voice notes) — but when they happen, they''re often warm and caring. ''Are you eating properly?'' is the classic friend/mum question. Offering to come over and cook for a stressed friend is a major gesture of care. Wine is the traditional contribution. ''Lovely'' is one of the most-used British adjectives — soft, warm, genuinely positive.",
+        "key_vocabulary": [
+          {
+            "note": "тёплое, между близкими",
+            "word": "How''s things?",
+            "translation": "Как дела?"
+          },
+          {
+            "note": "вместо готовки",
+            "word": "Ordering in",
+            "translation": "Заказывать еду на дом"
+          },
+          {
+            "note": "очень занято, хаос",
+            "word": "Work''s mad",
+            "translation": "На работе дурдом"
+          },
+          {
+            "note": "неформально",
+            "word": "Come over",
+            "translation": "Зайти в гости"
+          },
+          {
+            "note": "тёплое согласие",
+            "word": "That would be lovely",
+            "translation": "Это было бы чудесно"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "A bit tired — and not eating properly.",
+            "question": "How is Marie feeling?"
+          },
+          {
+            "hint": "To come over on Saturday and cook.",
+            "question": "What is Sophie offering?"
+          },
+          {
+            "hint": "Wine.",
+            "question": "What will Sophie bring?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 18,
+      "level": "A1",
+      "lesson_number": 17,
+      "title_en": "Gossip in the Park",
+      "title_ru": "Сплетни в парке",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Ooh, look at those ducks!",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "So cute. Right, I''ve got news.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Go on.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "You''ll never guess what Emma told me.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "What?!",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "She''s seeing someone new. From her gym.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "No way! Tell me everything.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "His name''s Tom, he''s a teacher.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh, she deserves this. Good for her.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Right? I''m so happy for her.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re in the park with a friend and you''ve got good gossip about a mutual friend. Build up the story with intrigue, share the news, react together positively.",
+          "prompt_phrases": [
+            "I''ve got news.",
+            "You''ll never guess what.",
+            "No way! Tell me everything.",
+            "Good for her / him."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "You''ll never guess what",
+          "example": "— You''ll never guess what Emma told me. — Oh, go on.",
+          "explanation": "Классическое британское начало любой сплетни или интересной истории. Создаёт интригу. Собеседник обычно отвечает ''What?'' или ''Go on!'' — и ты рассказываешь. Без этой фразы ни одна уважающая себя британская сплетня не начинается.",
+          "translation": "Ни за что не угадаешь что"
+        },
+        "cultural_note": "London''s parks are social spaces — people actually meet there to chat, not just exercise. Hyde Park, Regent''s Park, Clapham Common — all crowded on sunny weekends with groups of friends sitting on the grass. Gossip (when it''s kind, not cruel) is a bonding ritual in British friendship. ''Deserves this'' is an important concept: friends genuinely want to see each other happy, and news about love, jobs, or successes is celebrated as if it''s their own.",
+        "key_vocabulary": [
+          {
+            "note": "''got'' = ''have'' в разговоре",
+            "word": "I''ve got news",
+            "translation": "У меня новости"
+          },
+          {
+            "note": "просьба рассказать дальше",
+            "word": "Go on",
+            "translation": "Продолжай / давай"
+          },
+          {
+            "note": "интрига в начале истории",
+            "word": "You''ll never guess what",
+            "translation": "Никогда не угадаешь"
+          },
+          {
+            "note": "удивление",
+            "word": "No way!",
+            "translation": "Да ну! / не может быть!"
+          },
+          {
+            "note": "искренне радоваться за другого",
+            "word": "Good for her",
+            "translation": "Молодец / я рада за неё"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "In a park — Marie mentions ducks.",
+            "question": "Where are Sophie and Marie?"
+          },
+          {
+            "hint": "Emma is seeing someone new — Tom, from her gym.",
+            "question": "What''s the gossip?"
+          },
+          {
+            "hint": "Happy for her — ''she deserves this''.",
+            "question": "How do they feel about it?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 19,
+      "level": "A1",
+      "lesson_number": 18,
+      "title_en": "The Favour",
+      "title_ru": "Просьба",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Marie, can I ask you a favour?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Of course. What''s up?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I''m away next week. Could you feed my cat?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh, easy. Where are you going?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Bristol. Work thing.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Nice. How long will you be gone?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Five days. I''ll leave food and a key.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "No problem. Does Luna like strangers?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "She loves you, don''t be silly.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Awww. Leave me your number just in case.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re going away for a few days. Ask a friend for a small favour (feed a pet, water plants, accept a package). Explain details clearly and thank them.",
+          "prompt_phrases": [
+            "Can I ask you a favour?",
+            "I''m away next week.",
+            "Could you [task]?",
+            "I''ll leave [what you need]."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Can I ask you a favour?",
+          "example": "— Can I ask you a favour? — Of course, go on. — Could you water my plants next week?",
+          "explanation": "Вежливая прелюдия перед просьбой. Даёт собеседнику понять, что дальше будет просьба, и даёт ему пространство сразу сказать да или нет. Почти всегда после этого следует ''of course'' или ''sure'' — но привычка такая, британская.",
+          "translation": "Можно попросить об одолжении?"
+        },
+        "cultural_note": "Bristol is a lively city in South West England — often topping lists of ''best places to live''. Asking friends to pet-sit, water plants, or accept deliveries is a normal part of friendship in the UK. Giving a spare key is a sign of trust, and Brits take it seriously — if someone gives you their key, you''re officially inner-circle. When doing a favour, the correct response is always ''no problem'' or ''easy'' — never ''you owe me''.",
+        "key_vocabulary": [
+          {
+            "note": "вежливая прелюдия",
+            "word": "Can I ask you a favour?",
+            "translation": "Можно попросить об одолжении?"
+          },
+          {
+            "note": "внимание к собеседнику",
+            "word": "What''s up?",
+            "translation": "Что случилось?"
+          },
+          {
+            "note": "''I''m away'' = меня не будет",
+            "word": "Away",
+            "translation": "В отъезде"
+          },
+          {
+            "note": "короткое согласие",
+            "word": "Easy",
+            "translation": "Легко / без проблем"
+          },
+          {
+            "note": "универсальная фраза",
+            "word": "Just in case",
+            "translation": "На всякий случай"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Someone to feed her cat while she''s away.",
+            "question": "What does Sophie need?"
+          },
+          {
+            "hint": "Bristol — for work.",
+            "question": "Where is Sophie going?"
+          },
+          {
+            "hint": "Five days.",
+            "question": "For how long?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 20,
+      "level": "A1",
+      "lesson_number": 19,
+      "title_en": "At the GP",
+      "title_ru": "У врача",
+      "content": {
+        "dialogue": [
+          {
+            "line": "How did it go?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Fine. She was really nice.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What did she say?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "It''s just a bad cold. Nothing serious.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh, thank God. You had me worried.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "She said rest and fluids.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Classic. Did she give you anything?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Just paracetamol. Nothing strong.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Good. Let''s get you home.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Honestly, you''re a lifesaver.",
+            "speaker": "Sophie"
+          }
+        ],
+        "pratique": {
+          "scenario": "A friend meets you after a doctor''s appointment. Tell them how it went, what the doctor said, and what treatment you got. Reassure them it''s not serious.",
+          "prompt_phrases": [
+            "How did it go?",
+            "She said [advice].",
+            "It''s nothing serious.",
+            "You''re a lifesaver."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I''m not feeling great",
+          "example": "— How are you today? — Not feeling great, to be honest.",
+          "explanation": "Мягкий, нормальный способ сказать, что плохо себя чувствуешь. Не драматично (не ''I''m dying''), но и не преуменьшает (не ''I''m fine''). Идеально для разговоров с врачом, с коллегами, с друзьями. Можно добавить детали: ''a bit tired'', ''dizzy'', ''queasy''.",
+          "translation": "Я неважно себя чувствую"
+        },
+        "cultural_note": "GP stands for ''General Practitioner'' — the first doctor you see in the UK''s National Health Service (NHS). Healthcare is free, but appointments can be hard to get. The running joke: whatever you have, the GP will tell you ''rest and fluids'' and send you home with paracetamol. It''s mostly true — British medicine tends to be cautious about stronger drugs. A friend meeting you after an appointment is a common kindness, especially if you''ve been worried.",
+        "key_vocabulary": [
+          {
+            "note": "про визит, встречу, событие",
+            "word": "How did it go?",
+            "translation": "Как всё прошло?"
+          },
+          {
+            "note": "облегчение",
+            "word": "Thank God",
+            "translation": "Слава богу"
+          },
+          {
+            "note": "только что волновалась",
+            "word": "You had me worried",
+            "translation": "Ты меня напугала"
+          },
+          {
+            "note": "классический совет при простуде",
+            "word": "Rest and fluids",
+            "translation": "Отдых и жидкость"
+          },
+          {
+            "note": "тёплая благодарность",
+            "word": "Lifesaver",
+            "translation": "Спасительница"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "At the GP — the doctor.",
+            "question": "Where has Sophie been?"
+          },
+          {
+            "hint": "A bad cold — nothing serious.",
+            "question": "What''s wrong with her?"
+          },
+          {
+            "hint": "Just paracetamol.",
+            "question": "What medicine did the doctor prescribe?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 21,
+      "level": "A1",
+      "lesson_number": 20,
+      "title_en": "Train to Brighton",
+      "title_ru": "Поезд в Брайтон",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Platform 14. We''ve got ages.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Good. I hate rushing for trains.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Me too. Better safe than sorry.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Shall we grab a coffee?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yes. And maybe a croissant?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Obviously. How long is the journey?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "About an hour. Not bad.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Perfect. I love Brighton.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "The sea, the pier, fish and chips...",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Stop, you''re making me hungry!",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re at a train station with a friend, about to travel. Check the platform and time, decide to grab something to eat, talk about where you''re going.",
+          "prompt_phrases": [
+            "We''ve got ages.",
+            "Better safe than sorry.",
+            "Shall we grab [food/drink]?",
+            "How long is the journey?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Better safe than sorry",
+          "example": "— You''re two hours early! — Better safe than sorry.",
+          "explanation": "Британская мудрость по жизни. Используется когда делаешь что-то осторожное, хотя может и не обязательно. Например, берёшь зонт в ясный день, приходишь раньше на поезд, покупаешь билет заранее. Обычная фраза, звучит по-взрослому и рассудительно.",
+          "translation": "Лучше перестраховаться"
+        },
+        "cultural_note": "Brighton is the most famous seaside town in England — an hour south of London by train. Pebble beach (not sandy, Brits love complaining about this), the iconic Brighton Pier with old-school amusements, fish and chips, bohemian atmosphere. It''s called ''London-by-the-Sea''. Victoria Station is the main departure point from London. ''Getting the train'' for a day trip is a British institution — especially in summer.",
+        "key_vocabulary": [
+          {
+            "note": "не нужно спешить",
+            "word": "We''ve got ages",
+            "translation": "У нас куча времени"
+          },
+          {
+            "note": "гл. ''rush'' + ''ing''",
+            "word": "Rushing",
+            "translation": "Спешка / бежать сломя голову"
+          },
+          {
+            "note": "британская мудрость",
+            "word": "Better safe than sorry",
+            "translation": "Лучше перестраховаться"
+          },
+          {
+            "note": "любая поездка из А в Б",
+            "word": "The journey",
+            "translation": "Поездка, путь"
+          },
+          {
+            "note": "сдержанное одобрение",
+            "word": "Not bad",
+            "translation": "Неплохо"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Platform 14.",
+            "question": "Which platform is the train from?"
+          },
+          {
+            "hint": "About an hour.",
+            "question": "How long is the journey to Brighton?"
+          },
+          {
+            "hint": "The sea, the pier, and fish and chips.",
+            "question": "What does Sophie like about Brighton?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 22,
+      "level": "A1",
+      "lesson_number": 21,
+      "title_en": "The Pharmacy",
+      "title_ru": "В аптеке",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Hi, have you got anything for a sore throat?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "How bad is it?",
+            "speaker": "Pharmacist"
+          },
+          {
+            "line": "Not too bad. Just scratchy.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "These lozenges are very good.",
+            "speaker": "Pharmacist"
+          },
+          {
+            "line": "How often should I take them?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Every three hours, with food.",
+            "speaker": "Pharmacist"
+          },
+          {
+            "line": "Perfect. And a bottle of water, please.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "That''s six pounds forty altogether.",
+            "speaker": "Pharmacist"
+          },
+          {
+            "line": "Can I pay by card?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Of course. Hope you feel better soon!",
+            "speaker": "Pharmacist"
+          }
+        ],
+        "pratique": {
+          "scenario": "You have a minor health problem (sore throat, cold, headache). Go to a pharmacy and ask for help. Describe your symptom, ask how to take the medicine, pay.",
+          "prompt_phrases": [
+            "Have you got anything for [problem]?",
+            "Just a bit [symptom].",
+            "How often should I take them?",
+            "Can I pay by card?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Have you got anything for...?",
+          "example": "— Have you got anything for a sore throat? — Yes, these lozenges work well.",
+          "explanation": "Стандартная фраза в аптеке. ''Have you got'' — британский вариант ''do you have''. После этого называешь симптом или проблему. Фармацевт порекомендует лекарство. Очень частотная конструкция в бытовом английском.",
+          "translation": "У вас есть что-нибудь от...?"
+        },
+        "cultural_note": "Boots is the UK''s biggest pharmacy chain — you''ll find one on almost every high street. British pharmacists can advise on minor illnesses without a doctor''s note, and often recommend paracetamol, ibuprofen, or throat lozenges for common problems. Paying by card is standard everywhere — even for small amounts. The pharmacist''s parting line ''hope you feel better soon'' is a warm, customary goodbye in medical settings.",
+        "key_vocabulary": [
+          {
+            "note": "BrE; AmE ''do you have''",
+            "word": "Have you got...?",
+            "translation": "У вас есть...?"
+          },
+          {
+            "note": "''sore'' = болезненный",
+            "word": "Sore throat",
+            "translation": "Больное горло"
+          },
+          {
+            "note": "про горло — лёгкий дискомфорт",
+            "word": "Scratchy",
+            "translation": "Першит"
+          },
+          {
+            "note": "аптечный термин",
+            "word": "Lozenges",
+            "translation": "Пастилки для рассасывания"
+          },
+          {
+            "note": "при оплате",
+            "word": "Altogether",
+            "translation": "Всего / в сумме"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "She has a sore throat — a bit scratchy.",
+            "question": "What''s wrong with Marie?"
+          },
+          {
+            "hint": "Lozenges — every three hours, with food.",
+            "question": "What does the pharmacist recommend?"
+          },
+          {
+            "hint": "£6.40 altogether.",
+            "question": "How much does she pay?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:25:40.669105+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 23,
+      "level": "A1",
+      "lesson_number": 22,
+      "title_en": "Borough Market",
+      "title_ru": "Бороу Маркет",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Oh my God, look at this cheese stall.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I know. The smell is incredible.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Can I try a bit of the cheddar?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Of course, love. This one is three years aged.",
+            "speaker": "Stallholder"
+          },
+          {
+            "line": "Mmm. That is good.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "We''ll take two hundred grams, please.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Lovely. Anything else?",
+            "speaker": "Stallholder"
+          },
+          {
+            "line": "Do you have any fresh bread?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Next stall along, the sourdough is brilliant.",
+            "speaker": "Stallholder"
+          },
+          {
+            "line": "Perfect. This is my happy place.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re at a food market. Approach a stall, ask to try something, compliment it, ask about related products at other stalls.",
+          "prompt_phrases": [
+            "Can I try a bit?",
+            "Mmm. That is good.",
+            "We''ll take [quantity], please.",
+            "Do you have any [other food]?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Can I try a bit?",
+          "example": "— That cheese looks amazing. — Can I try a bit? — Of course, here you go.",
+          "explanation": "Волшебная фраза на любом рынке с едой. На британских рынках продавцы обычно с радостью дают попробовать — это часть культуры. ''A bit'' звучит скромно, не жадно. Используется для сыра, оливок, чатни, мёда, колбас — всего что можно попробовать.",
+          "translation": "Можно попробовать кусочек?"
+        },
+        "cultural_note": "Borough Market, near London Bridge, is England''s most famous food market — it''s been there in some form since the 1000s. Artisan cheese, sourdough bread, Spanish charcuterie, street food from everywhere. Stallholders calling you ''love'' or ''darling'' is friendly British retail culture, not flirting — totally normal. Trying before you buy is standard. Saturdays are crowded but magical. Budget extra time: you''ll eat your way through the market.",
+        "key_vocabulary": [
+          {
+            "note": "один из продавцов на рынке",
+            "word": "Stall",
+            "translation": "Прилавок / палатка на рынке"
+          },
+          {
+            "note": "тёплое обращение продавцов",
+            "word": "Love",
+            "translation": "Дорогая (обращение)"
+          },
+          {
+            "note": "долго зрел",
+            "word": "Aged",
+            "translation": "Выдержанный (о сыре, вине)"
+          },
+          {
+            "note": "рядом, чуть дальше",
+            "word": "Next stall along",
+            "translation": "Следующий прилавок"
+          },
+          {
+            "note": "где тебе хорошо",
+            "word": "Happy place",
+            "translation": "Любимое место"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Cheese — three-year-aged cheddar.",
+            "question": "What are Sophie and Marie buying?"
+          },
+          {
+            "hint": "Two hundred grams.",
+            "question": "How much cheese do they buy?"
+          },
+          {
+            "hint": "The next stall along — sourdough.",
+            "question": "Where can they buy bread?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 24,
+      "level": "A1",
+      "lesson_number": 23,
+      "title_en": "At the Bank",
+      "title_ru": "В банке",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Hi, there''s a problem with my card.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Okay, what happened?",
+            "speaker": "Bank clerk"
+          },
+          {
+            "line": "It was declined this morning. Twice.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Let me have a look. Your name?",
+            "speaker": "Bank clerk"
+          },
+          {
+            "line": "Sophie Clarke.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Right... ah, the card is blocked.",
+            "speaker": "Bank clerk"
+          },
+          {
+            "line": "Blocked? Why?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Suspicious activity. Someone tried to use it in Madrid.",
+            "speaker": "Bank clerk"
+          },
+          {
+            "line": "I''ve never been to Madrid!",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Exactly. Good thing we caught it. I''ll issue a new card.",
+            "speaker": "Bank clerk"
+          }
+        ],
+        "pratique": {
+          "scenario": "Your bank card has a problem. Go to the bank (or call), explain the issue, give your details, find out what the bank will do next.",
+          "prompt_phrases": [
+            "There''s a problem with my card.",
+            "It was declined.",
+            "Why is it blocked?",
+            "Good thing we caught it."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "There''s a problem with my card",
+          "example": "— How can I help? — There''s a problem with my card. It was declined.",
+          "explanation": "Стандартная фраза при любой проблеме с банковской картой — не работает, заблокирована, потеряна. Нейтральная, не драматичная. Идёт с сотрудниками банка, call-центром, кассирами. Простая конструкция ''there''s a problem with [X]'' работает для любой проблемы.",
+          "translation": "У меня проблема с картой"
+        },
+        "cultural_note": "British banks are generally good at fraud detection and block cards quickly when suspicious activity appears — abroad purchases especially. If you''re travelling, it''s smart to tell your bank beforehand (''travel notification'') or your card may be declined even for legitimate spending. When a card is blocked, getting a replacement usually takes 3-5 working days. Major banks: HSBC, Barclays, Lloyds, NatWest, Santander — they''re all on every high street.",
+        "key_vocabulary": [
+          {
+            "note": "банковский термин",
+            "word": "Declined",
+            "translation": "Отклонена (карта)"
+          },
+          {
+            "note": "''let me'' = позвольте",
+            "word": "Let me have a look",
+            "translation": "Дайте посмотрю"
+          },
+          {
+            "note": "''blocked card'' = стандартная фраза",
+            "word": "Blocked",
+            "translation": "Заблокирована"
+          },
+          {
+            "note": "причина блокировки",
+            "word": "Suspicious activity",
+            "translation": "Подозрительная активность"
+          },
+          {
+            "note": "''good thing we caught it'' = повезло",
+            "word": "Good thing",
+            "translation": "Хорошо что"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Her card was declined — twice.",
+            "question": "What''s Sophie''s problem?"
+          },
+          {
+            "hint": "Suspicious activity — someone tried to use it in Madrid.",
+            "question": "Why was the card blocked?"
+          },
+          {
+            "hint": "Issue a new card.",
+            "question": "What will the bank do?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 25,
+      "level": "A1",
+      "lesson_number": 24,
+      "title_en": "The Post Office",
+      "title_ru": "На почте",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Hi, I need to send this to France.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "What''s inside?",
+            "speaker": "Clerk"
+          },
+          {
+            "line": "A book and a small gift.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Worth more than fifty pounds?",
+            "speaker": "Clerk"
+          },
+          {
+            "line": "No, about twenty.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Right. Standard or tracked?",
+            "speaker": "Clerk"
+          },
+          {
+            "line": "How long will it take?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Standard — five to seven days. Tracked — three.",
+            "speaker": "Clerk"
+          },
+          {
+            "line": "Tracked, please. Can I pay by card?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Of course. That''ll be twelve pounds.",
+            "speaker": "Clerk"
+          }
+        ],
+        "pratique": {
+          "scenario": "You need to send a parcel abroad. Explain what''s inside, answer the value question, choose between standard and tracked, pay.",
+          "prompt_phrases": [
+            "I need to send this to [country].",
+            "A [item] and [another item].",
+            "How long will it take?",
+            "Can I pay by card?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "How long will it take?",
+          "example": "— How long will it take? — Three to five working days.",
+          "explanation": "Базовый вопрос про сроки доставки, ожидания в очереди, выполнения заказа. Универсальная фраза на почте, в ресторане, в мастерской. ''It'' относится к процессу, о котором говорите. Краткое, вежливое, практичное — и слышишь каждый день.",
+          "translation": "Сколько это займёт?"
+        },
+        "cultural_note": "Royal Mail is the UK''s main postal service — though private couriers like DPD and Evri (formerly Hermes) are also popular. Post offices now sit inside newsagents and small shops — the big standalone branches are disappearing. Sending abroad from the UK isn''t cheap: a small parcel to Europe starts around £10-12. Tracked services cost more but give you peace of mind — a very British concept. Christmas time is chaos; post early if you want it to arrive on time.",
+        "key_vocabulary": [
+          {
+            "note": "стандартный вопрос на почте",
+            "word": "What''s inside?",
+            "translation": "Что внутри?"
+          },
+          {
+            "note": "''worth'' = стоимость",
+            "word": "Worth more than",
+            "translation": "Стоит больше чем"
+          },
+          {
+            "note": "дороже, но с трекингом",
+            "word": "Tracked",
+            "translation": "С отслеживанием"
+          },
+          {
+            "note": "без выходных",
+            "word": "Working days",
+            "translation": "Рабочие дни"
+          },
+          {
+            "note": "''that will be'' = итог",
+            "word": "That''ll be",
+            "translation": "С вас будет"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "A book and a small gift.",
+            "question": "What is Marie sending?"
+          },
+          {
+            "hint": "To France.",
+            "question": "Where is she sending it?"
+          },
+          {
+            "hint": "Tracked — three days.",
+            "question": "Which option does she choose?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 26,
+      "level": "A1",
+      "lesson_number": 25,
+      "title_en": "What Do You Do?",
+      "title_ru": "Чем ты занимаешься?",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Can I ask you something a bit personal?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Go for it.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Do you actually like your job?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Honestly? Not really.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Same here. It''s okay, but...",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "But what?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I don''t know. I want to do something more creative.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh, what would you do?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Maybe design. Or writing. One day.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "One day soon, I hope.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re having an honest conversation with a close friend about work. Ask if they''re happy, share your own feelings, talk about dreams or changes you''d like to make.",
+          "prompt_phrases": [
+            "Can I ask you something personal?",
+            "Do you actually like your job?",
+            "Same here.",
+            "One day I want to [dream]."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "What do you do?",
+          "example": "— So, what do you do? — I''m a teacher. You?",
+          "explanation": "Стандартный британский способ спросить о профессии. ''Do'' здесь означает ''делать для работы''. Простой, универсальный — звучит на вечеринках, знакомствах, собеседованиях. В ответ не нужна длинная история — короткая формулировка работает лучше всего.",
+          "translation": "Чем ты занимаешься? (про работу)"
+        },
+        "cultural_note": "''What do you do?'' is one of the first questions Brits ask when meeting — even more than ''where are you from?''. But it''s not judgmental: people talk openly about job dissatisfaction. ''I''m between jobs'' or ''I''m doing X while I figure things out'' are completely acceptable answers. Making a career change is common and respected — the idea that you should do one thing forever is outdated. Dreaming aloud about creative work is normal friendship conversation, not showing off.",
+        "key_vocabulary": [
+          {
+            "note": "приглашение спросить или попробовать",
+            "word": "Go for it",
+            "translation": "Давай / валяй"
+          },
+          {
+            "note": "перед искренним ответом",
+            "word": "Honestly?",
+            "translation": "Честно?"
+          },
+          {
+            "note": "короткое подтверждение",
+            "word": "Same here",
+            "translation": "У меня так же"
+          },
+          {
+            "note": "противоположность ''rigid'' или ''routine''",
+            "word": "Creative",
+            "translation": "Творческий"
+          },
+          {
+            "note": "неопределённое будущее",
+            "word": "One day",
+            "translation": "Когда-нибудь"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Honestly, not really — she doesn''t love it.",
+            "question": "How does Marie feel about her job?"
+          },
+          {
+            "hint": "Something more creative — maybe design or writing.",
+            "question": "What does Sophie want to do instead?"
+          },
+          {
+            "hint": "''One day soon, I hope'' — encouraging.",
+            "question": "What does Marie say at the end?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 27,
+      "level": "A1",
+      "lesson_number": 26,
+      "title_en": "The Film at the Odeon",
+      "title_ru": "Кино в Odeon",
+      "content": {
+        "dialogue": [
+          {
+            "line": "So? What did you think?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Honestly? A bit long.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh really? I loved it.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "The ending was beautiful, I''ll give you that.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I cried three times.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Three?! Sophie, it was fine.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "You have no heart.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I have taste. Come on, chips?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Obviously. But we''re debating this further.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I was worried you''d say that.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You just saw a film or went to a concert with a friend. Share opinions, disagree playfully, tease each other about your different tastes.",
+          "prompt_phrases": [
+            "What did you think?",
+            "Honestly? [opinion].",
+            "I''ll give you that.",
+            "Come on, chips?"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "What did you think?",
+          "example": "— Well? What did you think? — Honestly? A bit long.",
+          "explanation": "Универсальный вопрос после совместного опыта — кино, ресторан, концерт, встреча. Приглашение поделиться мнением. Краткий, вежливый, предполагает честный ответ. Ответы могут быть очень разные: ''loved it'', ''not for me'', ''bit slow'', ''absolute rubbish''.",
+          "translation": "Что ты думаешь? (о чём-то)"
+        },
+        "cultural_note": "Odeon and Vue are the UK''s biggest cinema chains — you''ll find them in almost every city. Cinema culture is alive in Britain: premiere nights, arthouse indies, classic re-releases. Brits love debating films afterwards — in pubs, over chips, walking home. Disagreement is part of the fun: a friend who calls you ''no heart'' is joking, not fighting. And of course — chips after the cinema is tradition. Fish and chips if you''re near the sea, just chips otherwise.",
+        "key_vocabulary": [
+          {
+            "note": "после совместного опыта",
+            "word": "What did you think?",
+            "translation": "Что думаешь?"
+          },
+          {
+            "note": "мягкая критика",
+            "word": "A bit long",
+            "translation": "Чутка длинновато"
+          },
+          {
+            "note": "частичное согласие",
+            "word": "I''ll give you that",
+            "translation": "Тут соглашусь / тут ты прав(а)"
+          },
+          {
+            "note": "шутливое обвинение",
+            "word": "You have no heart",
+            "translation": "У тебя нет сердца"
+          },
+          {
+            "note": "продолжать делать что-то",
+            "word": "Further",
+            "translation": "Дальше / подробнее"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "No — Sophie loved it, Marie thought it was long.",
+            "question": "Did Sophie and Marie agree about the film?"
+          },
+          {
+            "hint": "Three times.",
+            "question": "How many times did Sophie cry?"
+          },
+          {
+            "hint": "Getting chips and continuing the debate.",
+            "question": "What are they doing after the film?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 28,
+      "level": "A1",
+      "lesson_number": 27,
+      "title_en": "A Bad Day",
+      "title_ru": "Плохой день",
+      "content": {
+        "dialogue": [
+          {
+            "line": "You look awful. What happened?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I''ve had a rubbish day.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Oh no. Tea?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Please.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Tell me everything.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "My boss. He was awful today.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "What did he do?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Shouted at me in front of everyone.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "That''s not on, Marie.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I just want to forget about it.",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "A friend has had a terrible day. Notice they look upset, offer comfort (tea!), listen to their story, and show you''re on their side.",
+          "prompt_phrases": [
+            "You look awful. What happened?",
+            "Oh no. Tea?",
+            "Tell me everything.",
+            "That''s not on."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I''ve had a rubbish day",
+          "example": "— How was your day? — Ugh. Rubbish, honestly.",
+          "explanation": "''Rubbish'' — очень британский способ сказать ''плохо'', ''дрянь''. Звучит честно, эмоционально, но не слишком драматично. Более мягкий вариант — ''a rough day''. Используется в тёплых, дружеских разговорах — когда хочется выговориться.",
+          "translation": "У меня был паршивый день"
+        },
+        "cultural_note": "When a British friend is having a bad day, the ritual is: tea first, then listening. Tea isn''t really about thirst — it''s a ceremony of care. ''That''s not on'' is a brilliantly British expression of moral disapproval — softer than ''that''s outrageous'' but stronger than ''that''s unfair''. It draws a clear line: this behaviour is not acceptable. Good friends respond with outrage on your behalf, not with ''well, maybe you did something wrong...''. Loyalty first, analysis later.",
+        "key_vocabulary": [
+          {
+            "note": "искреннее беспокойство",
+            "word": "You look awful",
+            "translation": "Ты выглядишь ужасно"
+          },
+          {
+            "note": "BrE, очень частотное",
+            "word": "Rubbish",
+            "translation": "Дрянной / паршивый"
+          },
+          {
+            "note": "приглашение выговориться",
+            "word": "Tell me everything",
+            "translation": "Рассказывай всё"
+          },
+          {
+            "note": "BrE — возмущение",
+            "word": "That''s not on",
+            "translation": "Это ненормально / так нельзя"
+          },
+          {
+            "note": "отпустить",
+            "word": "Forget about it",
+            "translation": "Забыть об этом"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Her boss shouted at her in front of everyone at work.",
+            "question": "Why is Marie upset?"
+          },
+          {
+            "hint": "Tea — a classic British comfort.",
+            "question": "What does Sophie offer first?"
+          },
+          {
+            "hint": "Forget about it.",
+            "question": "What does Marie want to do?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 29,
+      "level": "A1",
+      "lesson_number": 28,
+      "title_en": "The Lost Phone",
+      "title_ru": "Потерянный телефон",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Sophie! I can''t find my phone.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "What? Where did you have it last?",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "The taxi. Oh God, the taxi.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Okay, don''t panic. Call it from mine.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "It''s ringing! Someone''s picking up!",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Hello?",
+            "speaker": "Taxi driver"
+          },
+          {
+            "line": "Hi! I think I left my phone in your cab.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Yeah, it''s here on the back seat. Shall I drop it back?",
+            "speaker": "Taxi driver"
+          },
+          {
+            "line": "That would be amazing. Thank you so much.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "See? Always some good people around.",
+            "speaker": "Sophie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''ve lost your phone. Call a friend in a panic, retrace your steps, work out where it is, and contact whoever has it.",
+          "prompt_phrases": [
+            "I can''t find my [item]!",
+            "Where did you have it last?",
+            "Don''t panic.",
+            "That would be amazing. Thank you so much."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I can''t find my phone",
+          "example": "— Sophie! I can''t find my phone. — Okay, calm down. Where did you last see it?",
+          "explanation": "Простая конструкция для любой потерянной вещи: ''I can''t find my [X]''. Работает с ключами, очками, кошельком. В британской культуре паника вокруг потерянного телефона — социально приемлема, даже ожидаема. Друзья обычно сразу включаются в поиск.",
+          "translation": "Не могу найти свой телефон"
+        },
+        "cultural_note": "London black cabs (taxis) have a famous reputation for honesty — drivers often return lost property. Uber drivers too, though you''ll need to contact them through the app. The Find My iPhone / Find My Device apps can pinpoint lost phones — but a classic call-and-listen often works. When a stranger does you a kindness, the British response is overflow with thanks: ''amazing'', ''legend'', ''you''ve saved my life''. Never just ''thanks''. Offering to pay a little extra (like a tip) is appropriate and polite.",
+        "key_vocabulary": [
+          {
+            "note": "базовая конструкция",
+            "word": "I can''t find my...",
+            "translation": "Не могу найти свой(ю)..."
+          },
+          {
+            "note": "основной совет Marie в любой ситуации",
+            "word": "Don''t panic",
+            "translation": "Не паникуй"
+          },
+          {
+            "note": "синоним ''taxi''",
+            "word": "Cab",
+            "translation": "Такси (разг.)"
+          },
+          {
+            "note": "''drop off'' = подбросить",
+            "word": "Drop it back",
+            "translation": "Завезти обратно"
+          },
+          {
+            "note": "благодарность за предложение",
+            "word": "That would be amazing",
+            "translation": "Это было бы чудесно"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "In a taxi — on the back seat.",
+            "question": "Where did Marie leave her phone?"
+          },
+          {
+            "hint": "Sophie called it from her phone.",
+            "question": "How did they find out where it was?"
+          },
+          {
+            "hint": "Drop the phone back.",
+            "question": "What will the driver do?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 30,
+      "level": "A1",
+      "lesson_number": 29,
+      "title_en": "The Big News",
+      "title_ru": "Большая новость",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Marie, I''ve got something to tell you.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Oh God. Is it bad?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "No! It''s good. I think it''s good.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Well, out with it!",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I got the design job.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "What?! Sophie!",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I start in three weeks.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "I am so proud of you.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I''m terrified, honestly.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Terrified is normal. Let''s go celebrate!",
+            "speaker": "Marie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''ve got good news to share with a close friend. Build up the moment, share the news, share your real feelings (nervous, scared, excited), let them celebrate you.",
+          "prompt_phrases": [
+            "I''ve got something to tell you.",
+            "I got [news].",
+            "I''m terrified, honestly.",
+            "Let''s go celebrate!"
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "I''ve got something to tell you",
+          "example": "— Listen, I''ve got something to tell you. — Oh God, is it bad?",
+          "explanation": "Серьёзная прелюдия перед важной новостью — хорошей или плохой. Заставляет собеседника сесть и слушать. Интонация решает всё: радостная — хорошая новость, серьёзная — плохая. В любом случае после этой фразы в воздухе появляется напряжение.",
+          "translation": "Мне нужно тебе кое-что сказать"
+        },
+        "cultural_note": "Brits celebrate career milestones seriously — but also with a self-deprecating edge. ''I''m terrified'' is the honest, humble reaction to good news; saying ''I deserve this, I''m amazing'' would be seen as arrogant. A friend''s response: genuine pride (''proud of you'') + practical comfort (''terrified is normal'') + immediate celebration (pub, dinner, champagne). The British celebration of choice: a pub. Or a fancier place if the news is really big. ''Let''s go celebrate'' is a standard, warm, non-negotiable response.",
+        "key_vocabulary": [
+          {
+            "note": "серьёзная прелюдия",
+            "word": "I''ve got something to tell you",
+            "translation": "Мне нужно тебе сказать"
+          },
+          {
+            "note": "настоятельная просьба рассказать",
+            "word": "Out with it",
+            "translation": "Давай, говори!"
+          },
+          {
+            "note": "тёплая поддержка",
+            "word": "I''m so proud of you",
+            "translation": "Я так тобой горжусь"
+          },
+          {
+            "note": "сильнее чем ''scared''",
+            "word": "Terrified",
+            "translation": "В ужасе"
+          },
+          {
+            "note": "реакция на хорошую новость",
+            "word": "Let''s go celebrate",
+            "translation": "Пошли праздновать"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "She got the design job she wanted.",
+            "question": "What''s Sophie''s news?"
+          },
+          {
+            "hint": "In three weeks.",
+            "question": "When does she start?"
+          },
+          {
+            "hint": "Terrified, honestly — but it''s good news.",
+            "question": "How is she feeling?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    },
+    {
+      "id": 31,
+      "level": "A1",
+      "lesson_number": 30,
+      "title_en": "Arthur's Seat",
+      "title_ru": "Артурс Сит",
+      "content": {
+        "dialogue": [
+          {
+            "line": "Sophie... look at that view.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "I know. It''s ridiculous.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Edinburgh was a brilliant idea.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Told you. And we made it to the top.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Just about. My legs are destroyed.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Worth every step.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Do you remember our first coffee in that queue?",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Feels like ages ago.",
+            "speaker": "Sophie"
+          },
+          {
+            "line": "Here''s to all our coffees. And all the ones to come.",
+            "speaker": "Marie"
+          },
+          {
+            "line": "Cheers, Marie. To us.",
+            "speaker": "Sophie"
+          }
+        ],
+        "pratique": {
+          "scenario": "You''re at a beautiful place with a close friend. Take in the view, remember your shared history, raise a toast to your friendship.",
+          "prompt_phrases": [
+            "Look at that view.",
+            "[Place] was a brilliant idea.",
+            "Do you remember [memory]?",
+            "Here''s to [something]."
+          ]
+        },
+        "phrase_cle": {
+          "phrase": "Look at that view",
+          "example": "— Look at that view, Marie. — I know. It''s ridiculous.",
+          "explanation": "Простая, от сердца. Используется в моменты, когда пейзаж или зрелище действительно захватывает. ''That'' подчёркивает эмоциональную силу — не просто ''this view'', а ''что за вид''. Звучит на вершинах гор, на пляжах, в смотровых площадках. Финальная фраза A1 курса — потому что когда ты можешь просто выдохнуть и сказать это, ты уже говоришь по-английски.",
+          "translation": "Посмотри на этот вид"
+        },
+        "cultural_note": "Arthur''s Seat is an extinct volcano in the middle of Edinburgh — you can hike to the top in about 45 minutes and see all of the city, the sea, and the hills beyond. It''s a tradition for friends visiting Edinburgh together. ''Here''s to [something]'' is the classic British toast — raising a glass (or a takeaway coffee, or just your hand) to a person, an occasion, or a memory. Ending the A1 journey here is intentional: you''ve moved from ordering coffee in a London queue to toasting your friendship on a Scottish hilltop. That''s fluency beginning.",
+        "key_vocabulary": [
+          {
+            "note": "спонтанное восхищение",
+            "word": "Look at that view",
+            "translation": "Посмотри на этот вид"
+          },
+          {
+            "note": "так красиво, что нелепо",
+            "word": "Ridiculous",
+            "translation": "Нереальный / невероятный"
+          },
+          {
+            "note": "с трудом",
+            "word": "Just about",
+            "translation": "Еле-еле / едва"
+          },
+          {
+            "note": "ностальгия",
+            "word": "Feels like ages ago",
+            "translation": "Кажется, давно было"
+          },
+          {
+            "note": "поднимать бокал за что-то",
+            "word": "Here''s to...",
+            "translation": "За... (тост)"
+          }
+        ],
+        "comprehension_questions": [
+          {
+            "hint": "Edinburgh — at the top of Arthur''s Seat.",
+            "question": "Where are Sophie and Marie?"
+          },
+          {
+            "hint": "Their first coffee in the queue — their very first conversation.",
+            "question": "What does Marie remember?"
+          },
+          {
+            "hint": "Their friendship — ''to us''.",
+            "question": "What are they celebrating?"
+          }
+        ]
+      },
+      "created_at": "2026-04-24T10:35:11.625979+00:00",
+      "is_published": true,
+      "is_free_teaser": false
+    }
+  ]
+}
