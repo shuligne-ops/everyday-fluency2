@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-5',
-        max_tokens: 700,
+        max_tokens: 1024,
         system,
         messages: [{ role: 'user', content: user }],
       }),

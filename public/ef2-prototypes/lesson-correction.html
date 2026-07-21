@@ -242,8 +242,9 @@ Respond in STRICT JSON, no markdown, no preamble:
 }`;
 
     try{
-      const raw=await askClaude(system,`Learner said: "${tryText}"`);
-      const j=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      let j;
+      try { j = parseJSON(await askClaude(system,`Learner said: "${tryText}"`)); }
+      catch(_){ j = parseJSON(await askClaude(system,`Learner said: "${tryText}"`)); } // one retry on truncated/garbled JSON
       area.innerHTML='<div class="panel">'
         +'<div class="row"><span class="tag">You said</span><span class="you">“'+esc(j.you)+'”</span></div>'
         +'<div class="row"><span class="tag">More natural here</span><span class="nat">“'+esc(j.natural)+'”</span></div>'
@@ -285,8 +286,9 @@ Respond in STRICT JSON, no markdown:
 }`;
 
     try{
-      const raw=await askClaude(system,`Learner said: "${v}"`);
-      const j=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      let j;
+      try { j = parseJSON(await askClaude(system,`Learner said: "${v}"`)); }
+      catch(_){ j = parseJSON(await askClaude(system,`Learner said: "${v}"`)); }
       const rc='r'+j.score;
       const label=j.score===2?'Move carried ✓':(j.score===1?'Almost — mis-sized it':'Slipped back');
       area.innerHTML='<div class="panel">'
@@ -310,5 +312,13 @@ Respond in STRICT JSON, no markdown:
   };
 
   function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+  // Robust JSON extraction: tolerate ```-fences, preamble, or trailing text.
+  function parseJSON(raw){
+    let s = String(raw).replace(/```json|```/g,'').trim();
+    const a = s.indexOf('{'), b = s.lastIndexOf('}');
+    if(a!==-1 && b!==-1 && b>a) s = s.slice(a, b+1);
+    return JSON.parse(s);
+  }
 })();
 </script>
