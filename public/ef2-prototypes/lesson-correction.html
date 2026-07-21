@@ -1,0 +1,314 @@
+<!--
+EF 2.0 — Second B2 prototype (intentionally harder)
+Move: face-saving correction (high face-risk, public meeting)
+Structure: TRY → SCENE → CONTRAST → TRANSFER
+Acceptance criteria (pre-registered by GPT):
+ 1. TRY yields several plausible B2 answers, no obvious target phrase
+ 2. SCENE has a human arc independent of the teaching goal
+ 3. CONTRAST depends on the learner's answer (no canned debrief)
+ 4. TRANSFER requires carrying the strategy, not swapping a noun
+-->
+<style>
+  :root {
+    --ink:#0f1b3d; --ink-soft:#26355f; --amber:#f59e0b; --amber-deep:#c47d06;
+    --paper:#f7f5f0; --paper-warm:#efe9dd; --line:#d9d2c4;
+    --sophie:#0f1b3d; --other:#7c5410; --good:#2f7d54; --mute:#6b7280; --card:#fff;
+  }
+  *{box-sizing:border-box;}
+  #ef2{max-width:640px;margin:0 auto;font-family:'Georgia','Iowan Old Style',serif;color:var(--ink);line-height:1.55;}
+  #ef2 .phase{display:none;animation:rise .45s ease both;}
+  #ef2 .phase.active{display:block;}
+  @keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){#ef2 .phase{animation:none;}}
+  #ef2 .rail{display:flex;gap:6px;margin-bottom:28px;font-family:-apple-system,system-ui,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
+  #ef2 .rail span{flex:1;padding:7px 0 6px;text-align:center;color:var(--mute);border-top:2px solid var(--line);transition:color .3s,border-color .3s;}
+  #ef2 .rail span.on{color:var(--ink);border-top-color:var(--amber);font-weight:700;}
+  #ef2 .rail span.done{color:var(--amber-deep);border-top-color:var(--amber-deep);}
+  #ef2 .eyebrow{font-family:-apple-system,system-ui,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber-deep);font-weight:700;margin-bottom:10px;}
+  #ef2 h2{font-size:25px;line-height:1.2;margin:0 0 14px;font-weight:700;}
+  #ef2 .situation{background:var(--paper-warm);border-left:3px solid var(--amber);padding:16px 18px;border-radius:2px;margin:18px 0;font-size:16.5px;}
+  #ef2 .situation .who{font-family:-apple-system,system-ui,sans-serif;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:6px;}
+  #ef2 .situation .said{font-style:italic;color:var(--ink-soft);}
+  #ef2 p.lead{font-size:16px;}
+  #ef2 .prompt-q{font-weight:700;font-size:17px;margin:16px 0 12px;}
+  #ef2 textarea{width:100%;min-height:92px;padding:13px 15px;border:1.5px solid var(--line);border-radius:4px;font-family:'Georgia',serif;font-size:16px;color:var(--ink);background:var(--card);resize:vertical;line-height:1.5;}
+  #ef2 textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.15);}
+  #ef2 .btn{font-family:-apple-system,system-ui,sans-serif;font-size:15px;font-weight:600;color:#fff;background:var(--ink);border:none;padding:12px 24px;border-radius:4px;cursor:pointer;margin-top:14px;transition:background .2s,transform .05s;}
+  #ef2 .btn:hover{background:var(--ink-soft);}
+  #ef2 .btn:active{transform:translateY(1px);}
+  #ef2 .btn:disabled{opacity:.45;cursor:default;}
+  #ef2 .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);}
+  #ef2 .btn.ghost:hover{border-color:var(--amber);background:var(--paper-warm);}
+  #ef2 .hint{font-family:-apple-system,system-ui,sans-serif;font-size:13px;color:var(--mute);margin-top:10px;}
+  #ef2 .scene{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 4px;margin:18px 0;}
+  #ef2 .line{padding:9px 18px;opacity:0;animation:lineIn .5s ease forwards;}
+  @keyframes lineIn{to{opacity:1;}}
+  @media (prefers-reduced-motion:reduce){#ef2 .line{opacity:1;animation:none;}}
+  #ef2 .line .nm{font-family:-apple-system,system-ui,sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;display:block;margin-bottom:1px;}
+  #ef2 .line.sophie .nm{color:var(--sophie);}
+  #ef2 .line.other .nm{color:var(--other);}
+  #ef2 .line .tx{font-size:16.5px;}
+  #ef2 .line.stage{font-style:italic;color:var(--mute);font-size:14px;padding:4px 18px;font-family:-apple-system,system-ui,sans-serif;}
+  #ef2 .panel{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin:16px 0;}
+  #ef2 .panel .row{margin-bottom:14px;}
+  #ef2 .panel .row:last-child{margin-bottom:0;}
+  #ef2 .panel .tag{font-family:-apple-system,system-ui,sans-serif;font-size:11px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--mute);display:block;margin-bottom:3px;}
+  #ef2 .panel .you{color:var(--ink-soft);}
+  #ef2 .panel .nat{color:var(--good);font-weight:700;}
+  #ef2 .panel .why{font-size:15.5px;}
+  #ef2 .loading{font-family:-apple-system,system-ui,sans-serif;font-size:14px;color:var(--mute);padding:10px 0;}
+  #ef2 .loading::after{content:'';animation:dots 1.4s steps(4,end) infinite;}
+  @keyframes dots{0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}}
+  #ef2 .rubric{display:inline-flex;align-items:center;gap:8px;font-family:-apple-system,system-ui,sans-serif;font-size:13px;font-weight:700;padding:5px 12px;border-radius:20px;margin-top:6px;}
+  #ef2 .rubric.r2{background:#e4f1ea;color:var(--good);}
+  #ef2 .rubric.r1{background:#fdf0d9;color:var(--amber-deep);}
+  #ef2 .rubric.r0{background:#f3e4e4;color:#a3452f;}
+  #ef2 .final{text-align:center;padding:20px 0 4px;}
+  #ef2 .final .move{font-size:20px;font-weight:700;margin:8px 0 4px;}
+  #ef2 .divider{height:1px;background:var(--line);margin:22px 0;}
+  #ef2 .err{font-family:-apple-system,system-ui,sans-serif;font-size:13px;color:#a3452f;background:#f9ecec;padding:10px 12px;border-radius:4px;margin-top:10px;}
+</style>
+
+<div id="ef2">
+
+  <div class="rail">
+    <span id="r0" class="on">Try</span>
+    <span id="r1">Scene</span>
+    <span id="r2">Contrast</span>
+    <span id="r3">Transfer</span>
+  </div>
+
+  <!-- PHASE 1 · TRY -->
+  <section class="phase active" id="p0">
+    <div class="eyebrow">Everyday Fluency · B2 · harder</div>
+    <h2>Correcting someone — without the room noticing</h2>
+    <p class="lead">No phrases up front. You go first.</p>
+
+    <div class="situation">
+      <span class="who">Team call, six people, client on the line. Dan says, confidently:</span>
+      <span class="said">“Right, so we've got until Friday to ship this — plenty of time.”</span>
+    </div>
+
+    <p class="lead">You know it's <strong>Thursday</strong> — the client confirmed it in writing yesterday. Dan's wrong, publicly, in front of the client. If the team plans around Friday, you miss the deadline. But Dan's senior, he's sure of himself, and everyone heard him.</p>
+
+    <p class="prompt-q">You need to fix the date without making Dan look bad. What do you say — out loud, right now?</p>
+    <textarea id="tryInput" placeholder="Type what you'd say on the call…" aria-label="What you say on the call"></textarea>
+    <div><button class="btn" id="trySubmit">Say it →</button></div>
+    <p class="hint">The date's not the hard part. Not bruising Dan in front of the client is.</p>
+  </section>
+
+  <!-- PHASE 2 · SCENE -->
+  <section class="phase" id="p1">
+    <div class="eyebrow">Now watch Sophie handle the same corner</div>
+    <h2>Same wrong date, live on the call</h2>
+    <p class="lead">Sophie was on a call where Priya got a date wrong in front of a client. Watch how it actually went — just once, nothing to do.</p>
+    <div class="scene" id="sceneBox"></div>
+    <button class="btn" id="toContrast" style="display:none">See what you did differently →</button>
+  </section>
+
+  <!-- PHASE 3 · CONTRAST -->
+  <section class="phase" id="p2">
+    <div class="eyebrow">Your words ↔ the natural move</div>
+    <h2>Where yours and Sophie's part ways</h2>
+    <p class="lead">This one's about <em>face</em> — correcting the fact while protecting the person.</p>
+    <div id="contrastArea"><div class="loading" id="contrastLoad">Reading what you said</div></div>
+    <button class="btn" id="toTransfer" style="display:none">Try it in a new spot →</button>
+  </section>
+
+  <!-- PHASE 4 · TRANSFER -->
+  <section class="phase" id="p3">
+    <div class="eyebrow">New situation — carry the move, not the words</div>
+    <h2>Different power, same skill</h2>
+    <p class="lead">Now the person who's wrong is <strong>above</strong> you — and it's not a neutral fact, it's their own plan. You can't reuse the call line. Carry the move: fix it, protect them, and mind the power gap.</p>
+
+    <div class="situation">
+      <span class="who">Your manager, in a one-to-one, says:</span>
+      <span class="said">“So let's send the report to the whole client list on Monday — good to go.”</span>
+    </div>
+    <p class="lead">You know two of those clients already churned last week — sending would be embarrassing for the company and for her. She's your boss and it's her call. Flag it without making her feel caught out.</p>
+
+    <p class="prompt-q">What do you say?</p>
+    <textarea id="transferInput" placeholder="Type what you'd say to your manager…" aria-label="What you say to your manager"></textarea>
+    <div><button class="btn" id="transferSubmit">Say it →</button></div>
+    <div id="transferArea"></div>
+  </section>
+
+  <!-- DONE -->
+  <section class="phase" id="p4">
+    <div class="final">
+      <div class="eyebrow">Lesson move</div>
+      <div class="move">Correct the fact, protect the person, mind the power</div>
+      <p class="lead" style="max-width:470px;margin:12px auto 0;color:var(--ink-soft)">
+        Harder than a refusal — here a wrong word can bruise someone in front of others. You just did it twice: sideways among equals, then upward with a boss. It'll come back later with no warning, in a room where the stakes are higher still.
+      </p>
+      <div class="divider"></div>
+      <button class="btn ghost" id="restart">Run it again from the top</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  // SCENE — two arcs on purpose:
+  //  communicative arc: face-saving correction (epistemic softening, shared framing, no "you're wrong")
+  //  human arc: Priya's small defensiveness → Sophie gives her an out → Priya takes it, saves face, momentum restored
+  const scene = [
+    {who:'stage', tx:'Client\'s on the line. Priya\'s mid-flow.'},
+    {who:'other',  tx:'"—so we\'re all set for the Friday delivery, that gives us the full week."', nm:'Priya'},
+    {who:'sophie', tx:'"Mm — can I just check one thing before we lock that in?"'},
+    {who:'other',  tx:'"...sure."', nm:'Priya'},
+    {who:'sophie', tx:'"I might be misreading the thread — didn\'t they come back and pull it to Thursday? I could be wrong."'},
+    {who:'other',  tx:'"...did they? Hang on."', nm:'Priya'},
+    {who:'stage', tx:'A pause. Priya scrolls.'},
+    {who:'other',  tx:'"—oh. Yeah. Thursday. Good catch, I had Friday in my head."', nm:'Priya'},
+    {who:'sophie', tx:'"Easy one to miss, they buried it at the bottom. So — Thursday, but we\'re still fine on time?"'},
+    {who:'other',  tx:'"Yeah, totally fine. Right — Thursday, everyone."', nm:'Priya'},
+  ];
+
+  let tryText='';
+
+  function goto(n){
+    for(let i=0;i<5;i++) $('p'+i).classList.remove('active');
+    $('p'+n).classList.add('active');
+    for(let i=0;i<4;i++){const r=$('r'+i);r.classList.remove('on','done');if(i<n)r.classList.add('done');else if(i===n)r.classList.add('on');}
+    $('ef2')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  async function askClaude(system,user){
+    const res=await fetch("/api/lesson-eval",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({system,user})
+    });
+    if(!res.ok) throw new Error("eval failed");
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    return (data.text||"").trim();
+  }
+
+  $('trySubmit').onclick=function(){
+    const v=$('tryInput').value.trim();
+    if(v.length<3){$('tryInput').focus();return;}
+    tryText=v; goto(1); playScene();
+  };
+
+  function playScene(){
+    const box=$('sceneBox'); box.innerHTML='';
+    scene.forEach((l,i)=>{
+      const d=document.createElement('div');
+      d.className='line '+l.who;
+      d.style.animationDelay=(i*0.5)+'s';
+      if(l.who==='stage'){ d.textContent=l.tx; }
+      else{
+        const nm = l.who==='sophie' ? 'Sophie' : (l.nm||'');
+        d.innerHTML='<span class="nm">'+nm+'</span><span class="tx">'+l.tx+'</span>';
+      }
+      box.appendChild(d);
+    });
+    setTimeout(()=>{$('toContrast').style.display='inline-block';},(scene.length*0.5+0.4)*1000);
+  }
+
+  $('toContrast').onclick=function(){goto(2);runContrast();};
+
+  async function runContrast(){
+    const area=$('contrastArea');
+    const sceneText=scene.filter(l=>l.who!=='stage')
+      .map(l=>(l.who==='sophie'?'Sophie':(l.nm||'Priya'))+': '+l.tx).join('\n');
+
+    const system=
+`You are Sophie, a warm, sharp English fluency coach in a B2 lesson on FACE-SAVING CORRECTION — correcting someone who is wrong, in front of others, without bruising them.
+
+The learner had to correct Dan, who confidently gave the wrong deadline (Friday) on a client call when it's actually Thursday. Dan is senior and sure of himself. Then they saw this model scene (Sophie correcting Priya on the same kind of slip):
+${sceneText}
+
+The teaching target (the "move") balances:
+- epistemic softening ("I might be misreading this", "correct me if I'm wrong") — lowers the correction's force
+- shared framing / an out for the other person ("easy to miss", "they buried it") — hands them a face-saving reason
+- correcting the FACT clearly all the same (the date does get fixed — softening is not vagueness)
+- reading power & audience: a public, client-facing correction needs MORE face-protection than a private one
+- knowing that a blunt "Actually, it's Thursday" can be fine privately but sting publicly
+
+Analyse ONLY the learner's actual words. Compare their correction to the natural move. Pick the 1–2 MOST important differences — never more than two. This is about face and register, not grammar (mention grammar only if it directly bruises).
+
+Respond in STRICT JSON, no markdown, no preamble:
+{
+ "you":"<the single most telling phrase THEY wrote, quoted exactly>",
+ "natural":"<a more natural, more face-protecting version of THAT phrase>",
+ "why":"<one sentence, plain English, why the natural version protects Dan while still fixing the date>",
+ "second":"<optional: one more short observation, or empty string if their answer was already strong>",
+ "verdict":"<one short encouraging sentence naming what they already did well>"
+}`;
+
+    try{
+      const raw=await askClaude(system,`Learner said: "${tryText}"`);
+      const j=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      area.innerHTML='<div class="panel">'
+        +'<div class="row"><span class="tag">You said</span><span class="you">“'+esc(j.you)+'”</span></div>'
+        +'<div class="row"><span class="tag">More natural here</span><span class="nat">“'+esc(j.natural)+'”</span></div>'
+        +'<div class="row"><span class="tag">Why</span><span class="why">'+esc(j.why)+'</span></div>'
+        +(j.second&&j.second.length>2?'<div class="row"><span class="tag">One more thing</span><span class="why">'+esc(j.second)+'</span></div>':'')
+        +(j.verdict?'<div class="row"><span class="tag">You already nailed</span><span class="why">'+esc(j.verdict)+'</span></div>':'')
+        +'</div>';
+      $('toTransfer').style.display='inline-block';
+    }catch(e){
+      area.innerHTML='<div class="err">Couldn\'t reach the coach just now. The live analysis needs the Claude API — outside the app that call won\'t resolve. The flow and structure are all here to judge.</div>';
+      $('toTransfer').style.display='inline-block';
+    }
+  }
+
+  $('toTransfer').onclick=()=>goto(3);
+
+  $('transferSubmit').onclick=async function(){
+    const v=$('transferInput').value.trim();
+    if(v.length<3){$('transferInput').focus();return;}
+    $('transferSubmit').disabled=true;
+    const area=$('transferArea');
+    area.innerHTML='<div class="loading">Checking whether the move carried — up the power gap</div>';
+
+    const system=
+`You are Sophie, a B2 fluency coach. The learner just practised FACE-SAVING CORRECTION among equals (a peer on a call). Now they must correct someone MORE SENIOR — their manager — about HER OWN plan (sending a report to churned clients). This is harder: correcting upward, about the person's own decision, needs even more face-protection AND cannot be so soft that the error isn't actually flagged.
+
+Score whether they TRANSFERRED the move: fix the problem clearly + protect the manager's face + respect the power gap — WITHOUT copying the peer-call wording.
+
+Rubric:
+2 = carried the move and adjusted for power: flags the churned-clients problem clearly, gives the manager an out, stays respectful without grovelling
+1 = understood the move but wording is still assembled, or mis-sized the deference (too blunt upward, OR so soft the error is buried)
+0 = fell back to blunt correction, or over-deferred so the real problem never lands
+
+Respond in STRICT JSON, no markdown:
+{
+ "score":<0|1|2>,
+ "line":"<one warm, specific sentence naming what carried or slipped, esp. re: the power gap>",
+ "model":"<one natural manager-register version they could have said>"
+}`;
+
+    try{
+      const raw=await askClaude(system,`Learner said: "${v}"`);
+      const j=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      const rc='r'+j.score;
+      const label=j.score===2?'Move carried ✓':(j.score===1?'Almost — mis-sized it':'Slipped back');
+      area.innerHTML='<div class="panel">'
+        +'<span class="rubric '+rc+'">'+label+'</span>'
+        +'<div class="row" style="margin-top:12px"><span class="tag">Sophie</span><span class="why">'+esc(j.line)+'</span></div>'
+        +'<div class="row"><span class="tag">One natural version</span><span class="nat">“'+esc(j.model)+'”</span></div>'
+        +'</div>'
+        +'<button class="btn" id="done">Finish →</button>';
+      $('done').onclick=()=>goto(4);
+    }catch(e){
+      area.innerHTML='<div class="err">Couldn\'t reach the coach. In the app this scores your transfer live. Move on to see the lesson close.</div><button class="btn" id="done">Finish →</button>';
+      $('done').onclick=()=>goto(4);
+    }
+  };
+
+  $('restart').onclick=function(){
+    $('tryInput').value='';$('transferInput').value='';
+    $('transferSubmit').disabled=false;$('transferArea').innerHTML='';
+    $('toContrast').style.display='none';$('toTransfer').style.display='none';
+    tryText=''; goto(0);
+  };
+
+  function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+})();
+</script>
