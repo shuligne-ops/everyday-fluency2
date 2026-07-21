@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { FREE_A1_LESSONS, hasActiveSubscription } from '@/lib/access'
+import { MEETING_DISAGREEMENT_LESSON } from '@/lib/entryScenes'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
 
@@ -17,7 +18,7 @@ type LessonSummary = {
 }
 
 type Lesson = {
-  id: number
+  id: number | string
   level: string
   lesson_number: number
   title_en: string
@@ -180,10 +181,26 @@ function HomeContent() {
   // открываем первый урок A1. Срабатывает один раз, после загрузки списка уроков.
   useEffect(() => {
     if (autostartDone) return
+    const lessonParam = searchParams.get('lesson')
+    if (lessonParam === 'meeting-disagreement') {
+      const entryLesson: Lesson = {
+        id: MEETING_DISAGREEMENT_LESSON.slug,
+        level: MEETING_DISAGREEMENT_LESSON.level,
+        lesson_number: 0,
+        title_en: MEETING_DISAGREEMENT_LESSON.title,
+        title_ru: '',
+        content: MEETING_DISAGREEMENT_LESSON,
+      }
+      setAutostartDone(true)
+      setLesson(entryLesson)
+      setMsgs([])
+      kill()
+      void chat(entryLesson, [])
+      return
+    }
     if (!lessonsLoaded) return
     if (lessons.length === 0) return
     if (level !== 'A1') return
-    const lessonParam = searchParams.get('lesson')
     if (lessonParam !== '1') return
     setAutostartDone(true)
     open(lessons[0].id)
@@ -221,7 +238,7 @@ function HomeContent() {
     try {
       const r = await fetch('/api/chat', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lesson: l.content, lessonTitle: l.title_en, lessonLevel: l.level, lessonNumber: l.lesson_number, messages: m })
+        body: JSON.stringify({ lesson: l.content, lessonTitle: l.title_en, lessonLevel: l.level, lessonNumber: l.lesson_number, entryScene: l.content?.slug === 'meeting-disagreement' ? 'meeting-disagreement' : undefined, messages: m })
       })
       if (!r.ok) throw 0
       const rd = r.body?.getReader(), dc = new TextDecoder()

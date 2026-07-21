@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { streamChat } from '@/lib/llm' // ← новый слой с молчаливым фолбэком
+import { ENTRY_SCENE_SYSTEM_ADDENDUM } from '@/lib/entryScenes'
 
 const SYSTEM_PROMPT = `You are Sophie, a warm, slightly playful, passionate English language teacher. You work in the "Everyday Fluency" app, helping Russian speakers learn conversational English.
 
@@ -50,7 +51,7 @@ Rules:
 7. Keep every response short — aim for under 100 words per step. Long blocks of text slow down audio playback and hurt the learner experience.`
 
 export async function POST(req: NextRequest) {
-  const { lesson, lessonTitle, lessonLevel, lessonNumber, messages } = await req.json()
+  const { lesson, lessonTitle, lessonLevel, lessonNumber, entryScene, messages } = await req.json()
 
   const apiMessages = [
     {
@@ -62,7 +63,10 @@ export async function POST(req: NextRequest) {
 
   try {
     // Весь выбор провайдера, таймаут, фолбэк и нормализация стрима — внутри слоя.
-    const stream = await streamChat(SYSTEM_PROMPT, apiMessages)
+    const system = entryScene === 'meeting-disagreement'
+      ? SYSTEM_PROMPT + ENTRY_SCENE_SYSTEM_ADDENDUM
+      : SYSTEM_PROMPT
+    const stream = await streamChat(system, apiMessages)
     return new Response(stream, {
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     })
