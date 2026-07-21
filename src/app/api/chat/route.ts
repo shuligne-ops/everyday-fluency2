@@ -52,19 +52,22 @@ Rules:
 
 export async function POST(req: NextRequest) {
   const { lesson, lessonTitle, lessonLevel, lessonNumber, entryScene, messages } = await req.json()
+  const isMeetingDisagreementEntryScene = entryScene === 'meeting-disagreement'
 
   const apiMessages = [
     {
       role: 'user' as const,
-      content: `Here's the content of lesson ${lessonLevel}-${String(lessonNumber).padStart(2, '0')} "${lessonTitle}":\n\n${JSON.stringify(lesson, null, 2)}\n\nBegin the lesson with Step 1. CRITICAL REMINDER: in dialogues, every line must start with the name in bold (**Name:**) followed by the line, with one blank line between each line.`,
+      content: isMeetingDisagreementEntryScene
+        ? "Start the scene now. Open warmly, set the work-call context, then deliver Sophie's first line: \"OK, so my plan is — we skip the review step and ship on Friday. Faster that way.\" Stop and wait for the learner."
+        : `Here's the content of lesson ${lessonLevel}-${String(lessonNumber).padStart(2, '0')} "${lessonTitle}":\n\n${JSON.stringify(lesson, null, 2)}\n\nBegin the lesson with Step 1. CRITICAL REMINDER: in dialogues, every line must start with the name in bold (**Name:**) followed by the line, with one blank line between each line.`,
     },
     ...messages,
   ]
 
   try {
     // Весь выбор провайдера, таймаут, фолбэк и нормализация стрима — внутри слоя.
-    const system = entryScene === 'meeting-disagreement'
-      ? SYSTEM_PROMPT + ENTRY_SCENE_SYSTEM_ADDENDUM
+    const system = isMeetingDisagreementEntryScene
+      ? ENTRY_SCENE_SYSTEM_ADDENDUM
       : SYSTEM_PROMPT
     const stream = await streamChat(system, apiMessages)
     return new Response(stream, {
