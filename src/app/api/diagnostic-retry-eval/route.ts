@@ -41,13 +41,13 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false, autoRefreshToken: false } })
     const { data: retrySession, error: retryError } = await supabase
-      .from('diagnostic_sessions').select('transcript, anon_id, move, step').eq('id', retry_session_id).single()
+      .from('diagnostic_sessions').select('transcript, anon_id, move, step, attempt_id').eq('id', retry_session_id).single()
     if (retryError || !retrySession) return NextResponse.json({ error: 'RETRY-сессия не найдена' }, { status: 404 })
-    if (retrySession.anon_id !== anon_id || retrySession.move !== move || retrySession.step !== 'retry') return NextResponse.json({ error: 'Некорректная RETRY-сессия' }, { status: 400 })
+    if (retrySession.anon_id !== anon_id || retrySession.move !== move || retrySession.step !== 'retry' || !retrySession.attempt_id) return NextResponse.json({ error: 'Некорректная RETRY-сессия' }, { status: 400 })
     if (!retrySession.transcript) return NextResponse.json({ error: 'В RETRY-сессии нет транскрипта' }, { status: 400 })
 
     const { data: trySession, error: tryError } = await supabase
-      .from('diagnostic_sessions').select('transcript').eq('anon_id', anon_id).eq('move', move).eq('step', 'try').order('created_at', { ascending: false }).limit(1).maybeSingle()
+      .from('diagnostic_sessions').select('transcript').eq('anon_id', anon_id).eq('move', move).eq('attempt_id', retrySession.attempt_id).eq('step', 'try').order('created_at', { ascending: false }).limit(1).maybeSingle()
     if (tryError || !trySession?.transcript) return NextResponse.json({ error: 'Не найдена первая попытка TRY для этой сессии' }, { status: 400 })
 
     const raw = await callModel(RETRY_SYSTEM, buildRetryUserMessage({ situation: SITUATION, tryTranscript: trySession.transcript, retryTranscript: retrySession.transcript }))

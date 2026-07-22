@@ -24,6 +24,8 @@ export default function DiagnosticPage() {
   const [transferAnalysis, setTransferAnalysis] = useState<TransferAnalysis | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState('')
+  // Новая загрузка страницы — новый проход. attempt_id намеренно не попадает в localStorage.
+  const [attemptId] = useState(() => crypto.randomUUID())
   const [tryShownAt] = useState(() => Date.now())
   const [retryShownAt, setRetryShownAt] = useState(0)
   const [transferShownAt, setTransferShownAt] = useState(0)
@@ -79,7 +81,7 @@ export default function DiagnosticPage() {
       <p style={{ fontSize: 17, lineHeight: 1.6, color: '#1f2b4d', margin: '0 0 8px' }}>Вы точно знаете, что срок другой — задачу перенесли на понедельник. На звонке ещё пятеро, включая вашего общего руководителя.</p>
       <p style={{ fontSize: 17, lineHeight: 1.6, color: '#1f2b4d', margin: '0 0 28px', fontWeight: 600 }}>Что вы скажете? Ответьте вслух, по-английски — так, как сказали бы на самом деле.</p>
 
-      {phase === 'try' && <VoiceRecorder situationShownAt={tryShownAt} step="try" move="face_saving_correction" onResult={handleTry} />}
+      {phase === 'try' && <VoiceRecorder situationShownAt={tryShownAt} attemptId={attemptId} step="try" move="face_saving_correction" onResult={handleTry} />}
       {tryResult && <div style={{ marginTop: 32, padding: '18px 20px', background: '#f7f8fb', border: '1px solid #e3e7f0', borderRadius: 10 }}><p style={{ fontSize: 13, color: '#6b7280', margin: '0 0 6px', fontWeight: 600 }}>Вы сказали:</p><p style={{ fontSize: 17, lineHeight: 1.5, margin: 0 }}>«{tryResult.transcript}»</p></div>}
       {analyzing && <p style={{ marginTop: 20, fontSize: 15, color: '#6b7280' }}>Разбираю, как это звучит для собеседника…</p>}
       {error && <p role="alert" style={{ marginTop: 20, color: '#b42318' }}>{error}</p>}
@@ -95,13 +97,13 @@ export default function DiagnosticPage() {
       {(phase === 'retry' || phase === 'transfer' || phase === 'done') && <section style={{ marginTop: 36, paddingTop: 28, borderTop: '1px solid #e3e7f0' }}>
         <p style={{ fontSize: 13, letterSpacing: 1, textTransform: 'uppercase', color: '#f59e0b', fontWeight: 700, margin: 0 }}>Сразу ещё раз</p>
         <h2 style={{ fontSize: 21, margin: '10px 0' }}>Скажите своими словами</h2><p style={{ lineHeight: 1.6, margin: '0 0 18px' }}>Исправьте факт, но оставьте коллеге выход. Не повторяйте готовую фразу — найдите свой ход.</p>
-        {phase === 'retry' && <VoiceRecorder situationShownAt={retryShownAt} step="retry" move="face_saving_correction" onResult={handleRetry} />}
+        {phase === 'retry' && <VoiceRecorder situationShownAt={retryShownAt} attemptId={attemptId} step="retry" move="face_saving_correction" onResult={handleRetry} />}
         {retryAnalysis && <div style={{ marginTop: 20, padding: '16px 18px', background: retryAnalysis.shifted ? '#f0fdf4' : '#fff7ed', borderRadius: 10 }}><strong>{retryAnalysis.shifted ? 'Сдвиг есть' : 'Сдвиг пока не произошёл'}</strong><p style={{ margin: '8px 0 0', lineHeight: 1.55 }}>{retryAnalysis.shift_note}</p>{retryAnalysis.still_present && <p style={{ margin: '8px 0 0', color: '#8a5a00' }}>{retryAnalysis.still_present}{retryAnalysis.residual_quote && ` «${retryAnalysis.residual_quote}»`}</p>}</div>}
       </section>}
 
       {(phase === 'transfer' || phase === 'done') && <section style={{ marginTop: 36, paddingTop: 28, borderTop: '1px solid #e3e7f0' }}>
         <p style={{ fontSize: 13, letterSpacing: 1, textTransform: 'uppercase', color: '#f59e0b', fontWeight: 700, margin: 0 }}>Новая ситуация</p><h2 style={{ fontSize: 21, margin: '10px 0' }}>Теперь — клиент</h2><p style={{ lineHeight: 1.6, margin: '0 0 18px' }}>{TRANSFER_SITUATION}</p>
-        {phase === 'transfer' && <VoiceRecorder situationShownAt={transferShownAt} step="transfer" move="face_saving_correction" onResult={handleTransfer} />}
+        {phase === 'transfer' && <VoiceRecorder situationShownAt={transferShownAt} attemptId={attemptId} step="transfer" move="face_saving_correction" onResult={handleTransfer} />}
         {transferAnalysis && <div style={{ marginTop: 20, padding: '16px 18px', background: '#f7f8fb', borderRadius: 10 }}><strong>{transferAnalysis.score_label} · {transferAnalysis.transfer_score}/2</strong>{transferAnalysis.what_worked && <p style={{ margin: '8px 0 0', lineHeight: 1.55 }}>{transferAnalysis.what_worked}</p>}{transferAnalysis.what_missing && <p style={{ margin: '8px 0 0', lineHeight: 1.55, color: '#8a5a00' }}>{transferAnalysis.what_missing}</p>}{transferAnalysis.quote && <p style={{ margin: '8px 0 0', fontStyle: 'italic' }}>«{transferAnalysis.quote}»</p>}</div>}
       </section>}
     </main>

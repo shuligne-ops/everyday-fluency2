@@ -10,6 +10,7 @@ type VoiceResult = {
 
 type VoiceRecorderProps = {
   situationShownAt: number
+  attemptId: string
   step?: 'try' | 'retry' | 'transfer'
   move?: string
   onResult: (data: VoiceResult) => void
@@ -19,6 +20,7 @@ type RecorderState = 'idle' | 'recording' | 'uploading'
 
 export default function VoiceRecorder({
   situationShownAt,
+  attemptId,
   step = 'try',
   move = 'face_saving_correction',
   onResult,
@@ -63,6 +65,7 @@ export default function VoiceRecorder({
       const formData = new FormData()
       formData.append('audio', blob, 'recording.webm')
       formData.append('anon_id', getAnonId())
+      formData.append('attempt_id', attemptId)
       formData.append('duration_ms', String(Date.now() - startedAtRef.current))
       formData.append('latency_ms', String(latencyMs))
       formData.append('step', step)

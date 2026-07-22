@@ -9,13 +9,14 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const audio = formData.get('audio')
     const anonId = formData.get('anon_id')?.toString()
+    const attemptId = formData.get('attempt_id')?.toString()
     const durationMs = Number(formData.get('duration_ms'))
     const latencyMs = Number(formData.get('latency_ms'))
     const step = formData.get('step')?.toString() || 'try'
     const move = formData.get('move')?.toString() || 'face_saving_correction'
 
-    if (!(audio instanceof File) || !anonId) {
-      return NextResponse.json({ error: 'Нужны аудиозапись и anon_id' }, { status: 400 })
+    if (!(audio instanceof File) || !anonId || !attemptId) {
+      return NextResponse.json({ error: 'Нужны аудиозапись, anon_id и attempt_id' }, { status: 400 })
     }
 
     const openAiApiKey = process.env[OPENAI_API_KEY_ENV]
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest) {
         p_transcript: transcript,
         p_duration_ms: Number.isFinite(durationMs) ? durationMs : null,
         p_latency_ms: Number.isFinite(latencyMs) ? latencyMs : null,
+        p_attempt_id: attemptId,
       }
     )
 
