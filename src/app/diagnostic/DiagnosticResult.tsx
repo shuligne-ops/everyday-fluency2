@@ -126,8 +126,9 @@ export default function DiagnosticResult({ result, onStartBeta, seatsLeft }: Pro
           <p style={{ ...body, color: INK }}>
             В рабочей ситуации ты сказал: <span style={{ color: AMBER }}>«{userLine}»</span>.
           </p>
+          <p style={{ ...eyebrow, color: MUTED, marginTop: 12, marginBottom: 4 }}>Как это считывается</p>
           <p style={{ ...body, color: INK }}>
-            Носитель считывает это как <span style={{ color: AMBER }}>{nativeReads}</span>.
+            <span style={{ color: AMBER }}>{nativeReads}</span>
           </p>
           <p style={{ ...small, color: MUTED, marginTop: 12 }}>
             Мы меряем не вежливость и не «британскость». Мы меряем, как твоя реплика управляет
@@ -166,14 +167,14 @@ export default function DiagnosticResult({ result, onStartBeta, seatsLeft }: Pro
           <p style={{ ...eyebrow, color: AMBER }}>Программа — 8 недель</p>
           <h2 style={h2}>Не «ещё уроки». Контракт на результат.</h2>
           <ol style={{ ...body, color: INK, paddingLeft: 20, margin: '8px 0 16px' }}>
-            <li style={li}>входной профиль и <b>3 приоритетных паттерна</b> — разбирает лично основатель;</li>
+            <li style={li}>входной профиль и <b>3 приоритетных паттерна</b> — твою речь на входе разбираю я сам;</li>
             <li style={li}>разговорные сессии на замену этих паттернов под разным давлением;</li>
             <li style={li}>отложенные проверки (delayed probes) — держится ли сдвиг через дни;</li>
             <li style={li}>слепой ретест в новой смоделированной ситуации;</li>
-            <li style={li}>before/after report — что было и что стало, <b>визирует лично основатель</b>.</li>
+            <li style={li}>before/after report — что было и что стало, <b>финальный разбор делаю тоже я</b>.</li>
           </ol>
           <p style={{ ...small, color: MUTED }}>
-            Честно про доставку: личный разбор основателя — на входе и на выходе. Между ними
+            Честно про доставку: твою речь на входе и на выходе смотрю я лично. Между ними
             работает система. Это не «живое сопровождение каждой сессии» — это закрытый
             экспериментальный поток, где измерение калибруется на живых людях.
           </p>
