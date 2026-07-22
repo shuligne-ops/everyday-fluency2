@@ -414,9 +414,27 @@ function HomeContent() {
         ) : null}
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 700, color: '#1a1a2e', marginBottom: '8px' }}>Everyday Fluency</h1>
-        <p style={{ color: '#888', fontSize: '18px' }}>Разговорный английский каждый день</p>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', fontWeight: 700, color: '#1a1a2e', marginBottom: '10px' }}>Everyday Fluency</h1>
+        <p style={{ color: '#f59e0b', fontSize: '15px', fontWeight: 600, letterSpacing: '0.3px', marginBottom: '20px' }}>
+          Школа дала чтение — мы даём звук
+        </p>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 700, color: '#1a1a2e', lineHeight: 1.25, marginBottom: '14px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+          Ты знаешь английский глазами.<br />Начни узнавать его на слух — и в речи.
+        </h2>
+        <p style={{ color: '#555', fontSize: '16px', lineHeight: 1.55, maxWidth: '560px', margin: '0 auto 8px' }}>
+          Читаешь, знаешь грамматику, работаешь на английском. Но стоит людям заговорить в живом темпе —
+          знакомый язык вдруг труднее. А когда отвечать твоя очередь, нужная фраза приходит слишком поздно
+          или звучит как из учебника.
+        </p>
+        <p style={{ color: '#888', fontSize: '15px', lineHeight: 1.5, maxWidth: '560px', margin: '0 auto' }}>
+          «Я ведь это знаю. Почему не услышал?» · «Я ведь знаю, как сказать. Почему фраза не пришла?» —
+          Everyday Fluency тренирует именно этот разрыв. Живой диалог → разбор → второе прослушивание →
+          выражения, которые ты забираешь в свою речь.
+        </p>
+        <p style={{ color: '#aaa', fontSize: '13px', marginTop: '18px' }}>
+          Выбери урок своего уровня ↓
+        </p>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
