@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import VoiceRecorder from './VoiceRecorder'
+import DiagnosticResult, { type DiagnosticResultData } from './DiagnosticResult'
 
 type VoiceResult = { session_id: string; transcript: string; audio_path: string }
 type Phase = 'try' | 'retry' | 'transfer' | 'done'
@@ -22,6 +23,7 @@ export default function DiagnosticPage() {
   const [contrast, setContrast] = useState<Contrast | null>(null)
   const [retryAnalysis, setRetryAnalysis] = useState<RetryAnalysis | null>(null)
   const [transferAnalysis, setTransferAnalysis] = useState<TransferAnalysis | null>(null)
+  const [finalResult, setFinalResult] = useState<DiagnosticResultData | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState('')
   // Новая загрузка страницы — новый проход. attempt_id намеренно не попадает в localStorage.
@@ -68,10 +70,25 @@ export default function DiagnosticPage() {
     try {
       const analysis = await postEval('/api/diagnostic-transfer-eval', { session_id: data.session_id })
       setTransferAnalysis(analysis as TransferAnalysis)
+      const resultResponse = await fetch('/api/diagnostic-result', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ attempt_id: attemptId }),
+      })
+      const resultJson = await resultResponse.json()
+      if (!resultResponse.ok) throw new Error(resultJson.error || 'Не удалось собрать итог')
+      setFinalResult(resultJson.result as DiagnosticResultData)
       setPhase('done')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка разбора TRANSFER')
     } finally { setAnalyzing(false) }
+  }
+
+  function handleStartBeta() {
+    // Текущий checkout требует Bearer-токен; ведём в существующую точку входа авторизации.
+    window.location.href = '/auth?return=/diagnostic'
+  }
+
+  if (phase === 'done' && finalResult) {
+    return <DiagnosticResult result={finalResult} onStartBeta={handleStartBeta} />
   }
 
   return (
