@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { FREE_A1_LESSONS, hasActiveSubscription } from '@/lib/access'
+import { FREE_A1_LESSONS, checkLessonAccess, hasActiveSubscription } from '@/lib/access'
 import { MEETING_DISAGREEMENT_LESSON } from '@/lib/entryScenes'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
@@ -15,6 +15,7 @@ type LessonSummary = {
   title_en: string
   title_ru: string
   is_published?: boolean
+  is_free_teaser?: boolean
 }
 
 type Lesson = {
@@ -24,6 +25,7 @@ type Lesson = {
   title_en: string
   title_ru: string
   content: any
+  is_free_teaser?: boolean
 }
 
 type Message = {
@@ -58,6 +60,7 @@ function HomeContent() {
   const recRef = useRef<any>(null)
 
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [hasSubscription, setHasSubscription] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
@@ -80,6 +83,7 @@ function HomeContent() {
       if (cancelled) return
       if (user) {
         setUserEmail(user.email ?? null)
+        setUserId(user.id)
         hasActiveSubscription(user.id).then(has => {
           if (!cancelled) setHasSubscription(has)
         })
@@ -96,7 +100,9 @@ function HomeContent() {
       if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'SIGNED_IN') return
 
       const newEmail = session?.user?.email ?? null
+      const newUserId = session?.user?.id ?? null
       setUserEmail(prev => (prev === newEmail ? prev : newEmail))
+      setUserId(prev => (prev === newUserId ? prev : newUserId))
 
       if (session?.user) {
         hasActiveSubscription(session.user.id).then(has => {
@@ -131,14 +137,8 @@ function HomeContent() {
       setLessonsRetry(r => r + 1)
     }, LESSONS_FETCH_TIMEOUT)
 
-    if (authChecked && level !== 'A1' && !hasSubscription && !isAdmin) {
-      if (timeoutId) clearTimeout(timeoutId)
-      setLessonsLoaded(true)
-      return
-    }
-
     let query = supabase.from('lessons_v2')
-      .select('id,level,lesson_number,title_en,title_ru,is_published')
+      .select('id,level,lesson_number,title_en,title_ru,is_published,is_free_teaser')
       .eq('level', level)
       .order('lesson_number')
 
@@ -220,8 +220,15 @@ function HomeContent() {
     const { data } = await supabase.from('lessons_v2').select('*').eq('id', id).single()
     if (!data) return
     const lessonData = data as Lesson
-    const canOpen = isAdmin || hasSubscription || (lessonData.level === 'A1' && lessonData.lesson_number <= FREE_A1_LESSONS)
-    if (!canOpen) {
+    const access = isAdmin || hasSubscription
+      ? { allowed: true }
+      : await checkLessonAccess(userId, {
+        id: Number(lessonData.id),
+        level: lessonData.level,
+        lesson_number: lessonData.lesson_number,
+        is_free_teaser: lessonData.is_free_teaser,
+      })
+    if (!access.allowed) {
       router.push(userEmail ? '/pricing' : '/auth?return=/pricing')
       return
     }
@@ -533,15 +540,25 @@ function HomeContent() {
             )}
           </div>
         ) : (
-          lessons.map(ls => (
+          lessons.map(ls => {
+            const teaserOpen = ls.level === 'A1' || !!ls.is_free_teaser || hasSubscription || isAdmin
+            return (
             <button key={ls.id} onClick={() => open(ls.id)} style={{
-              display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit'
+              display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: teaserOpen ? '1px solid #f59e0b55' : '1px solid #eee', cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit', opacity: teaserOpen ? 1 : 0.78
             }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
                 <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#999' }}>{String(ls.lesson_number).padStart(2, '0')}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: '#1a1a2e', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {ls.title_en}
+                    {ls.is_free_teaser && !hasSubscription && !isAdmin && (
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#92400e', background: '#fef3c7', padding: '3px 8px', borderRadius: '8px', letterSpacing: '0.3px' }}>
+                        Бесплатный урок
+                      </span>
+                    )}
+                    {!teaserOpen && (
+                      <span style={{ fontSize: '12px', color: '#999' }}>🔒</span>
+                    )}
                     {isAdmin && ls.is_published === false && (
                       <span style={{ fontSize: '10px', fontWeight: 600, color: '#999', background: '#f3f4f6', padding: '2px 8px', borderRadius: '8px', letterSpacing: '0.5px' }}>
                         DRAFT
@@ -552,7 +569,7 @@ function HomeContent() {
                 </div>
               </div>
             </button>
-          ))
+          )})
         )}
       </div>
       <SiteFooter />
