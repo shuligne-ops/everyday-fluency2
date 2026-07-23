@@ -7,6 +7,7 @@ import { FREE_A1_LESSONS, checkLessonAccess, hasActiveSubscription } from '@/lib
 import { MEETING_DISAGREEMENT_LESSON } from '@/lib/entryScenes'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
+import { track, trackOnce } from '@/lib/analytics'
 
 type LessonSummary = {
   id: number
@@ -41,6 +42,10 @@ let gAudioIdx = -1
 // Таймаут на запрос уроков. Если supabase молчит дольше — считаем
 // что запрос потерян и пытаемся ещё раз.
 const LESSONS_FETCH_TIMEOUT = 5000
+
+// Сколько реплик студента считаем признаком «втянулся, а не заглянул».
+// Порог — рабочая гипотеза, будем корректировать по первым данным Метрики.
+const LESSON_ENGAGED_TURNS = 4
 
 function HomeContent() {
   const router = useRouter()
@@ -218,6 +223,14 @@ function HomeContent() {
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs])
 
   useEffect(() => {
+    if (!lesson) return
+    const userTurns = msgs.filter((message) => message.role === 'user').length
+    if (userTurns >= LESSON_ENGAGED_TURNS) {
+      trackOnce('lesson_50', `lesson50_${lesson.id}`, { level: lesson.level, lesson_id: lesson.id })
+    }
+  }, [msgs, lesson])
+
+  useEffect(() => {
     if (taRef.current) {
       taRef.current.style.height = '48px'
       taRef.current.style.height = Math.min(taRef.current.scrollHeight, 160) + 'px'
@@ -240,6 +253,7 @@ function HomeContent() {
       router.push(userEmail ? '/pricing' : '/auth?return=/pricing')
       return
     }
+    track('lesson_start', { level: lessonData.level, lesson_id: lessonData.id })
     setLesson(lessonData)
     setMsgs([])
     kill()
