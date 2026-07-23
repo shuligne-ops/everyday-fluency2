@@ -208,6 +208,14 @@ function HomeContent() {
       void chat(entryLesson, [])
       return
     }
+    // Ни ?lesson=, ни ?level= в URL — автозапускать нечего.
+    // Флаг взводим немедленно, иначе эффект продолжит жить и будет
+    // возвращать уровень к дефолтному при каждом переключении селектора.
+    const levelParam = searchParams.get('level')
+    if (!lessonParam && !levelParam) {
+      setAutostartDone(true)
+      return
+    }
     if (!lessonsLoaded) return
     if (lessons.length === 0) return
     const requestedLevel = searchParams.get('level')
@@ -221,7 +229,13 @@ function HomeContent() {
     const targetLesson = requestedLevel
       ? lessons.find((item) => String(item.id) === lessonParam)
       : lessonParam === '1' ? lessons[0] : undefined
-    if (!targetLesson) return
+    if (!targetLesson) {
+      // Урок из параметра не найден в списке (например, чужой id или уровень
+      // без такого номера). Автозапуск не состоится — глушим эффект, чтобы он
+      // не мешал ручному переключению уровней.
+      setAutostartDone(true)
+      return
+    }
     setAutostartDone(true)
     open(targetLesson.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
