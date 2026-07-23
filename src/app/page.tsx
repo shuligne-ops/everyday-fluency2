@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { FREE_A1_LESSONS, checkLessonAccess, hasActiveSubscription } from '@/lib/access'
+import { checkLessonAccess, hasActiveSubscription } from '@/lib/access'
 import { MEETING_DISAGREEMENT_LESSON } from '@/lib/entryScenes'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
@@ -142,14 +142,17 @@ function HomeContent() {
       setLessonsRetry(r => r + 1)
     }, LESSONS_FETCH_TIMEOUT)
 
-    let query = supabase.from('lessons_v2')
+    // Список строится из витрины lessons_catalog — это представление над lessons_v2
+    // БЕЗ поля content, доступное на чтение анониму. Так человек видит, что уроки
+    // существуют (замок + paywall), но содержимое остаётся под RLS: сам урок
+    // открывается через open() из lessons_v2, где проверка доступа не изменилась.
+    // Админу нужны и неопубликованные (бейдж DRAFT), поэтому он читает таблицу.
+    const source = isAdmin ? 'lessons_v2' : 'lessons_catalog'
+
+    const query = supabase.from(source)
       .select('id,level,lesson_number,title_en,title_ru,is_published,is_free_teaser')
       .eq('level', level)
       .order('lesson_number')
-
-    if (level === 'A1' && !hasSubscription && !isAdmin) {
-      query = query.lte('lesson_number', FREE_A1_LESSONS)
-    }
 
     query
       .then(({ data }) => {
