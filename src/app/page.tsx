@@ -50,7 +50,9 @@ const LESSON_ENGAGED_TURNS = 4
 function HomeContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [level, setLevel] = useState('A1')
+  // Дефолт — B1, а не A1: продукт адресован тем, кто язык уже знает.
+  // Человек, пришедший без ?level=, не должен упираться в «уроки для начинающих».
+  const [level, setLevel] = useState('B1')
   const [lessons, setLessons] = useState<LessonSummary[]>([])
   const [lessonsLoaded, setLessonsLoaded] = useState(false)
   const [lesson, setLesson] = useState<Lesson | null>(null)
@@ -209,7 +211,9 @@ function HomeContent() {
     if (!lessonsLoaded) return
     if (lessons.length === 0) return
     const requestedLevel = searchParams.get('level')
-    const targetLevel = requestedLevel && LEVELS.includes(requestedLevel) ? requestedLevel : 'A1'
+    const targetLevel = requestedLevel && LEVELS.includes(requestedLevel)
+      ? requestedLevel
+      : lessonParam === '1' ? 'A1' : 'B1'
     if (level !== targetLevel) {
       setLevel(targetLevel)
       return
@@ -493,81 +497,11 @@ function HomeContent() {
           </div>
    ) : lessons.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 24px' }}>
-            {level === 'A1' ? (
-              <p style={{ color: '#999' }}>Уроки уровня {level} скоро появятся.</p>
-            ) : !userEmail ? (
-              <div style={{
-                background: 'white', border: '1px solid #f59e0b30', borderRadius: '16px',
-                padding: '32px 24px', maxWidth: '480px', margin: '0 auto',
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
-              }}>
-                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔓</div>
-                <h2 style={{
-                  fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
-                  color: '#1a1a2e', marginBottom: '12px'
-                }}>
-                  Все уровни от A2 до C2 — по подписке
-                </h2>
-                <p style={{ color: '#666', fontSize: '15px', marginBottom: '24px', lineHeight: 1.5 }}>
-                  Знакомое перестаёт проскакивать мимо не за один диалог, а когда таких диалогов набирается несколько десятков. Дальше — 30 уроков на твоём уровне и все остальные уровни в придачу: рабочие разговоры, споры, неловкие паузы, живой темп.
-                </p>
-                <button onClick={() => router.push('/auth')} style={{
-                  background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
-                  fontSize: '15px', fontWeight: 700, padding: '14px 32px',
-                  borderRadius: '12px', fontFamily: 'inherit',
-                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
-                }}>
-                  Войти и подписаться →
-                </button>
-              </div>
-            ) : (
-              <div style={{
-                background: 'white', border: '1px solid #f59e0b30', borderRadius: '16px',
-                padding: '32px 24px', maxWidth: '480px', margin: '0 auto',
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
-              }}>
-                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔓</div>
-                <h2 style={{
-                  fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
-                  color: '#1a1a2e', marginBottom: '12px'
-                }}>
-                  Один урок — это проба. Разница начинается на объёме
-                </h2>
-                <p style={{ color: '#666', fontSize: '15px', marginBottom: '20px', lineHeight: 1.5 }}>
-                  Знакомое перестаёт проскакивать мимо не за один диалог, а когда таких диалогов
-                  набирается несколько десятков. Дальше — 30 уроков на твоём уровне и все остальные
-                  уровни в придачу: рабочие разговоры, споры, неловкие паузы, живой темп.
-                </p>
-
-                <div style={{
-                  background: '#FEF3C7', borderRadius: '10px', padding: '12px 16px',
-                  marginBottom: '20px', fontSize: '14px', color: '#92400e'
-                }}>
-                  🎁 <strong>Старт-оффер до 31 августа:</strong> год за 4 990 ₽ вместо 7 990 ₽
-                </div>
-
-                <button onClick={() => router.push('/pricing')} style={{
-                  background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
-                  fontSize: '15px', fontWeight: 700, padding: '14px 32px',
-                  borderRadius: '12px', fontFamily: 'inherit', width: '100%',
-                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
-                }}>
-                  Выбрать тариф →
-                </button>
-
-                <p style={{ fontSize: '13px', color: '#999', marginTop: '14px' }}>
-                  От 990 ₽/мес · Год 7 990 ₽
-                </p>
-
-                <p style={{ fontSize: '12px', color: '#bbb', marginTop: '8px', fontStyle: 'italic' }}>
-                  Один тариф — все уровни, без доплат за переход выше
-                </p>
-              </div>
-            )}
+            <p style={{ color: '#999' }}>Уроки уровня {level} скоро появятся.</p>
           </div>
         ) : (
           lessons.map(ls => {
-            const teaserOpen = ls.level === 'A1' || !!ls.is_free_teaser || hasSubscription || isAdmin
+            const teaserOpen = !!ls.is_free_teaser || hasSubscription || isAdmin
             return (
             <button key={ls.id} onClick={() => open(ls.id)} style={{
               display: 'block', width: '100%', textAlign: 'left', padding: '16px 20px', background: 'white', borderRadius: '12px', border: teaserOpen ? '1px solid #f59e0b55' : '1px solid #eee', cursor: 'pointer', marginBottom: '8px', fontFamily: 'inherit', opacity: teaserOpen ? 1 : 0.78
@@ -598,6 +532,79 @@ function HomeContent() {
           )})
         )}
       </div>
+      {!hasSubscription && !isAdmin && lessons.some(ls => !ls.is_free_teaser) && (
+        <div style={{ textAlign: 'center', padding: '32px 24px' }}>
+          {!userEmail ? (
+            <div style={{
+              background: 'white', border: '1px solid #f59e0b30', borderRadius: '16px',
+              padding: '32px 24px', maxWidth: '480px', margin: '0 auto',
+              boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
+            }}>
+              <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔓</div>
+              <h2 style={{
+                fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
+                color: '#1a1a2e', marginBottom: '12px'
+              }}>
+                Все уровни от A2 до C2 — по подписке
+              </h2>
+              <p style={{ color: '#666', fontSize: '15px', marginBottom: '24px', lineHeight: 1.5 }}>
+                Знакомое перестаёт проскакивать мимо не за один диалог, а когда таких диалогов набирается несколько десятков. Дальше — 30 уроков на твоём уровне и все остальные уровни в придачу: рабочие разговоры, споры, неловкие паузы, живой темп.
+              </p>
+              <button onClick={() => router.push('/auth')} style={{
+                background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
+                fontSize: '15px', fontWeight: 700, padding: '14px 32px',
+                borderRadius: '12px', fontFamily: 'inherit',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
+              }}>
+                Войти и подписаться →
+              </button>
+            </div>
+          ) : (
+            <div style={{
+              background: 'white', border: '1px solid #f59e0b30', borderRadius: '16px',
+              padding: '32px 24px', maxWidth: '480px', margin: '0 auto',
+              boxShadow: '0 4px 12px rgba(245, 158, 11, 0.08)'
+            }}>
+              <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔓</div>
+              <h2 style={{
+                fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
+                color: '#1a1a2e', marginBottom: '12px'
+              }}>
+                Один урок — это проба. Разница начинается на объёме
+              </h2>
+              <p style={{ color: '#666', fontSize: '15px', marginBottom: '20px', lineHeight: 1.5 }}>
+                Знакомое перестаёт проскакивать мимо не за один диалог, а когда таких диалогов
+                набирается несколько десятков. Дальше — 30 уроков на твоём уровне и все остальные
+                уровни в придачу: рабочие разговоры, споры, неловкие паузы, живой темп.
+              </p>
+
+              <div style={{
+                background: '#FEF3C7', borderRadius: '10px', padding: '12px 16px',
+                marginBottom: '20px', fontSize: '14px', color: '#92400e'
+              }}>
+                🎁 <strong>Старт-оффер до 31 августа:</strong> год за 4 990 ₽ вместо 7 990 ₽
+              </div>
+
+              <button onClick={() => router.push('/pricing')} style={{
+                background: '#f59e0b', border: 'none', color: 'white', cursor: 'pointer',
+                fontSize: '15px', fontWeight: 700, padding: '14px 32px',
+                borderRadius: '12px', fontFamily: 'inherit', width: '100%',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
+              }}>
+                Выбрать тариф →
+              </button>
+
+              <p style={{ fontSize: '13px', color: '#999', marginTop: '14px' }}>
+                От 990 ₽/мес · Год 7 990 ₽
+              </p>
+
+              <p style={{ fontSize: '12px', color: '#bbb', marginTop: '8px', fontStyle: 'italic' }}>
+                Один тариф — все уровни, без доплат за переход выше
+              </p>
+            </div>
+          )}
+        </div>
+      )}
       <SiteFooter />
     </div>
   )

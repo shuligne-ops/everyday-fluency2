@@ -12,7 +12,7 @@ export type Lesson = {
   is_free_teaser?: boolean
 }
 
-export const FREE_A1_LESSONS = 3
+export const FREE_A1_LESSONS = 1
 
 export type AccessResult = {
   allowed: boolean
