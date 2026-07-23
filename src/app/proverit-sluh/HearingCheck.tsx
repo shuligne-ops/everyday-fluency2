@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { track, trackOnce } from '@/lib/analytics'
 
 /**
  * Аудио-микротест EF — /proverit-sluh
@@ -79,6 +80,7 @@ const CLIPS: Clip[] = [
 export default function HearingCheck() {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({})
   const [played, setPlayed] = useState<Record<string, boolean>>({})
+  useEffect(() => { trackOnce('landing_view', 'landing_sluh') }, [])
 
   return (
     <main style={{ background: CREAM, minHeight: '100vh', color: INK, fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -109,8 +111,8 @@ export default function HearingCheck() {
             index={i + 1}
             revealed={!!revealed[clip.id]}
             played={!!played[clip.id]}
-            onPlayed={() => setPlayed(p => ({ ...p, [clip.id]: true }))}
-            onReveal={() => setRevealed(r => ({ ...r, [clip.id]: true }))}
+            onPlayed={() => { track('audio_play', { level: clip.level }); setPlayed(p => ({ ...p, [clip.id]: true })) }}
+            onReveal={() => { track('reveal', { level: clip.level }); setRevealed(r => ({ ...r, [clip.id]: true })) }}
           />
         ))}
 

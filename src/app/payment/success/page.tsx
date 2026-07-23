@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { hasActiveSubscription } from '@/lib/access'
+import { trackOnce } from '@/lib/analytics'
 
 // Главный экспорт — оборачивает контент в Suspense.
 // Это требование Next.js 16: useSearchParams() должен быть внутри Suspense
@@ -72,6 +73,10 @@ function PaymentSuccessContent() {
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempts])
+
+  useEffect(() => {
+    if (status === 'active') trackOnce('paid', `paid_${planFromUrl ?? 'unknown'}`, { plan: planFromUrl })
+  }, [status, planFromUrl])
 
   return (
     <div style={containerStyle}>

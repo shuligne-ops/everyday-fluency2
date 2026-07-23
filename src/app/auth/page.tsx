@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { trackOnce } from '@/lib/analytics'
 
 function readAttribution(): Record<string, string> {
   if (typeof window === 'undefined') return {}
@@ -25,7 +26,10 @@ export default function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) router.push('/')
+      if (user) {
+        trackOnce('registration', 'registration')
+        router.push('/')
+      }
     })
   }, [router])
 
