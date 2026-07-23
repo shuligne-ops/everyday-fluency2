@@ -120,9 +120,9 @@ export default function PricingPage() {
         {/* Monthly */}
         <PricingCard
           title="Месяц"
-          price="1 500 ₽"
+          price="990 ₽"
           period="/ месяц"
-          description="Полный доступ ко всем уровням от A2 до C2. Списывается раз в месяц, можно отменить в любой момент."
+          description="Полный доступ ко всем уровням от A2 до C2 на 30 дней. Разовый платёж — автопродления нет, ничего не списывается повторно."
           isCurrentPlan={currentPlan === 'monthly'}
           isLoading={loading === 'monthly'}
           disabled={hasSubscription || loading !== null}
@@ -134,8 +134,8 @@ export default function PricingPage() {
           title="Год"
           price="7 990 ₽"
           period="/ год"
-          description="Полный доступ ко всем уровням от A2 до C2 на 12 месяцев. Экономия 25 % по сравнению с помесячной оплатой."
-          subtext="Стартовое предложение для первых 50 подписчиков — 4 990 ₽ за год."
+          description="Полный доступ ко всем уровням от A2 до C2 на 12 месяцев. Экономия 33 % по сравнению с помесячной оплатой."
+          subtext="Стартовое предложение до 31 августа — 4 990 ₽ за год."
           subtextLink={{ label: 'Воспользоваться', plan: 'launch_annual' }}
           featured
           isCurrentPlan={currentPlan === 'annual' || currentPlan === 'launch_annual'}
@@ -151,10 +151,9 @@ export default function PricingPage() {
         <ul style={{ listStyle: 'none', padding: 0, color: '#57534e', fontSize: '15px', lineHeight: 1.8 }}>
           <li>✓ Все 180 уроков от A1 до C2 — курс готов целиком</li>
           <li>✓ Виртуальный преподаватель Sophie с памятью и характером</li>
-          <li>✓ Озвучка диалогов профессиональным голосом</li>
+          <li>✓ Озвучка всех диалогов — живой темп и британский акцент</li>
           <li>✓ Распознавание речи — отвечайте голосом</li>
           <li>✓ Трекер выученных выражений</li>
-          <li>✓ Отмена подписки в любой момент</li>
         </ul>
       </main>
     </div>

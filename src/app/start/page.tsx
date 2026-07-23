@@ -237,50 +237,6 @@ function StartContent() {
         </div>
       </section>
 
-      {/* FOUNDER STORY */}
-      <section style={{
-        maxWidth: '600px',
-        margin: '0 auto',
-        padding: '40px 20px',
-      }}>
-        <div style={{
-          background: 'rgba(245, 240, 224, 0.04)',
-          borderRadius: '16px',
-          padding: '28px 24px',
-          border: '1px solid rgba(245, 240, 224, 0.08)',
-        }}>
-          <p style={{
-            color: '#8896aa',
-            fontSize: '13px',
-            letterSpacing: '1.5px',
-            marginBottom: '16px',
-          }}>
-            ПОЧЕМУ Я СДЕЛАЛ ЭТОТ КУРС
-          </p>
-          <p style={{
-            fontSize: '16px',
-            lineHeight: 1.7,
-            color: '#d6dde8',
-            margin: 0,
-          }}>
-            Я учил английский больше десяти лет. Школа, репетиторы, учебники, приложения. Знал грамматику. Читал статьи без словаря.
-            <br/><br/>
-            А когда приехал в Лондон — не понял ни одной фразы в первом разговоре. Звуки шли — слов не было. Будто язык, которому меня учили, и язык, на котором говорят, — это два разных языка.
-            <br/><br/>
-            Через несколько месяцев я понял: они и правда разные. Школа учит, <strong>как слова пишутся</strong>. А носители говорят, <strong>как они звучат вместе</strong>. И этой второй системе в России не учат — ни в школе, ни в большинстве курсов.
-            <br/><br/>
-            Everyday Fluency — это то, чего мне самому не хватало все эти годы. Курс, где ты слышишь язык таким, какой он есть. И постепенно начинаешь сам звучать так же.
-          </p>
-          <p style={{
-            marginTop: '16px',
-            fontSize: '14px',
-            color: '#8896aa',
-          }}>
-            — Александр, автор курса
-          </p>
-        </div>
-      </section>
-
       {/* PRICING */}
       <section style={{
         maxWidth: '600px',
@@ -314,7 +270,7 @@ function StartContent() {
           textAlign: 'center',
           fontSize: '14px',
         }}>
-          🎁 <strong style={{ color: '#f59e0b' }}>Старт-оффер для первых 50:</strong> год за 4 990 ₽ вместо 7 990 ₽
+          🎁 <strong style={{ color: '#f59e0b' }}>Старт-оффер до 31 августа:</strong> год за 4 990 ₽ вместо 7 990 ₽
         </div>
 
         <div style={{
@@ -322,8 +278,8 @@ function StartContent() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '12px',
         }}>
-          <Price label="Месяц" value="1 500 ₽" period="в мес" />
-          <Price label="Год" value="7 990 ₽" period="экономия 25%" highlight />
+          <Price label="Месяц" value="990 ₽" period="в мес" />
+          <Price label="Год" value="7 990 ₽" period="экономия 33%" highlight />
         </div>
 
         <p style={{

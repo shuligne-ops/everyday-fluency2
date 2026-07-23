@@ -16,10 +16,14 @@ import { createClient } from '@supabase/supabase-js'
 // Тарифы — в копейках чтобы избежать проблем с float.
 // Если поменяешь цены — синхронизируй и здесь, и на /pricing, и в SQL CHECK.
 const PLANS = {
-  monthly: { amount_kopeks: 150000, label: 'Подписка на месяц', plan: 'monthly' as const },
+  monthly: { amount_kopeks: 99000, label: 'Подписка на месяц', plan: 'monthly' as const },
   annual: { amount_kopeks: 799000, label: 'Подписка на год', plan: 'annual' as const },
   launch_annual: { amount_kopeks: 499000, label: 'Стартовая подписка на год', plan: 'launch_annual' as const },
 }
+
+// Старт-оффер действует до конца 31 августа 2026 по московскому времени.
+// Дата продублирована в текстах на /start и /pricing — менять синхронно.
+const LAUNCH_OFFER_UNTIL = new Date('2026-09-01T00:00:00+03:00')
 
 type PlanKey = keyof typeof PLANS
 
@@ -79,6 +83,15 @@ export async function POST(req: NextRequest) {
 
   // 4. Если launch_annual — проверяем что место в первой 50-ке ещё есть
   if (planKey === 'launch_annual') {
+    if (new Date() >= LAUNCH_OFFER_UNTIL) {
+      return NextResponse.json(
+        {
+          error: 'launch_offer_ended',
+          message: 'Стартовое предложение завершено. Доступен обычный годовой тариф.',
+        },
+        { status: 410 }
+      )
+    }
     const { count, error: countErr } = await supabaseService
       .from('user_subscriptions')
       .select('id', { count: 'exact', head: true })
@@ -92,7 +105,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'launch_offer_ended',
-          message: 'Стартовое предложение для первых 50 подписчиков уже использовано. Доступен обычный годовой тариф.',
+          message: 'Стартовое предложение завершено. Доступен обычный годовой тариф.',
         },
         { status: 410 }
       )
