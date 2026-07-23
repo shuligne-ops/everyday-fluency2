@@ -528,18 +528,19 @@ function HomeContent() {
                   fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
                   color: '#1a1a2e', marginBottom: '12px'
                 }}>
-                  Откройте все уровни — от A2 до C2
+                  Один урок — это проба. Разница начинается на объёме
                 </h2>
                 <p style={{ color: '#666', fontSize: '15px', marginBottom: '20px', lineHeight: 1.5 }}>
-                  150 уроков-диалогов. Sophie, Marie и их друзья в новых ситуациях:
-                  работа, дружба, эмоции, конфликты, путешествия, профессия.
+                  Знакомое перестаёт проскакивать мимо не за один диалог, а когда таких диалогов
+                  набирается несколько десятков. Дальше — 30 уроков на твоём уровне и все остальные
+                  уровни в придачу: рабочие разговоры, споры, неловкие паузы, живой темп.
                 </p>
 
                 <div style={{
                   background: '#FEF3C7', borderRadius: '10px', padding: '12px 16px',
                   marginBottom: '20px', fontSize: '14px', color: '#92400e'
                 }}>
-                  🎁 <strong>Старт-оффер первым 50:</strong> год за 4 990 ₽ вместо 7 990 ₽
+                  🎁 <strong>Старт-оффер до 31 августа:</strong> год за 4 990 ₽ вместо 7 990 ₽
                 </div>
 
                 <button onClick={() => router.push('/pricing')} style={{
@@ -556,7 +557,7 @@ function HomeContent() {
                 </p>
 
                 <p style={{ fontSize: '12px', color: '#bbb', marginTop: '8px', fontStyle: 'italic' }}>
-                  Один тариф открывает все 5 уровней: A2, B1, B2, C1, C2
+                  Один тариф — все уровни, без доплат за переход выше
                 </p>
               </div>
             )}
