@@ -200,10 +200,18 @@ function HomeContent() {
     }
     if (!lessonsLoaded) return
     if (lessons.length === 0) return
-    if (level !== 'A1') return
-    if (lessonParam !== '1') return
+    const requestedLevel = searchParams.get('level')
+    const targetLevel = requestedLevel && LEVELS.includes(requestedLevel) ? requestedLevel : 'A1'
+    if (level !== targetLevel) {
+      setLevel(targetLevel)
+      return
+    }
+    const targetLesson = requestedLevel
+      ? lessons.find((item) => String(item.id) === lessonParam)
+      : lessonParam === '1' ? lessons[0] : undefined
+    if (!targetLesson) return
     setAutostartDone(true)
-    open(lessons[0].id)
+    open(targetLesson.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonsLoaded, lessons, level, searchParams, autostartDone])
 
