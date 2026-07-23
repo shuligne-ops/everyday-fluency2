@@ -77,7 +77,7 @@ function StartContent() {
           maxWidth: '560px',
           margin: '0 auto 32px',
         }}>
-          Ты знаешь английский глазами: читаешь, понимаешь грамматику, работаешь на нём. Но живую речь ловишь через раз, а «Jeet?» вместо «Did you eat?» звучит как другой язык. Здесь ты учишься узнавать английский на слух — и доставать его в разговоре.
+          Ты знаешь английский глазами: читаешь, понимаешь грамматику, работаешь на нём. Но в живой речи знакомые слова проскакивают мимо — а когда отвечать твоя очередь, нужная фраза приходит с опозданием. Здесь ты учишься узнавать английский на слух и доставать его вовремя.
         </p>
 
         <button
@@ -136,36 +136,11 @@ function StartContent() {
           но не понимаешь ни одного в разговоре?
         </h2>
 
-        <GapRow
-          school='"I have got to go now."'
-          schoolPhonetic="— ай хэв гот ту гоу нау —"
-          real='"I&apos;vegoddagonow."'
-          realPhonetic="айвгодагонау — одно слово, 0.7 секунды"
-        />
-        <GapRow
-          school='"What are you doing?"'
-          schoolPhonetic="— уот ар ю дуинг —"
-          real='"Whatcha doin&apos;?"'
-          realPhonetic="уача доин — один слог"
-        />
-        <GapRow
-          school='"Did you eat?"'
-          schoolPhonetic="— дид ю ит —"
-          real='"Jeet?"'
-          realPhonetic="джит — один звук"
-        />
-
-        <p style={{
-          textAlign: 'center',
-          fontSize: '15px',
-          color: '#b8c5d6',
-          marginTop: '24px',
-          fontStyle: 'italic',
-          lineHeight: 1.6,
-        }}>
-          Это называется <strong style={{ color: '#f59e0b', fontStyle: 'normal' }}>connected speech</strong> — реальная фонетика английского.<br/>
-          В школе её нет. У нас — на каждом уроке.
-        </p>
+        <div style={{ background: 'rgba(245, 240, 224, 0.04)', borderRadius: '16px', padding: '24px', border: '1px solid rgba(245, 158, 11, 0.15)' }}>
+          <p style={{ fontSize: '19px', color: '#f5f0e0', fontStyle: 'italic', margin: '0 0 16px' }}>«Both can be true. Right. The partners had their quarterly meeting on Monday. Your name came up.»</p>
+          <p style={{ fontSize: '15px', color: '#b8c5d6', lineHeight: 1.6, margin: 0 }}>Здесь нет ни одного слова, которого ты не знаешь. Но главное — в последних четырёх: «твоё имя упоминали». Они проходят на том же ровном тоне, что и остальное, без выделения. Именно их чаще всего и не слышат.</p>
+        </div>
+        <p style={{ textAlign: 'center', fontSize: '15px', color: '#b8c5d6', marginTop: '24px', fontStyle: 'italic', lineHeight: 1.6 }}>Дело не в словарном запасе. Разрыв — между <strong style={{ color: '#f59e0b', fontStyle: 'normal' }}>«знаю глазами»</strong> и <strong style={{ color: '#f59e0b', fontStyle: 'normal' }}>«узнаю на слух в темпе»</strong>.</p>
       </section>
 
       {/* DIALOGUE PREVIEW */}
@@ -230,8 +205,8 @@ function StartContent() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '20px',
         }}>
-          <Feature icon="🎙" title="Живой голос Sophie" text="Не синтезатор. Живой британский акцент со связками, ритмом и реальной скоростью" />
-          <Feature icon="🎭" title="Connected speech" text="Wanna, gonna, hafta, jeet — реальная фонетика, которой не учат в школе" />
+          <Feature icon="🎙" title="Голос, а не текст" text="Каждый диалог звучит: британский акцент, живой темп, реальная скорость разговора" />
+          <Feature icon="🎭" title="Разбор на месте" text="Что именно проскочило мимо и почему — сразу после диалога, на твоих же словах" />
           <Feature icon="🗣" title="Говоришь — тебя слышат" text="Произносишь фразу вслух — приложение распознаёт речь и реагирует. Проверяешь, что тебя понимают" />
           <Feature icon="📈" title="180 уроков, 6 уровней" text="От первых фраз до уверенного понимания живой речи. Каждый урок — новая ситуация" />
         </div>
@@ -258,7 +233,7 @@ function StartContent() {
           color: '#8896aa',
           marginBottom: '24px',
         }}>
-          3 урока A1 — бесплатно. Дальше один тариф открывает все уровни A1–C2.
+          Первый урок каждого уровня — бесплатно, без регистрации. Дальше один тариф открывает все уровни A1–C2.
         </p>
 
         <div style={{
@@ -340,7 +315,7 @@ function StartContent() {
           fontSize: '13px',
           color: '#8896aa',
         }}>
-          3 урока A1 — бесплатно, без регистрации.
+          Первый урок твоего уровня — бесплатно, без регистрации.
         </p>
       </section>
 
