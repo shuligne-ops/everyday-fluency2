@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import YandexMetrika from './components/YandexMetrika';
 
 export const metadata: Metadata = {
   title: 'Everyday Fluency',
@@ -12,8 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body className="min-h-screen bg-[#FFF8F0]">
+        <YandexMetrika />
         {children}
       </body>
     </html>
