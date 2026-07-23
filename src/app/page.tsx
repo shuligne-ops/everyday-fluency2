@@ -552,7 +552,7 @@ function HomeContent() {
                 </button>
 
                 <p style={{ fontSize: '13px', color: '#999', marginTop: '14px' }}>
-                  От 1 500 ₽/мес · Год 7 990 ₽
+                  От 990 ₽/мес · Год 7 990 ₽
                 </p>
 
                 <p style={{ fontSize: '12px', color: '#bbb', marginTop: '8px', fontStyle: 'italic' }}>
