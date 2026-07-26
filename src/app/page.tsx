@@ -16,6 +16,7 @@ import {
   reportAuthError,
   withTimeout,
 } from '@/lib/authRecovery'
+import { recordLessonEvent } from '@/lib/lessonEvents'
 
 type LessonSummary = {
   id: number
@@ -258,8 +259,14 @@ function HomeContent() {
     const userTurns = msgs.filter((message) => message.role === 'user').length
     if (userTurns >= LESSON_ENGAGED_TURNS) {
       trackOnce('lesson_50', `lesson50_${lesson.id}`, { level: lesson.level, lesson_id: lesson.id })
+      recordLessonEvent({
+        userId,
+        lessonId: lesson.id,
+        level: lesson.level,
+        event: 'lesson_50',
+      })
     }
-  }, [msgs, lesson])
+  }, [msgs, lesson, userId])
 
   useEffect(() => {
     if (taRef.current) {
@@ -297,6 +304,12 @@ function HomeContent() {
         return
       }
       track('lesson_start', { level: lessonData.level, lesson_id: lessonData.id })
+      recordLessonEvent({
+        userId,
+        lessonId: lessonData.id,
+        level: lessonData.level,
+        event: 'lesson_start',
+      })
       setLesson(lessonData)
       setMsgs([])
       kill()
