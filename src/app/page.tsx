@@ -304,12 +304,14 @@ function HomeContent() {
         return
       }
       track('lesson_start', { level: lessonData.level, lesson_id: lessonData.id })
-      recordLessonEvent({
-        userId,
-        lessonId: lessonData.id,
-        level: lessonData.level,
-        event: 'lesson_start',
-      })
+      try {
+        recordLessonEvent({
+          userId,
+          lessonId: lessonData.id,
+          level: lessonData.level,
+          event: 'lesson_start',
+        })
+      } catch {}
       setLesson(lessonData)
       setMsgs([])
       kill()
