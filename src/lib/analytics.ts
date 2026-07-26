@@ -1,4 +1,13 @@
-export type AnalyticsEvent = 'landing_view' | 'audio_play' | 'reveal' | 'lesson_start' | 'lesson_50' | 'registration' | 'paid'
+export type AnalyticsEvent =
+  | 'landing_view'
+  | 'audio_play'
+  | 'reveal'
+  | 'lesson_start'
+  | 'lesson_50'
+  | 'registration'
+  | 'paid'
+  | 'auth_error'
+  | 'auth_recovery_clicked'
 
 type AnalyticsParams = Record<string, string | number | boolean | null | undefined>
 

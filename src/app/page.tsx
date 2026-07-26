@@ -7,7 +7,15 @@ import { checkLessonAccess, hasActiveSubscription } from '@/lib/access'
 import { MEETING_DISAGREEMENT_LESSON } from '@/lib/entryScenes'
 import ReactMarkdown from 'react-markdown'
 import SiteFooter from './components/SiteFooter'
+import AuthRecoveryScreen from './components/AuthRecoveryScreen'
 import { track, trackOnce } from '@/lib/analytics'
+import {
+  AuthErrorReason,
+  AuthErrorStage,
+  hasStoredAuthSession,
+  reportAuthError,
+  withTimeout,
+} from '@/lib/authRecovery'
 
 type LessonSummary = {
   id: number
@@ -39,9 +47,8 @@ const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 let gAudio: HTMLAudioElement | null = null
 let gAudioIdx = -1
 
-// Таймаут на запрос уроков. Если supabase молчит дольше — считаем
-// что запрос потерян и пытаемся ещё раз.
-const LESSONS_FETCH_TIMEOUT = 5000
+const SESSION_RESTORE_TIMEOUT = 8000
+const LESSONS_FETCH_TIMEOUT = 8000
 
 // Сколько реплик студента считаем признаком «втянулся, а не заглянул».
 // Порог — рабочая гипотеза, будем корректировать по первым данным Метрики.
@@ -71,36 +78,53 @@ function HomeContent() {
   const [hasSubscription, setHasSubscription] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
+  const [authRecoveryRequired, setAuthRecoveryRequired] = useState(false)
+  const authRecoveryShownRef = useRef(false)
 
   // Флаг автозапуска первого урока — чтобы не запустить дважды
   const [autostartDone, setAutostartDone] = useState(false)
 
-  // Счётчик попыток загрузки уроков. Если запрос завис — увеличиваем
-  // счётчик, useEffect перезапускается и делает свежий запрос.
-  const [lessonsRetry, setLessonsRetry] = useState(0)
+  function requireAuthRecovery(stage: AuthErrorStage, error: unknown, reason?: AuthErrorReason) {
+    if (authRecoveryShownRef.current) return
+    authRecoveryShownRef.current = true
+    reportAuthError(stage, error, reason)
+    setAuthRecoveryRequired(true)
+  }
 
   // ───────── AUTH ─────────
   useEffect(() => {
     let cancelled = false
+    const hadStoredSession = hasStoredAuthSession()
 
-    const authPromise = supabase.auth.getUser().then(({ data: { user } }) => user)
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500))
+    void (async () => {
+      try {
+        const { data: { session }, error } = await withTimeout(
+          supabase.auth.getSession(),
+          SESSION_RESTORE_TIMEOUT,
+          'Session restore timed out after 8000ms',
+        )
+        if (error) throw error
+        if (!session && hadStoredSession) {
+          requireAuthRecovery('session_restore', 'Stored auth session could not be restored', 'no_session')
+          return
+        }
+        if (cancelled) return
 
-    Promise.race([authPromise, timeoutPromise]).then(async (user) => {
-      if (cancelled) return
-      if (user) {
-        setUserEmail(user.email ?? null)
-        setUserId(user.id)
-        hasActiveSubscription(user.id).then(has => {
-          if (!cancelled) setHasSubscription(has)
-        })
-        supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
-          .then(({ data }) => { if (!cancelled) setIsAdmin(!!data) })
+        const user = session?.user ?? null
+        if (user) {
+          setUserEmail(user.email ?? null)
+          setUserId(user.id)
+          hasActiveSubscription(user.id).then(has => {
+            if (!cancelled) setHasSubscription(has)
+          })
+          supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle()
+            .then(({ data }) => { if (!cancelled) setIsAdmin(!!data) })
+        }
+        setAuthChecked(true)
+      } catch (error) {
+        if (!cancelled) requireAuthRecovery('session_restore', error)
       }
-      setAuthChecked(true)
-    }).catch(() => {
-      if (!cancelled) setAuthChecked(true)
-    })
+    })()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (cancelled) return
@@ -132,17 +156,11 @@ function HomeContent() {
   // ───────── ЗАГРУЗКА УРОКОВ ─────────
   useEffect(() => {
     let cancelled = false
-    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     setLessonsLoaded(false)
     setLessons([])
 
     if (!authChecked) return
-
-    timeoutId = setTimeout(() => {
-      if (cancelled) return
-      setLessonsRetry(r => r + 1)
-    }, LESSONS_FETCH_TIMEOUT)
 
     // Список строится из витрины lessons_catalog — это представление над lessons_v2
     // БЕЗ поля content, доступное на чтение анониму. Так человек видит, что уроки
@@ -156,35 +174,27 @@ function HomeContent() {
       .eq('level', level)
       .order('lesson_number')
 
-    query
-      .then(({ data }) => {
+    void (async () => {
+      try {
+        const { data, error } = await withTimeout(
+          query,
+          LESSONS_FETCH_TIMEOUT,
+          `Lessons fetch timed out after ${LESSONS_FETCH_TIMEOUT}ms`,
+        )
+        if (error) throw error
+        if (!Array.isArray(data)) throw new Error('Lessons fetch returned no data')
         if (cancelled) return
-        if (timeoutId) { clearTimeout(timeoutId); timeoutId = null }
-        setLessons((data as LessonSummary[]) ?? [])
+        setLessons(data as LessonSummary[])
         setLessonsLoaded(true)
-      })
+      } catch (error) {
+        if (!cancelled) requireAuthRecovery('lessons_fetch', error)
+      }
+    })()
 
     return () => {
       cancelled = true
-      if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [level, lessonsRetry, authChecked, hasSubscription, isAdmin])
-
-  useEffect(() => {
-    if (!authChecked) return
-    setLessonsRetry(r => r + 1)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userEmail, isAdmin, hasSubscription])
-
-  useEffect(() => {
-    const onVis = () => {
-      if (document.visibilityState === 'visible' && !lessonsLoaded) {
-        setLessonsRetry(r => r + 1)
-      }
-    }
-    document.addEventListener('visibilitychange', onVis)
-    return () => document.removeEventListener('visibilitychange', onVis)
-  }, [lessonsLoaded])
+  }, [level, authChecked, hasSubscription, isAdmin])
 
   // ───────── АВТОЗАПУСК ПЕРВОГО УРОКА ─────────
   // Если в URL есть ?lesson=1 (приход с лендинга /start) — автоматически
@@ -259,26 +269,37 @@ function HomeContent() {
   }, [input])
 
   async function open(id: number) {
-    const { data } = await supabase.from('lessons_v2').select('*').eq('id', id).single()
-    if (!data) return
-    const lessonData = data as Lesson
-    const access = isAdmin || hasSubscription
-      ? { allowed: true }
-      : await checkLessonAccess(userId, {
-        id: Number(lessonData.id),
-        level: lessonData.level,
-        lesson_number: lessonData.lesson_number,
-        is_free_teaser: lessonData.is_free_teaser,
-      })
-    if (!access.allowed) {
-      router.push(userEmail ? '/pricing' : '/auth?return=/pricing')
-      return
+    try {
+      const { data, error } = await withTimeout(
+        supabase.from('lessons_v2').select('*').eq('id', id).single(),
+        LESSONS_FETCH_TIMEOUT,
+        `Lesson load timed out after ${LESSONS_FETCH_TIMEOUT}ms`,
+      )
+      if (error) throw error
+      if (!data) throw new Error(`Lesson ${id} returned no data`)
+
+      const lessonData = data as Lesson
+      const access = isAdmin || hasSubscription
+        ? { allowed: true, reason: 'subscription' as const }
+        : await checkLessonAccess(userId, {
+          id: Number(lessonData.id),
+          level: lessonData.level,
+          lesson_number: lessonData.lesson_number,
+          is_free_teaser: lessonData.is_free_teaser,
+        })
+      if (access.reason === 'error') throw new Error(access.error ?? 'Lesson access check failed')
+      if (!access.allowed) {
+        router.push(userEmail ? '/pricing' : '/auth?return=/pricing')
+        return
+      }
+      track('lesson_start', { level: lessonData.level, lesson_id: lessonData.id })
+      setLesson(lessonData)
+      setMsgs([])
+      kill()
+      await chat(lessonData, [])
+    } catch (error) {
+      requireAuthRecovery('lesson_load', error)
     }
-    track('lesson_start', { level: lessonData.level, lesson_id: lessonData.id })
-    setLesson(lessonData)
-    setMsgs([])
-    kill()
-    await chat(lessonData, [])
   }
 
   async function chat(l: Lesson, h: Message[], u?: string) {
@@ -373,6 +394,8 @@ function HomeContent() {
     setLesson(null)
     setMsgs([])
   }
+
+  if (authRecoveryRequired) return <AuthRecoveryScreen />
 
   if (lesson) return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: '800px', margin: '0 auto' }}>
