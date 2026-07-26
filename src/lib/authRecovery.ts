@@ -113,5 +113,6 @@ export async function recoverAccess() {
     }
   } catch {}
 
+  await new Promise((resolve) => setTimeout(resolve, 400))
   window.location.reload()
 }

@@ -7,6 +7,7 @@ export type AnalyticsEvent =
   | 'registration'
   | 'paid'
   | 'auth_error'
+  | 'auth_retry_clicked'
   | 'auth_recovery_clicked'
 
 type AnalyticsParams = Record<string, string | number | boolean | null | undefined>

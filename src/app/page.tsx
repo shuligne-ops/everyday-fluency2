@@ -281,12 +281,16 @@ function HomeContent() {
       const lessonData = data as Lesson
       const access = isAdmin || hasSubscription
         ? { allowed: true, reason: 'subscription' as const }
-        : await checkLessonAccess(userId, {
-          id: Number(lessonData.id),
-          level: lessonData.level,
-          lesson_number: lessonData.lesson_number,
-          is_free_teaser: lessonData.is_free_teaser,
-        })
+        : await withTimeout(
+          checkLessonAccess(userId, {
+            id: Number(lessonData.id),
+            level: lessonData.level,
+            lesson_number: lessonData.lesson_number,
+            is_free_teaser: lessonData.is_free_teaser,
+          }),
+          LESSONS_FETCH_TIMEOUT,
+          `Lesson access check timed out after ${LESSONS_FETCH_TIMEOUT}ms`,
+        )
       if (access.reason === 'error') throw new Error(access.error ?? 'Lesson access check failed')
       if (!access.allowed) {
         router.push(userEmail ? '/pricing' : '/auth?return=/pricing')
