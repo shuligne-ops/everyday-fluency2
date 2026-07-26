@@ -16,7 +16,8 @@ export const FREE_A1_LESSONS = 1
 
 export type AccessResult = {
   allowed: boolean
-  reason: 'free_a1' | 'free_teaser' | 'subscription' | 'level_grant' | 'admin' | 'paywall' | 'login_required'
+  reason: 'free_a1' | 'free_teaser' | 'subscription' | 'level_grant' | 'admin' | 'paywall' | 'login_required' | 'error'
+  error?: string
 }
 
 /**
@@ -54,13 +55,14 @@ export async function checkLessonAccess(
     })
     if (error) {
       console.error('[access] can_access_level error:', error)
-      return { allowed: false, reason: 'paywall' }
+      return { allowed: false, reason: 'error', error: error.message }
     }
     if (data === true) {
       return { allowed: true, reason: 'subscription' }
     }
   } catch (err) {
     console.error('[access] RPC failed:', err)
+    return { allowed: false, reason: 'error', error: err instanceof Error ? err.message : String(err) }
   }
 
   return { allowed: false, reason: 'paywall' }
