@@ -97,7 +97,7 @@ export default function PricingPage() {
         <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#292524', marginBottom: '12px' }}>Тарифы</h1>
         <p style={{ fontSize: '16px', color: '#57534e', marginBottom: '32px', lineHeight: 1.6 }}>
           Первый урок каждого уровня — бесплатно, без регистрации.
-          Платная подписка открывает все остальные уровни — A2, B1, B2, C1 и C2.
+          Подписка открывает все уроки курса — 180 уроков, все уровни A1–C2.
           Курс готов целиком: 180 уроков, шесть уровней CEFR, от первого «Hello» до свободного владения языком.
           Разговорный английский с виртуальным преподавателем Sophie.
         </p>
@@ -122,7 +122,7 @@ export default function PricingPage() {
           title="Месяц"
           price="990 ₽"
           period="/ месяц"
-          description="Полный доступ ко всем уровням от A2 до C2 на 30 дней. Разовый платёж — автопродления нет, ничего не списывается повторно."
+          description="Полный доступ ко всем 180 урокам курса на 30 дней. Разовый платёж — автопродления нет, ничего не списывается повторно."
           isCurrentPlan={currentPlan === 'monthly'}
           isLoading={loading === 'monthly'}
           disabled={hasSubscription || loading !== null}
@@ -134,7 +134,7 @@ export default function PricingPage() {
           title="Год"
           price="7 990 ₽"
           period="/ год"
-          description="Полный доступ ко всем уровням от A2 до C2 на 12 месяцев. Экономия 33 % по сравнению с помесячной оплатой."
+          description="Полный доступ ко всем 180 урокам курса на 12 месяцев. Экономия 33 % по сравнению с помесячной оплатой."
           subtext="Стартовое предложение до 31 августа — 4 990 ₽ за год."
           subtextLink={{ label: 'Воспользоваться', plan: 'launch_annual' }}
           featured
