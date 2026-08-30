@@ -1,6 +1,6 @@
 // src/app/api/diagnostic-contrast/route.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// CONTRAST-разбор одного диагностического ответа (voice-slice, День 2).
+// CONTRAST-разбор одного диагностического ответа (шаг TRY).
 //
 // Отдельный роут, НЕ трогает существующий /api/lesson-eval (generic-обёртка,
 // на которой работают текстовые прототипы lesson-correction / lesson-refusal).
@@ -8,82 +8,17 @@
 // и пишет разбор обратно в базу — для продольной модели.
 //
 // Вход:  { session_id }  — id строки в diagnostic_sessions (там уже лежит transcript).
-// Выход: { analysis }    — JSON по схеме CONTRAST_SYSTEM, он же сохраняется в
-//        колонку contrast (jsonb) для последующего сравнения паттерна.
+// Выход: { analysis }    — JSON по схеме из rubrics.output_schema, он же сохраняется
+//        в колонку contrast (jsonb) для последующего сравнения паттерна.
 //
-// Модель зовётся напрямую с ручным фолбэком Anthropic(sonnet-5) → OpenAI(gpt-4o).
+// Ни сцена, ни критерии здесь не захардкожены: и то и другое приходит из БД по
+// move разбираемой сессии. Новый ход добавляется строками в scenarios и rubrics.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { CONTRAST_SYSTEM, buildContrastUserMessage } from '@/lib/contrast-prompt'
-
-// Ситуация должна совпадать с тем, что показано на /diagnostic. Источник истины
-// для разбора: студент отвечал именно на это.
-const SITUATIONS: Record<string, string> = {
-  face_saving_correction:
-    'Рабочий созвон при команде и общем руководителе. Коллега уверенно называет неверный дедлайн (пятница). Студент знает, что срок перенесли на понедельник, и должен поправить факт, не выставив коллегу некомпетентным.',
-}
-
-// Один вызов модели без стрима, с ручным фолбэком Anthropic → OpenAI.
-async function callModel(system: string, user: string): Promise<string> {
-  // Попытка 1: Anthropic (claude-sonnet-5 — как в существующем lesson-eval)
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-5',
-        max_tokens: 1024,
-        system,
-        messages: [{ role: 'user', content: user }],
-      }),
-    })
-    if (r.ok) {
-      const data = await r.json()
-      const text = data?.content?.[0]?.text
-      if (text) return text
-    } else {
-      console.error('[diagnostic-contrast] anthropic', r.status, await r.text().catch(() => ''))
-    }
-  } catch (err) {
-    console.error('[diagnostic-contrast] anthropic failed:', err)
-  }
-
-  // Попытка 2: OpenAI (резерв)
-  const r = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY!}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      max_tokens: 1024,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: user },
-      ],
-    }),
-  })
-  if (!r.ok) {
-    throw new Error(`openai fallback status ${r.status}: ${await r.text().catch(() => '')}`)
-  }
-  const data = await r.json()
-  const text = data?.choices?.[0]?.message?.content
-  if (!text) throw new Error('openai fallback: пустой ответ')
-  return text
-}
-
-// Модель иногда оборачивает JSON в ```json ... ``` — снимаем.
-function parseJsonLoose(text: string): any {
-  const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim()
-  return JSON.parse(cleaned)
-}
+import { buildContrastUserMessage } from '@/lib/contrast-prompt'
+import { callEvalModel, parseJsonLoose } from '@/lib/eval-model'
+import { createServiceClient, loadRubric, loadScenario } from '@/lib/speaking-engine'
 
 export async function POST(req: NextRequest) {
   try {
@@ -92,11 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нужен session_id' }, { status: 400 })
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    )
+    const supabase = createServiceClient()
 
     // Тянем транскрипт и move из базы (не доверяем клиенту транскрипт — он уже сохранён).
     const { data: session, error: fetchError } = await supabase
@@ -113,18 +44,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'В сессии нет транскрипта' }, { status: 400 })
     }
 
-    const situation = SITUATIONS[session.move] ?? SITUATIONS.face_saving_correction
+    const [scenario, rubric] = await Promise.all([
+      loadScenario(supabase, session.move, 'try'),
+      loadRubric(supabase, session.move, 'try'),
+    ])
+    if (!scenario || !rubric) {
+      console.error('[diagnostic-contrast] нет сценария или рубрики для хода', session.move)
+      return NextResponse.json({ error: 'Для этого хода не настроен разбор' }, { status: 400 })
+    }
+
     const userMessage = buildContrastUserMessage({
-      situation,
+      situation: scenario.situationModel,
       transcript: session.transcript,
     })
 
-    const raw = await callModel(CONTRAST_SYSTEM, userMessage)
+    const { text: raw, model } = await callEvalModel(rubric.systemPrompt, userMessage, 'diagnostic-contrast')
 
-    let analysis: any
+    let analysis: unknown
     try {
       analysis = parseJsonLoose(raw)
-    } catch (parseErr) {
+    } catch {
       console.error('[diagnostic-contrast] JSON parse failed. Raw:', raw)
       return NextResponse.json({ error: 'Не удалось разобрать ответ модели' }, { status: 502 })
     }
@@ -132,7 +71,7 @@ export async function POST(req: NextRequest) {
     // Сохраняем разбор в базу (для продольной модели). Колонка contrast — jsonb.
     const { error: saveError } = await supabase
       .from('diagnostic_sessions')
-      .update({ contrast: analysis })
+      .update({ contrast: analysis, rubric_id: rubric.id, model_used: model })
       .eq('id', session_id)
 
     if (saveError) {

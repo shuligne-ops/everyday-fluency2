@@ -11,8 +11,10 @@ type VoiceResult = {
 type VoiceRecorderProps = {
   situationShownAt: number
   attemptId: string
-  step?: 'try' | 'retry' | 'transfer'
-  move?: string
+  step: 'try' | 'retry' | 'transfer'
+  /** Ход, который тренируется. Приходит со страницы, а не задаётся здесь: от него
+   *  зависит, какой сценарий и какая рубрика подберутся на сервере. */
+  move: string
   onResult: (data: VoiceResult) => void
 }
 
@@ -21,8 +23,8 @@ type RecorderState = 'idle' | 'recording' | 'uploading'
 export default function VoiceRecorder({
   situationShownAt,
   attemptId,
-  step = 'try',
-  move = 'face_saving_correction',
+  step,
+  move,
   onResult,
 }: VoiceRecorderProps) {
   const [state, setState] = useState<RecorderState>('idle')

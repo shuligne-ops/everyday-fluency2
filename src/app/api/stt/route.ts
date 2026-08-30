@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createServiceClient, loadScenario, DEFAULT_MOVE, type ScenarioKind } from '@/lib/speaking-engine'
 
 // Имя совпадает с fallback-провайдером из lib/llm.ts.
 const OPENAI_API_KEY_ENV = 'OPENAI_API_KEY'
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const durationMs = Number(formData.get('duration_ms'))
     const latencyMs = Number(formData.get('latency_ms'))
     const step = formData.get('step')?.toString() || 'try'
-    const move = formData.get('move')?.toString() || 'face_saving_correction'
+    const move = formData.get('move')?.toString() || DEFAULT_MOVE
 
     if (!(audio instanceof File) || !anonId || !attemptId) {
       return NextResponse.json({ error: 'Нужны аудиозапись, anon_id и attempt_id' }, { status: 400 })
@@ -50,11 +50,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Whisper не вернул транскрипт' }, { status: 500 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-    const supabaseService = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    })
+    const supabaseService = createServiceClient()
 
     const timestamp = Date.now()
     const audioPath = `${anonId}/${step}-${timestamp}.webm`
@@ -93,6 +89,20 @@ export async function POST(req: NextRequest) {
     if (updateError) {
       console.error('STT update audio path error:', updateError)
       return NextResponse.json({ error: 'Не удалось связать запись с сессией' }, { status: 500 })
+    }
+
+    // Шаг записи 1:1 совпадает с kind сценария. Привязка нужна, чтобы попытка
+    // осталась связанной с ТЕМ текстом, который человек слышал: при перекалибровке
+    // сценарий получает новую версию, а старая строка продолжает указывать на старую.
+    const scenario = await loadScenario(supabaseService, move, step as ScenarioKind)
+    if (scenario) {
+      const { error: scenarioError } = await supabaseService
+        .from('diagnostic_sessions')
+        .update({ scenario_id: scenario.id })
+        .eq('id', sessionId)
+      if (scenarioError) console.error('STT link scenario error:', scenarioError)
+    } else {
+      console.error('STT: сценарий не найден для', move, step)
     }
 
     return NextResponse.json({ session_id: sessionId, transcript, audio_path: audioPath })
