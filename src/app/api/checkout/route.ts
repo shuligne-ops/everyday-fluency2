@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
       .from('user_subscriptions')
       .select('id', { count: 'exact', head: true })
       .eq('plan', 'launch_annual')
+      .eq('status', 'active')
 
     if (countErr) {
       console.error('[checkout] launch count check failed:', countErr)
