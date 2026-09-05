@@ -1,5 +1,8 @@
 import { NextRequest } from 'next/server'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 function cleanForTTS(text: string): string {
   let t = text
   // Remove character names before dialogue lines (bold or plain)
@@ -54,7 +57,7 @@ async function fetchTTSStream(text: string, voiceId: string, apiKey: string, att
 
   // 429 = чужой запрос в этот момент занимает лимит аккаунта — временная
   // перегрузка, не наша логическая ошибка. Один retry почти всегда решает
-  // это, если укладываемся в 10-секундный потолок Vercel Hobby.
+  // это.
   if (r.status === 429 && attempt < 1) {
     await sleep(RETRY_DELAY_MS)
     return fetchTTSStream(text, voiceId, apiKey, attempt + 1)
@@ -80,5 +83,3 @@ export async function POST(req: NextRequest) {
     return new Response('TTS Error', { status: 500 })
   }
 }
-
-export const maxDuration = 10 // потолок Vercel Hobby
