@@ -40,7 +40,19 @@ function splitText(text: string, maxLen: number): string[] {
   return chunks.filter(c => c.length > 0)
 }
 
-async function genChunk(text: string, voiceId: string, apiKey: string): Promise<ArrayBuffer> {
+// ElevenLabs ограничивает число ОДНОВРЕМЕННЫХ генераций на весь аккаунт
+// (проверено вживую: 3 параллельных запроса — ок, 4-й падает с 429 мгновенно).
+// Поэтому нельзя стрелять всеми кусками разом через Promise.all —
+// нужно батчить и переживать случайный 429 (например, от другого
+// студента, слушающего в этот же момент) через короткий retry.
+const MAX_CONCURRENT = 3
+const RETRY_DELAY_MS = 600
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function genChunk(text: string, voiceId: string, apiKey: string, attempt = 0): Promise<ArrayBuffer> {
   const r = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_22050_32`,
     {
@@ -53,8 +65,26 @@ async function genChunk(text: string, voiceId: string, apiKey: string): Promise<
       }),
     }
   )
-  if (!r.ok) throw new Error('TTS chunk failed')
-  return r.arrayBuffer()
+  if (r.ok) return r.arrayBuffer()
+
+  // 429 = уперлись в лимит одновременных генераций аккаунта — не наша
+  // логическая ошибка, а временная перегрузка. Один retry почти всегда
+  // решает это, если укладываемся в 10-секундный потолок Vercel Hobby.
+  if (r.status === 429 && attempt < 1) {
+    await sleep(RETRY_DELAY_MS)
+    return genChunk(text, voiceId, apiKey, attempt + 1)
+  }
+  throw new Error(`TTS chunk failed: ${r.status}`)
+}
+
+async function genAllChunks(chunks: string[], voiceId: string, apiKey: string): Promise<ArrayBuffer[]> {
+  const results: ArrayBuffer[] = []
+  for (let i = 0; i < chunks.length; i += MAX_CONCURRENT) {
+    const batch = chunks.slice(i, i + MAX_CONCURRENT)
+    const batchResults = await Promise.all(batch.map(c => genChunk(c, voiceId, apiKey)))
+    results.push(...batchResults)
+  }
+  return results
 }
 
 export async function POST(req: NextRequest) {
@@ -69,14 +99,16 @@ export async function POST(req: NextRequest) {
   const chunks = splitText(cleaned, 700)
 
   try {
-    const buffers = await Promise.all(chunks.map(c => genChunk(c, voiceId, apiKey)))
+    const buffers = await genAllChunks(chunks, voiceId, apiKey)
     const total = buffers.reduce((s, b) => s + b.byteLength, 0)
     const combined = new Uint8Array(total)
     let off = 0
     for (const b of buffers) { combined.set(new Uint8Array(b), off); off += b.byteLength }
     return new Response(combined.buffer, { headers: { 'Content-Type': 'audio/mpeg' } })
   } catch (err) {
-    console.error('TTS error:', err)
+    console.error('TTS error:', err, `chunks=${chunks.length}`)
     return new Response('TTS Error', { status: 500 })
   }
 }
+
+export const maxDuration = 10 // потолок Vercel Hobby; сообщения на 4+ куска (>~2100 симв.) физически не влезают

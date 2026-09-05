@@ -67,7 +67,7 @@ function HomeContent() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [recording, setRecording] = useState(false)
-  const [tts, setTts] = useState<'idle' | 'load' | 'play'>('idle')
+  const [tts, setTts] = useState<'idle' | 'load' | 'play' | 'error'>('idle')
   const [ttsIdx, setTtsIdx] = useState(-1)
   const endRef = useRef<HTMLDivElement>(null)
   const taRef = useRef<HTMLTextAreaElement>(null)
@@ -360,7 +360,13 @@ function HomeContent() {
       a.onended = () => kill()
       a.onerror = () => kill()
       a.play(); setTts('play')
-    } catch { kill() }
+    } catch (err) {
+      console.error('speak() failed:', err)
+      if (gAudio) { gAudio.pause(); gAudio.src = ''; gAudio = null }
+      gAudioIdx = -1
+      setTts('error')
+      setTimeout(() => { setTts(t => t === 'error' ? 'idle' : t); setTtsIdx(t => t === idx ? -1 : t) }, 2000)
+    }
   }
 
   function mic() {
@@ -422,10 +428,10 @@ function HomeContent() {
                 {m.content.length > 10 && (
                   <button onClick={() => speak(m.content, i)} style={{
                     marginTop: '8px', padding: '6px 14px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontSize: '13px',
-                    background: ttsIdx === i && tts === 'load' ? '#FEF3C7' : ttsIdx === i && tts === 'play' ? '#f59e0b' : '#f3f4f6',
-                    color: ttsIdx === i && tts === 'play' ? 'white' : '#555'
+                    background: ttsIdx === i && tts === 'load' ? '#FEF3C7' : ttsIdx === i && tts === 'play' ? '#f59e0b' : ttsIdx === i && tts === 'error' ? '#FEE2E2' : '#f3f4f6',
+                    color: ttsIdx === i && tts === 'play' ? 'white' : ttsIdx === i && tts === 'error' ? '#B91C1C' : '#555'
                   }}>
-                    {ttsIdx === i && tts === 'load' ? '⏳ Загрузка...' : ttsIdx === i && tts === 'play' ? '⏸ Пауза' : '🔊 Слушать'}
+                    {ttsIdx === i && tts === 'load' ? '⏳ Загрузка...' : ttsIdx === i && tts === 'play' ? '⏸ Пауза' : ttsIdx === i && tts === 'error' ? '⚠️ Не вышло, попробуй ещё раз' : '🔊 Слушать'}
                   </button>
                 )}
               </div>
