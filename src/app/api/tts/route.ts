@@ -1,30 +1,8 @@
 import { NextRequest } from 'next/server'
+import { cleanForTTS } from '@/lib/clean-for-tts'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
-
-function cleanForTTS(text: string): string {
-  let t = text
-  // Remove character names before dialogue lines (bold or plain)
-  t = t.replace(/\*{0,2}(Sophie|Marie|Ben|Luca|Priya|Jess|Carlos|Zoe|Anna|Dan|Eleanor|Maya|John|Arthur|Tom|Sarah|Emma|Mike|Kate|Oliver|Lucy|Jack|Alice|James|Mia|Noah|Lily|Leo|Ava|Sam|Ellie|Mark|Ruby|Adam|Ivy|Chris|Ella|Nina|Max|Gemma|Henry|Rose|Waiter|Waitress|Barista|Stranger|Pharmacist|Receptionist|Manager)\*{0,2}\s*:\s*/gi, '')
-  // Remove markdown
-  t = t.replace(/#{1,6}\s*/g, '')
-  t = t.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
-  t = t.replace(/`([^`]+)`/g, '$1')
-  t = t.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-  // Remove Russian text in parentheses
-  t = t.replace(/\([^)]*[\u0400-\u04FF][^)]*\)/g, '')
-  // Remove standalone Russian sentences
-  t = t.replace(/[\u0400-\u04FF][\u0400-\u04FF\s,.!?;:'"()-]*[.!?\n]/g, '')
-  // Remove remaining Cyrillic
-  t = t.replace(/[\u0400-\u04FF]+/g, '')
-  // Remove special chars
-  t = t.replace(/[*#_~`>|]/g, '')
-  // Collapse whitespace
-  t = t.replace(/\s{2,}/g, ' ')
-  t = t.replace(/\n{3,}/g, '\n\n')
-  return t.trim()
-}
 
 const RETRY_DELAY_MS = 600
 

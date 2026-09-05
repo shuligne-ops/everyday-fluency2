@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-clean-for-tts": "node scripts/check-clean-for-tts.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
