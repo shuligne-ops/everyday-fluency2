@@ -10,6 +10,12 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+// Значение из env может прийти с BOM (U+FEFF) или невидимыми пробелами —
+// такой заголовок роняет fetch с "Cannot convert argument to a ByteString".
+function sanitizeEnv(value: string | undefined): string {
+  return (value || '').replace(/[^\x21-\x7E]/g, '')
+}
+
 // ElevenLabs ограничивает число ОДНОВРЕМЕННЫХ генераций на весь аккаунт
 // (проверено вживую: 3 параллельных запроса — ок, 4-й падает с 429 мгновенно).
 // Раньше текст резался на куски по 700 символов и генерился параллельно —
@@ -33,6 +39,9 @@ async function fetchTTSStream(text: string, voiceId: string, apiKey: string, att
   )
   if (r.ok) return r
 
+  const body = await r.text().catch(() => '<no body>')
+  console.error(`TTS: ElevenLabs ${r.status} ${r.statusText}: ${body.slice(0, 500)}`)
+
   // 429 = чужой запрос в этот момент занимает лимит аккаунта — временная
   // перегрузка, не наша логическая ошибка. Один retry почти всегда решает
   // это.
@@ -50,11 +59,15 @@ export async function POST(req: NextRequest) {
   const cleaned = cleanForTTS(text)
   if (cleaned.length < 5) return new Response('Too short', { status: 400 })
 
-  const voiceId = process.env.ELEVENLABS_VOICE_ID || 'a9Y3nxjUXhy3ZLsW0XXb'
-  const apiKey = process.env.ELEVENLABS_API_KEY!
+  const voiceId = sanitizeEnv(process.env.ELEVENLABS_VOICE_ID) || 'a9Y3nxjUXhy3ZLsW0XXb'
+  const KEY = sanitizeEnv(process.env.ELEVENLABS_API_KEY)
+  if (!KEY) {
+    console.error('TTS: ELEVENLABS_API_KEY не задан (или содержит только невалидные символы)')
+    return Response.json({ error: 'ELEVENLABS_API_KEY не задан' }, { status: 500 })
+  }
 
   try {
-    const upstream = await fetchTTSStream(cleaned, voiceId, apiKey)
+    const upstream = await fetchTTSStream(cleaned, voiceId, KEY)
     return new Response(upstream.body, { headers: { 'Content-Type': 'audio/mpeg' } })
   } catch (err) {
     console.error('TTS error:', err, `len=${cleaned.length}`)
