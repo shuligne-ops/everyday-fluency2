@@ -1,9 +1,5 @@
 import { NextRequest } from 'next/server'
-
-type AnthropicContentBlock = {
-  type: string
-  text?: string
-}
+import { callEvalModel } from '@/lib/eval-model'
 
 export async function POST(req: NextRequest) {
   const { system, user } = await req.json()
@@ -13,35 +9,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-5',
-        max_tokens: 1024,
-        system,
-        messages: [{ role: 'user', content: user }],
-      }),
-    })
-
-    if (!response.ok) {
-      const detail = await response.text()
-      console.error('lesson-eval API error:', detail)
-      return Response.json({ error: 'upstream error' }, { status: 502 })
-    }
-
-    const data = await response.json() as { content?: AnthropicContentBlock[] }
-    const text = (data.content || [])
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text || '')
-      .join('\n')
-      .trim()
-
-    return Response.json({ text })
+    // Anthropic → при сбое OpenAI (gpt-4o), как в diagnostic-retry-eval.
+    const { text } = await callEvalModel(system, user, 'lesson-eval')
+    return Response.json({ text: text.trim() })
   } catch (error) {
     console.error('lesson-eval request failed:', error)
     return Response.json({ error: 'upstream error' }, { status: 502 })
