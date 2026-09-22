@@ -2,27 +2,27 @@
 
 import { useEffect } from 'react'
 
-function describeScore(value: string, end = false) {
-  if (value.startsWith('2/')) return end ? ['Получилось самостоятельно', 'целевая форма появилась без подсказки'] : ['Получилось сразу', 'целевая форма уже была доступна']
-  if (value.startsWith('1/')) return ['Почти получилось', 'форма узнаваема, но ещё неустойчива']
-  return end ? ['Пока не закрепилось', 'в последнем примере форма ещё не появилась'] : ['Не получилось с первого раза', 'до тренировки целевая форма не извлеклась']
+function scoreMeaning(value: string) {
+  if (value.startsWith('2/')) return ['целевая конструкция появилась полностью', 'Полностью']
+  if (value.startsWith('1/')) return ['целевая конструкция появилась частично', 'Частично']
+  return ['целевая конструкция не появилась', 'Не появилась']
 }
 
 function describeStrength(value: string) {
   const n = Number(value.split('/')[0])
-  if (n >= 5) return ['Очень хорошее', 'форма держится уверенно в разных примерах']
-  if (n >= 4) return ['Хорошее', 'форма уже появляется в большинстве новых примеров']
-  if (n >= 3) return ['Среднее', 'форма появляется, но пока не каждый раз']
-  if (n >= 2) return ['Пока слабое', 'нужны ещё повторения в разных контекстах']
+  if (n >= 5) return ['Очень уверенно', 'форма держится уверенно в разных примерах']
+  if (n >= 4) return ['Уверенно', 'форма уже появляется в большинстве новых примеров']
+  if (n >= 3) return ['Неровно', 'форма появляется, но пока не каждый раз']
+  if (n >= 2) return ['Пока слабо', 'нужны ещё повторения в разных контекстах']
   return ['Пока не закрепилось', 'конструкция всё ещё требует заметной поддержки']
 }
 
 function describeLatency(value: string) {
   const seconds = Number.parseFloat(value.replace(',', '.'))
-  if (!Number.isFinite(seconds)) return 'сколько обычно проходит до начала ответа'
-  if (seconds < 3) return 'ответ обычно начинается почти сразу'
-  if (seconds < 6) return 'есть небольшая пауза перед ответом'
-  return 'пока есть заметная пауза перед ответом'
+  if (!Number.isFinite(seconds)) return 'медианное время от показа задания до начала ответа по всей серии'
+  if (seconds < 3) return 'медианное время до начала ответа по всей серии · ответ обычно начинается почти сразу'
+  if (seconds < 6) return 'медианное время до начала ответа по всей серии · есть небольшая пауза'
+  return 'медианное время до начала ответа по всей серии · пока есть заметная пауза'
 }
 
 function addNote(card: HTMLElement, text: string) {
@@ -60,31 +60,31 @@ function applyClarity() {
   const strengthValue = strengthCard.querySelector('strong')?.textContent?.trim() || '—'
 
   if (!firstCard.dataset.clarityDone) {
-    const first = describeScore(firstValue, false)
-    const last = describeScore(lastValue, true)
+    const first = scoreMeaning(firstValue)
+    const last = scoreMeaning(lastValue)
     const strength = describeStrength(strengthValue)
 
     const firstLabel = firstCard.querySelector('small')
     const firstStrong = firstCard.querySelector('strong')
-    if (firstLabel) firstLabel.textContent = 'С первой попытки'
-    if (firstStrong) firstStrong.textContent = first[0]
-    addNote(firstCard, first[1])
+    if (firstLabel) firstLabel.textContent = '1-й пример · точность конструкции'
+    if (firstStrong) firstStrong.textContent = `${firstValue} · ${first[1]}`
+    addNote(firstCard, `${first[0]}. Шкала: 0 = нет, 1 = частично, 2 = полностью.`)
 
     const lastLabel = lastCard.querySelector('small')
     const lastStrong = lastCard.querySelector('strong')
-    if (lastLabel) lastLabel.textContent = 'К концу серии'
-    if (lastStrong) lastStrong.textContent = last[0]
-    addNote(lastCard, last[1])
+    if (lastLabel) lastLabel.textContent = '10-й пример · точность конструкции'
+    if (lastStrong) lastStrong.textContent = `${lastValue} · ${last[1]}`
+    addNote(lastCard, `${last[0]}. Это тот же показатель, что и в первом примере.`)
 
     const latencyLabel = latencyCard.querySelector('small')
-    if (latencyLabel) latencyLabel.textContent = 'Обычно до начала ответа'
+    if (latencyLabel) latencyLabel.textContent = 'Скорость извлечения'
     addNote(latencyCard, describeLatency(latencyValue))
 
     const strengthLabel = strengthCard.querySelector('small')
     const strengthStrong = strengthCard.querySelector('strong')
-    if (strengthLabel) strengthLabel.textContent = 'Насколько закрепилось'
+    if (strengthLabel) strengthLabel.textContent = 'Итог по всей серии'
     if (strengthStrong) strengthStrong.textContent = strength[0]
-    addNote(strengthCard, `${strength[1]} · внутренняя шкала ${strengthValue}`)
+    addNote(strengthCard, `${strength[1]}. Внутренняя шкала ${strengthValue}; она учитывает всю серию и сильнее — последние примеры.`)
 
     firstCard.dataset.clarityDone = 'true'
     lastCard.dataset.clarityDone = 'true'
@@ -102,17 +102,17 @@ function applyClarity() {
       summary.style.background = '#111c3f'
       summary.style.color = '#e2e8f0'
       summary.style.lineHeight = '1.6'
-      summary.innerHTML = `<strong style="display:block;color:white;margin-bottom:6px">Что это значит</strong><span>${first[1]}. К концу серии: ${last[1]}. Обычно до начала ответа проходит <b style="color:white">${latencyValue}</b>. ${strength[1]}.</span>`
+      summary.innerHTML = `<strong style="display:block;color:white;margin-bottom:6px">Что именно сравниваем</strong><span>В первом и десятом примере измеряется одно и то же: появилась ли <b style="color:white">целевая конструкция</b> в ответе. Начало серии: <b style="color:white">${firstValue}</b> — ${first[0]}. Конец серии: <b style="color:white">${lastValue}</b> — ${last[0]}. Скорость извлечения по всей серии: <b style="color:white">${latencyValue}</b>.</span>`
       grid.insertAdjacentElement('afterend', summary)
     }
 
     const paragraphs = Array.from(document.querySelectorAll('p')) as HTMLElement[]
     const repeat = paragraphs.find((p) => p.textContent?.trim().startsWith('Следующий повтор:'))
     if (repeat) {
-      const match = repeat.textContent?.match(/Следующий повтор:\s*([^\.]+\.?)/)
-      const date = match?.[1]?.trim() || ''
+      const raw = repeat.textContent || ''
+      const date = raw.replace(/^Следующий повтор:\s*/, '').split('. Это')[0].trim()
       repeat.textContent = date
-        ? `Повторить ${date.replace(/\.$/, '')}: не чтобы заново учить правило, а чтобы проверить, всплывает ли конструкция позже без подсказки.`
+        ? `Повторить ${date}: не чтобы заново учить правило, а чтобы проверить, всплывает ли конструкция позже без подсказки.`
         : 'Следующий повтор нужен, чтобы проверить, сохраняется ли конструкция без подсказки.'
     }
   }
