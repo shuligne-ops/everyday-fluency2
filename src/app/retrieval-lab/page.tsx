@@ -14,6 +14,20 @@ type Analysis = {
 type Attempt = { transcript: string; latencyMs: number; analysis: Analysis }
 type Attempts = Partial<Record<Exclude<Phase, 'done'>, Attempt>>
 
+type SpeechRecognitionLike = {
+  lang: string
+  interimResults: boolean
+  continuous: boolean
+  maxAlternatives: number
+  start: () => void
+  stop: () => void
+  abort: () => void
+  onstart: (() => void) | null
+  onresult: ((event: { results: ArrayLike<{ 0?: { transcript?: string } }> }) => void) | null
+  onerror: ((event: { error?: string }) => void) | null
+  onend: (() => void) | null
+}
+
 const SCENES: Record<Exclude<Phase, 'done'>, { kicker: string; title: string; body: string; instruction: string }> = {
   baseline: {
     kicker: '1 · Без подсказки',
@@ -42,7 +56,7 @@ const SCENES: Record<Exclude<Phase, 'done'>, { kicker: string; title: string; bo
 }
 
 const COLORS = { navy: '#0f1b3d', amber: '#f59e0b', pale: '#fff8ed', ink: '#17213f', muted: '#667085', green: '#15803d', red: '#b42318' }
-const STORAGE_KEY = 'ef_retrieval_lab_v1'
+const STORAGE_KEY = 'ef_retrieval_lab_v2'
 
 export default function RetrievalLabPage() {
   const [phase, setPhase] = useState<Phase>('baseline')
@@ -53,9 +67,7 @@ export default function RetrievalLabPage() {
   const [typed, setTyped] = useState('')
   const [showTyped, setShowTyped] = useState(false)
   const shownAtRef = useRef(Date.now())
-  const recorderRef = useRef<MediaRecorder | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const chunksRef = useRef<BlobPart[]>([])
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const latencyRef = useRef(0)
 
   useEffect(() => {
@@ -63,6 +75,9 @@ export default function RetrievalLabPage() {
     setTyped('')
     setShowTyped(false)
     setError('')
+    try { recognitionRef.current?.abort() } catch {}
+    recognitionRef.current = null
+    setRecording(false)
   }, [phase])
 
   useEffect(() => {
@@ -85,54 +100,66 @@ export default function RetrievalLabPage() {
     } catch {}
   }
 
-  function cleanupStream() {
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
-  }
-
-  async function startRecording() {
+  function startVoice() {
     setError('')
+    const w = window as typeof window & {
+      SpeechRecognition?: new () => SpeechRecognitionLike
+      webkitSpeechRecognition?: new () => SpeechRecognitionLike
+    }
+    const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition
+    if (!SR) {
+      setError('Голосовой ввод не поддерживается этим браузером. Открой в Chrome или напечатай ответ.')
+      setShowTyped(true)
+      return
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-      chunksRef.current = []
-      const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : undefined
-      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream)
-      recorderRef.current = rec
+      const rec = new SR()
+      rec.lang = 'en-US'
+      rec.interimResults = false
+      rec.continuous = false
+      rec.maxAlternatives = 1
+      recognitionRef.current = rec
       latencyRef.current = Math.max(0, Date.now() - shownAtRef.current)
-      rec.ondataavailable = (e) => { if (e.data.size) chunksRef.current.push(e.data) }
-      rec.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' })
-        cleanupStream()
-        void processAudio(blob, latencyRef.current)
+
+      rec.onstart = () => setRecording(true)
+      rec.onresult = (event) => {
+        const last = event.results[event.results.length - 1]
+        const transcript = last?.[0]?.transcript?.trim()
+        if (!transcript) {
+          setError('Не расслышал ответ. Попробуй ещё раз или напечатай.')
+          return
+        }
+        setRecording(false)
+        setBusy(true)
+        void evaluate(transcript, latencyRef.current)
+          .catch((e) => setError(e instanceof Error ? e.message : 'Не удалось оценить ответ'))
+          .finally(() => setBusy(false))
       }
-      rec.onerror = () => { cleanupStream(); setRecording(false); setError('Запись прервалась. Попробуй ещё раз или напечатай ответ.') }
+      rec.onerror = (event) => {
+        setRecording(false)
+        const code = event.error || ''
+        if (code === 'not-allowed' || code === 'service-not-allowed') {
+          setError('Браузер не дал доступ к распознаванию речи. Разреши микрофон или используй текст.')
+        } else if (code === 'no-speech') {
+          setError('Речь не услышана. Нажми ещё раз и ответь.')
+        } else {
+          setError('Голосовой ввод не сработал. Можно сразу напечатать ответ.')
+        }
+        setShowTyped(true)
+      }
+      rec.onend = () => setRecording(false)
       rec.start()
-      setRecording(true)
     } catch {
-      cleanupStream()
-      setError('Не удалось включить микрофон. Можно пройти прототип текстом.')
+      setRecording(false)
+      setError('Не удалось запустить голосовой ввод. Можно пройти прототип текстом.')
       setShowTyped(true)
     }
   }
 
-  function stopRecording() {
-    if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
+  function stopVoice() {
+    try { recognitionRef.current?.stop() } catch {}
     setRecording(false)
-  }
-
-  async function processAudio(blob: Blob, latencyMs: number) {
-    setBusy(true); setError('')
-    try {
-      const form = new FormData()
-      form.append('audio', blob, 'response.webm')
-      const stt = await fetch('/api/retrieval-lab/stt', { method: 'POST', body: form })
-      const sttJson = await stt.json()
-      if (!stt.ok) throw new Error(sttJson.error || 'Речь не распознана')
-      await evaluate(String(sttJson.transcript), latencyMs)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Не удалось обработать ответ')
-    } finally { setBusy(false) }
   }
 
   async function submitTyped() {
@@ -202,14 +229,15 @@ export default function RetrievalLabPage() {
         <p style={bodyText}>{current.body}</p>
         <p style={{ ...bodyText, fontWeight: 750 }}>{current.instruction}</p>
 
-        {phase === 'delayed' && <div style={notice}>Для решения «нужно ли это вообще» кнопку delayed probe можно пройти сейчас. Если оставить вкладку и вернуться завтра, прототип также умеет поднять эту проверку как действительно отложенную.</div>}
+        {phase === 'delayed' && <div style={notice}>Для решения «нужно ли это вообще» blind probe можно пройти сейчас. Для настоящей проверки закрепления вернись завтра с этого же браузера.</div>}
 
         {!attempt && (
           <section style={{ marginTop: 28 }}>
-            <button disabled={busy} onClick={recording ? stopRecording : startRecording} style={{ ...primaryButton, background: recording ? '#dc2626' : COLORS.navy, opacity: busy ? .6 : 1 }}>
-              {busy ? 'Разбираю…' : recording ? '■ Закончить ответ' : '🎙 Ответить голосом'}
+            <button disabled={busy} onClick={recording ? stopVoice : startVoice} style={{ ...primaryButton, minWidth: 220, background: recording ? '#dc2626' : COLORS.navy, color: 'white', opacity: busy ? .6 : 1 }}>
+              {busy ? 'Разбираю…' : recording ? '■ Остановить' : '🎙 Ответить голосом'}
             </button>
             {!recording && <button onClick={() => setShowTyped((v) => !v)} style={{ ...ghostButton, marginLeft: 10 }}>{showTyped ? 'Скрыть текст' : 'Или напечатать'}</button>}
+            {recording && <p style={{ color: COLORS.green, marginTop: 12, fontWeight: 700 }}>Слушаю… скажи одну естественную реплику.</p>}
             {showTyped && <div style={{ marginTop: 16 }}><textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Your answer in English…" rows={3} style={textarea} /><button disabled={busy || !typed.trim()} onClick={submitTyped} style={{ ...primaryButton, marginTop: 10 }}>Проверить</button></div>}
             {error && <p style={{ color: COLORS.red, marginTop: 14 }}>{error}</p>}
           </section>
@@ -230,7 +258,7 @@ export default function RetrievalLabPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 22, flexWrap: 'wrap' }}>
               <button onClick={advance} style={primaryButton}>{phase === 'baseline' ? 'Попробовать другой пример →' : phase === 'retry' ? 'Проверить перенос →' : phase === 'transfer' ? 'Сымитировать проверку завтра →' : 'Показать итог →'}</button>
-              <span style={{ fontSize: 13, color: COLORS.muted }}>Старт ответа: {(attempt.latencyMs / 1000).toFixed(1)} с</span>
+              <span style={{ fontSize: 13, color: COLORS.muted }}>До начала ответа: {(attempt.latencyMs / 1000).toFixed(1)} с</span>
             </div>
           </section>
         )}
@@ -252,9 +280,9 @@ function Result({ attempts, onReset }: { attempts: Attempts; onReset: () => void
 
     {latencyDelta != null && <div style={{ background: '#111c3f', border: '1px solid #334155', borderRadius: 14, padding: 20, marginBottom: 20 }}><strong>Изменение скорости извлечения</strong><p style={{ margin: '8px 0 0', color: '#cbd5e1' }}>{latencyDelta < 0 ? `Blind probe начался на ${Math.abs(latencyDelta).toFixed(1)} с быстрее baseline.` : latencyDelta > 0 ? `Blind probe начался на ${latencyDelta.toFixed(1)} с медленнее baseline.` : 'Время начала ответа не изменилось.'}</p></div>}
 
-    <div style={{ background: '#fff', color: COLORS.ink, borderRadius: 16, padding: 22 }}><h2 style={{ margin: '0 0 10px', color: COLORS.navy }}>Критерий решения</h2><p style={{ lineHeight: 1.6, margin: 0 }}>Если тебе как ученику сам цикл <b>ответ → минимальный repair → новый контекст → blind probe + latency</b> ощущается содержательнее обычного «поговорить с AI», идею стоит развивать. Если последний этап не даёт нового ощущения или полезной информации, усложнять основной курс этим механизмом не стоит.</p></div>
+    <div style={{ background: '#fff', color: COLORS.ink, borderRadius: 16, padding: 22 }}><h2 style={{ margin: '0 0 10px', color: COLORS.navy }}>Критерий решения</h2><p style={{ lineHeight: 1.6, margin: 0 }}>Если сам цикл <b>ответ → минимальный repair → новый контекст → blind probe + latency</b> ощущается содержательнее обычного «поговорить с AI», идею стоит развивать. Если последний этап не даёт новой ценности, усложнять основной курс этим механизмом не стоит.</p></div>
 
-    <p style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.55, marginTop: 18 }}>Важно: сегодняшняя кнопка «завтра» симулирует delayed probe и проверяет UX/логику. Настоящее закрепление можно оценить только при реальном возвращении через день и позже.</p>
+    <p style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.55, marginTop: 18 }}>Сегодняшняя кнопка «завтра» симулирует delayed probe и проверяет UX/логику. Настоящее закрепление можно оценить только при реальном возвращении через день и позже.</p>
     <button onClick={onReset} style={{ ...primaryButton, marginTop: 22, background: COLORS.amber, color: COLORS.navy }}>Пройти ещё раз</button>
   </div></main>
 }
