@@ -1,5 +1,5 @@
-import V2Lab from './V2Lab'
+import ExperimentalLab from './ExperimentalLab'
 
 export default function RetrievalLabV2Page() {
-  return <V2Lab />
+  return <ExperimentalLab />
 }
