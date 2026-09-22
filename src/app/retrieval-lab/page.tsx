@@ -1,11 +1,5 @@
-import DeepPractice from './DeepPractice'
-import ResultClarityLayer from './ResultClarityLayer'
+import ExpandedPractice from './ExpandedPractice'
 
 export default function RetrievalLabPage() {
-  return (
-    <>
-      <ResultClarityLayer />
-      <DeepPractice />
-    </>
-  )
+  return <ExpandedPractice />
 }
