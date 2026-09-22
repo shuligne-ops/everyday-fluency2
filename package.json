@@ -10,7 +10,7 @@
     "check-clean-for-tts": "node scripts/check-clean-for-tts.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/supabase-js": "2.103.3",
     "next": "^16.2.4",
     "react": "^18",
     "react-dom": "^18",
