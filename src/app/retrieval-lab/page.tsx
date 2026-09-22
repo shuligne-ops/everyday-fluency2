@@ -1,10 +1,44 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-type Stage = 'baseline' | 'retry' | 'transfer' | 'delayed' | 'done'
-type ActiveStage = Exclude<Stage, 'done'>
-type PatternId = 'wish_past' | 'end_up' | 'about_to' | 'might_as_well' | 'mixed_conditional'
+type Stage = 'baseline' | 'retry' | 'transfer' | 'delayed'
+type View = 'library' | 'practice' | 'result'
+type PatternId =
+  | 'wish_past'
+  | 'should_have'
+  | 'mixed_conditional'
+  | 'present_perfect_continuous'
+  | 'used_to'
+  | 'about_to'
+  | 'end_up'
+  | 'might_as_well'
+  | 'no_point_in'
+  | 'would_rather'
+  | 'supposed_to'
+  | 'managed_to'
+
+type Prompt = { title: string; body: string; instruction: string; model: string }
+type Pattern = {
+  id: PatternId
+  name: string
+  category: 'Времена и aspect' | 'Модальность' | 'Разговорные конструкции'
+  level: string
+  form: string
+  meaning: string
+  repair: string
+  prompts: Record<Stage, Prompt>
+}
+type Attempt = { transcript: string; latencyMs: number; score: 0 | 1 | 2 }
+type Attempts = Partial<Record<Stage, Attempt>>
+type Progress = {
+  strength: number
+  sessions: number
+  bestLatencyMs: number | null
+  lastScore: number
+  nextDueAt: string
+}
+type ProgressMap = Partial<Record<PatternId, Progress>>
 
 type SpeechRecognitionLike = {
   lang: string
@@ -21,335 +55,254 @@ type SpeechRecognitionLike = {
   onend: (() => void) | null
 }
 
-type Prompt = {
-  title: string
-  body: string
-  instruction: string
-  model: string
-}
-
-type Pattern = {
-  id: PatternId
-  chooser: string
-  level: string
-  form: string
-  repair: string
-  prompts: Record<ActiveStage, Prompt>
-}
-
-type Attempt = {
-  transcript: string
-  latencyMs: number
-  score: 0 | 1 | 2
-}
-
-type Attempts = Partial<Record<ActiveStage, Attempt>>
-
 const COLORS = {
-  navy: '#0f1b3d', amber: '#f59e0b', pale: '#fff8ed', ink: '#17213f',
-  muted: '#667085', green: '#15803d', red: '#b42318', line: '#eadfce',
+  navy: '#0f1b3d', amber: '#f59e0b', pale: '#fff8ed', ink: '#17213f', muted: '#667085',
+  green: '#15803d', red: '#b42318', line: '#eadfce', bluePale: '#eef4ff',
 }
-
-const STORAGE_KEY = 'ef_language_retrieval_lab_v1'
+const STORAGE_KEY = 'ef_language_retrieval_progress_v2'
+const STAGES: Stage[] = ['baseline', 'retry', 'transfer', 'delayed']
 
 const PATTERNS: Pattern[] = [
   {
-    id: 'wish_past',
-    chooser: 'Сожаление о прошлом',
-    level: 'B1–B2',
-    form: 'I wish + had + V3',
-    repair: 'Когда жалеешь о прошлом, отодвинь действие ещё на один шаг назад: wish + past perfect.',
+    id: 'wish_past', name: 'Сожаление о прошлом', category: 'Времена и aspect', level: 'B1–B2',
+    form: 'wish + had + V3',
+    meaning: 'Сожаление о том, что в прошлом произошло иначе.',
+    repair: 'Отодвинь прошлое ещё на шаг назад: после wish используй past perfect.',
     prompts: {
-      baseline: {
-        title: 'Ты отказался от работы год назад. Сейчас жалеешь.',
-        body: 'Та работа была интереснее и лучше оплачивалась. Сейчас ты всё ещё на старом месте.',
-        instruction: 'Скажи по-английски: «Жаль, что я тогда не принял ту работу».',
-        model: "I wish I'd taken that job.",
-      },
-      retry: {
-        title: 'Вчера ты лёг слишком поздно.',
-        body: 'Сегодня весь день сонный и ничего не соображаешь.',
-        instruction: 'Скажи: «Жаль, что я не лёг раньше».',
-        model: "I wish I'd gone to bed earlier.",
-      },
-      transfer: {
-        title: 'Вы выбрали дешёвый ноутбук.',
-        body: 'Теперь он постоянно тормозит, и вы уже пожалели об экономии.',
-        instruction: 'Скажи естественно: «Жаль, что мы купили более дешёвый вариант».',
-        model: "I wish we hadn't bought the cheaper one.",
-      },
-      delayed: {
-        title: 'Цена билета выросла вдвое.',
-        body: 'Неделю назад он стоил дёшево, но ты отложил покупку.',
-        instruction: 'Скажи: «Жаль, что я не забронировал его раньше».',
-        model: "I wish I'd booked it earlier.",
-      },
+      baseline: { title: 'Ты отказался от работы год назад. Сейчас жалеешь.', body: 'Та работа была интереснее и лучше оплачивалась.', instruction: 'Скажи: «Жаль, что я тогда не принял ту работу».', model: "I wish I'd taken that job." },
+      retry: { title: 'Вчера ты лёг слишком поздно.', body: 'Сегодня весь день сонный.', instruction: 'Скажи: «Жаль, что я не лёг раньше».', model: "I wish I'd gone to bed earlier." },
+      transfer: { title: 'Вы выбрали дешёвый ноутбук.', body: 'Теперь он постоянно тормозит.', instruction: 'Скажи: «Жаль, что мы купили более дешёвый вариант».', model: "I wish we hadn't bought the cheaper one." },
+      delayed: { title: 'Ты не забронировал столик заранее.', body: 'Теперь в ресторане нет мест.', instruction: 'Скажи: «Жаль, что я не забронировал заранее».', model: "I wish I'd booked in advance." },
     },
   },
   {
-    id: 'end_up',
-    chooser: 'Как всё вышло в итоге',
-    level: 'B1–B2',
-    form: 'end up + -ing',
-    repair: 'Когда реальный итог отличается от плана или ожидания: end up + действие с -ing.',
+    id: 'should_have', name: 'Надо было сделать', category: 'Модальность', level: 'B1–B2',
+    form: 'should have + V3', meaning: 'Правильное действие в прошлом, которое не произошло.',
+    repair: 'Когда оцениваешь прошлое решение задним числом: should have + V3.',
     prompts: {
-      baseline: {
-        title: 'Вы собирались зайти на час.',
-        body: 'Разговор затянулся, и в гостях вы просидели почти до полуночи.',
-        instruction: 'Скажи: «В итоге мы просидели там три часа».',
-        model: 'We ended up staying there for three hours.',
-      },
-      retry: {
-        title: 'Ты зашёл в магазин только за хлебом.',
-        body: 'Но увидел скидки и купил ещё кучу продуктов.',
-        instruction: 'Скажи: «В итоге я купил гораздо больше, чем собирался».',
-        model: 'I ended up buying much more than I planned.',
-      },
-      transfer: {
-        title: 'Она хотела работать в маркетинге.',
-        body: 'После университета всё сложилось иначе: теперь она преподаёт английский.',
-        instruction: 'Скажи: «В итоге она стала преподавать английский».',
-        model: 'She ended up teaching English.',
-      },
-      delayed: {
-        title: 'Ты искал комнату в квартире.',
-        body: 'После недели поисков нашёл маленькую студию и снял её.',
-        instruction: 'Скажи: «В итоге я снял студию».',
-        model: 'I ended up renting a studio.',
-      },
+      baseline: { title: 'Ты забыл зарядить телефон перед поездкой.', body: 'В дороге батарея села.', instruction: 'Скажи: «Надо было зарядить его вчера».', model: 'I should have charged it yesterday.' },
+      retry: { title: 'Вы выехали слишком поздно.', body: 'Теперь стоите в пробке.', instruction: 'Скажи: «Нам надо было выехать раньше».', model: 'We should have left earlier.' },
+      transfer: { title: 'Друг проигнорировал письмо от банка.', body: 'Теперь возникла проблема.', instruction: 'Скажи ему: «Тебе надо было ответить сразу».', model: 'You should have replied straight away.' },
+      delayed: { title: 'Ты купил билет в последний момент.', body: 'Он оказался очень дорогим.', instruction: 'Скажи: «Надо было купить его раньше».', model: 'I should have bought it earlier.' },
     },
   },
   {
-    id: 'about_to',
-    chooser: 'Прямо собирался что-то сделать',
-    level: 'B1',
-    form: 'be about to + verb',
-    repair: 'Для действия, которое вот-вот должно было произойти: be about to + базовая форма глагола.',
+    id: 'mixed_conditional', name: 'Прошлое → результат сейчас', category: 'Времена и aspect', level: 'B2',
+    form: 'If + had + V3, would + V now', meaning: 'Нереальное прошлое, последствия которого важны сейчас.',
+    repair: 'Причина — в прошлом, результат — сейчас: if + past perfect → would + глагол сейчас.',
     prompts: {
-      baseline: {
-        title: 'Ты уже стоял у двери в пальто.',
-        body: 'И тут тебе позвонил старый друг.',
-        instruction: 'Скажи: «Я как раз собирался уходить, когда ты позвонил».',
-        model: 'I was about to leave when you called.',
-      },
-      retry: {
-        title: 'Она взяла телефон в руки.',
-        body: 'В этот момент сообщение от тебя пришло первым.',
-        instruction: 'Скажи: «Она как раз собиралась тебе позвонить».',
-        model: 'She was about to call you.',
-      },
-      transfer: {
-        title: 'Вы почти отменили поездку.',
-        body: 'За минуту до отмены авиакомпания прислала хорошие новости.',
-        instruction: 'Скажи: «Мы уже собирались отменить поездку».',
-        model: 'We were about to cancel the trip.',
-      },
-      delayed: {
-        title: 'Ты открыл чат со мной.',
-        body: 'Но моё сообщение пришло раньше, чем ты успел написать.',
-        instruction: 'Скажи: «Я как раз собирался тебе написать».',
-        model: 'I was about to message you.',
-      },
+      baseline: { title: 'Ты лёг поздно и сейчас еле держишься.', body: 'Причина была вчера, результат — сейчас.', instruction: 'Скажи: «Если бы я лёг раньше, я бы сейчас не был таким уставшим».', model: "If I'd gone to bed earlier, I wouldn't be so tired now." },
+      retry: { title: 'Она не учила французский в школе.', body: 'Сейчас не может общаться с клиентом из Парижа.', instruction: 'Скажи это одним условным предложением.', model: "If she'd learned French at school, she could talk to the client now." },
+      transfer: { title: 'Ты отказался от той работы.', body: 'Сейчас по-прежнему работаешь на старом месте.', instruction: 'Скажи: «Если бы я принял ту работу, я бы сейчас здесь не работал».', model: "If I'd taken that job, I wouldn't be working here now." },
+      delayed: { title: 'Мы купили старую машину.', body: 'Теперь постоянно тратимся на ремонт.', instruction: 'Скажи: «Если бы мы купили новую, мы бы сейчас не ремонтировали её каждую неделю».', model: "If we'd bought a new one, we wouldn't be fixing it every week now." },
     },
   },
   {
-    id: 'might_as_well',
-    chooser: 'Раз уж так — можно и…',
-    level: 'B2',
-    form: 'might as well + verb',
-    repair: 'Когда обстоятельства уже сложились и разумно воспользоваться ситуацией: might as well + глагол.',
+    id: 'present_perfect_continuous', name: 'Длится до настоящего момента', category: 'Времена и aspect', level: 'B1–B2',
+    form: 'have/has been + -ing', meaning: 'Действие началось раньше и продолжается или только что закончилось с видимым эффектом.',
+    repair: 'Подчеркни процесс, который тянется до сейчас: have/has been + -ing.',
     prompts: {
-      baseline: {
-        title: 'Автобус только что ушёл.',
-        body: 'Следующий через двадцать минут, а пешком идти пятнадцать.',
-        instruction: 'Скажи: «Можно тогда и пешком пойти».',
-        model: 'We might as well walk.',
-      },
-      retry: {
-        title: 'Уже поздно готовить.',
-        body: 'Все остальные всё равно заказывают пиццу.',
-        instruction: 'Скажи: «Тогда можно и нам заказать».',
-        model: 'We might as well order some too.',
-      },
-      transfer: {
-        title: 'Вы приехали на встречу на сорок минут раньше.',
-        body: 'Через дорогу есть хорошее кафе.',
-        instruction: 'Скажи: «Раз уж мы здесь, можно выпить кофе».',
-        model: 'We might as well grab a coffee.',
-      },
-      delayed: {
-        title: 'До дождя осталось минут десять.',
-        body: 'Вы уже почти у магазина, который собирались посетить позже.',
-        instruction: 'Скажи: «Можно зайти туда сейчас».',
-        model: 'We might as well go in now.',
-      },
+      baseline: { title: 'Ты работаешь над отчётом с самого утра.', body: 'И всё ещё работаешь.', instruction: 'Скажи: «Я работаю над этим отчётом с восьми утра».', model: "I've been working on this report since eight." },
+      retry: { title: 'На улице дождь уже три часа.', body: 'Он всё ещё идёт.', instruction: 'Скажи: «Дождь идёт уже три часа».', model: "It's been raining for three hours." },
+      transfer: { title: 'Ты учишь французский последние полгода.', body: 'Процесс продолжается.', instruction: 'Скажи это естественно по-английски.', model: "I've been learning French for the last six months." },
+      delayed: { title: 'Она ждёт врача уже сорок минут.', body: 'Врач пока не пришёл.', instruction: 'Скажи: «Она ждёт уже сорок минут».', model: "She's been waiting for forty minutes." },
     },
   },
   {
-    id: 'mixed_conditional',
-    chooser: 'Прошлое → результат сейчас',
-    level: 'B2–C1',
-    form: 'If + had + V3 → would + verb now',
-    repair: 'Причина нереальна в прошлом, а последствие относится к настоящему: past perfect в if-части + would сейчас.',
+    id: 'used_to', name: 'Раньше было регулярно', category: 'Времена и aspect', level: 'B1',
+    form: 'used to + verb', meaning: 'Прошлая привычка или состояние, которых сейчас уже нет.',
+    repair: 'Для регулярного прошлого, которое изменилось: used to + начальная форма.',
     prompts: {
-      baseline: {
-        title: 'Ты лёг очень поздно вчера.',
-        body: 'Сейчас сидишь совершенно разбитый.',
-        instruction: 'Скажи: «Если бы я вчера лёг раньше, я бы сейчас не был таким уставшим».',
-        model: "If I'd gone to bed earlier, I wouldn't be so tired now.",
-      },
-      retry: {
-        title: 'Она отказалась от работы в Лондоне.',
-        body: 'Если бы согласилась тогда, сейчас жила бы там.',
-        instruction: 'Скажи это одним естественным предложением.',
-        model: "If she'd taken that job, she'd be living in London now.",
-      },
-      transfer: {
-        title: 'Вы купили слишком дешёвый сервер.',
-        body: 'Теперь постоянно тратите время на его ремонт.',
-        instruction: 'Скажи: «Если бы мы не купили этот сервер, мы бы сейчас не тратили столько времени на ремонт».',
-        model: "If we hadn't bought this server, we wouldn't be spending so much time fixing it now.",
-      },
-      delayed: {
-        title: 'Ты не начал французский пять лет назад.',
-        body: 'Если бы начал, сейчас уже говорил бы свободно.',
-        instruction: 'Скажи это по-английски.',
-        model: "If I'd started French five years ago, I'd speak it fluently now.",
-      },
+      baseline: { title: 'Раньше ты курил, но бросил.', body: 'Сейчас не куришь.', instruction: 'Скажи: «Я раньше курил».', model: 'I used to smoke.' },
+      retry: { title: 'Когда она была ребёнком, семья жила у моря.', body: 'Сейчас они живут в другом месте.', instruction: 'Скажи: «Они раньше жили у моря».', model: 'They used to live by the sea.' },
+      transfer: { title: 'Ты раньше часто ездил на работу на велосипеде.', body: 'Теперь ездишь на машине.', instruction: 'Скажи это одной естественной фразой.', model: 'I used to cycle to work.' },
+      delayed: { title: 'В этом здании раньше был кинотеатр.', body: 'Теперь здесь супермаркет.', instruction: 'Скажи: «Здесь раньше был кинотеатр».', model: 'There used to be a cinema here.' },
+    },
+  },
+  {
+    id: 'about_to', name: 'Вот-вот собираюсь', category: 'Разговорные конструкции', level: 'B1',
+    form: 'be about to + verb', meaning: 'Действие должно произойти буквально сейчас.',
+    repair: 'Для «вот-вот» используй be about to + глагол.',
+    prompts: {
+      baseline: { title: 'Ты уже надеваешь пальто.', body: 'Через минуту выходишь.', instruction: 'Скажи: «Я как раз собирался выходить».', model: 'I was just about to leave.' },
+      retry: { title: 'Телефон в руке.', body: 'Ты собирался ему позвонить именно сейчас.', instruction: 'Скажи: «Я как раз собирался тебе звонить».', model: 'I was just about to call you.' },
+      transfer: { title: 'Поезд вот-вот отправится.', body: 'Двери уже закрываются.', instruction: 'Скажи: «Поезд сейчас отправится».', model: 'The train is about to leave.' },
+      delayed: { title: 'Ты собираешься начать встречу.', body: 'Все уже подключились.', instruction: 'Скажи: «Мы вот-вот начнём».', model: "We're about to start." },
+    },
+  },
+  {
+    id: 'end_up', name: 'В итоге получилось', category: 'Разговорные конструкции', level: 'B1–B2',
+    form: 'end up + -ing', meaning: 'Неожиданный или конечный результат цепочки событий.',
+    repair: 'Для «в итоге» после end up обычно идёт -ing.',
+    prompts: {
+      baseline: { title: 'Ты хотел зайти на десять минут.', body: 'Но просидел там весь вечер.', instruction: 'Скажи: «В итоге я остался там на весь вечер».', model: 'I ended up staying there all evening.' },
+      retry: { title: 'Вы спорили о маршруте.', body: 'В итоге поехали поездом.', instruction: 'Скажи это через end up.', model: 'We ended up taking the train.' },
+      transfer: { title: 'Она не собиралась покупать машину.', body: 'Но после долгих поисков всё-таки купила.', instruction: 'Скажи: «В итоге она купила машину».', model: 'She ended up buying a car.' },
+      delayed: { title: 'Ты начал смотреть одну серию.', body: 'В итоге посмотрел весь сезон.', instruction: 'Скажи это естественно.', model: 'I ended up watching the whole season.' },
+    },
+  },
+  {
+    id: 'might_as_well', name: 'Раз уж так — можно и…', category: 'Модальность', level: 'B2',
+    form: 'might as well + verb', meaning: 'Практичный выбор, когда альтернативы не лучше.',
+    repair: 'Когда «раз уж всё равно…»: might as well + глагол.',
+    prompts: {
+      baseline: { title: 'Автобус только что ушёл.', body: 'Следующий через сорок минут, а пешком идти двадцать.', instruction: 'Скажи: «Тогда уж можем пойти пешком».', model: 'We might as well walk.' },
+      retry: { title: 'Ты уже открыл документ.', body: 'Осталось исправить всего две строки.', instruction: 'Скажи: «Раз уж открыл, можно сразу закончить».', model: 'I might as well finish it now.' },
+      transfer: { title: 'Вы приехали слишком рано.', body: 'Кафе рядом уже открыто.', instruction: 'Скажи: «Можно тогда выпить кофе».', model: 'We might as well get a coffee.' },
+      delayed: { title: 'Дождь всё равно не прекращается.', body: 'Вы уже промокли.', instruction: 'Скажи: «Можно тогда продолжать идти».', model: 'We might as well keep going.' },
+    },
+  },
+  {
+    id: 'no_point_in', name: 'Нет смысла', category: 'Разговорные конструкции', level: 'B1–B2',
+    form: "there's no point in + -ing", meaning: 'Действие бесполезно или уже ничего не изменит.',
+    repair: 'После no point in идёт -ing, не infinitive.',
+    prompts: {
+      baseline: { title: 'Магазин уже закрыт.', body: 'До него двадцать минут пешком.', instruction: 'Скажи: «Нет смысла туда сейчас идти».', model: "There's no point in going there now." },
+      retry: { title: 'Решение уже принято.', body: 'Спорить с ним сейчас ничего не изменит.', instruction: 'Скажи: «Нет смысла сейчас спорить».', model: "There's no point in arguing now." },
+      transfer: { title: 'Поезд уже ушёл.', body: 'Бежать на платформу поздно.', instruction: 'Скажи это через no point.', model: "There's no point in running now." },
+      delayed: { title: 'Ты уже знаешь ответ.', body: 'Перечитывать всю статью не нужно.', instruction: 'Скажи: «Нет смысла читать всё снова».', model: "There's no point in reading it all again." },
+    },
+  },
+  {
+    id: 'would_rather', name: 'Я бы предпочёл', category: 'Разговорные конструкции', level: 'B1–B2',
+    form: "I'd rather + verb", meaning: 'Прямое, разговорное предпочтение.',
+    repair: 'После would rather — глагол без to.',
+    prompts: {
+      baseline: { title: 'Тебе предлагают встречу вечером.', body: 'Ты предпочитаешь утро.', instruction: 'Скажи: «Я бы лучше встретился утром».', model: "I'd rather meet in the morning." },
+      retry: { title: 'Все хотят заказать еду.', body: 'Ты предпочёл бы приготовить дома.', instruction: 'Скажи это через rather.', model: "I'd rather cook at home." },
+      transfer: { title: 'Тебя спрашивают: поезд или самолёт?', body: 'Ты предпочитаешь поезд.', instruction: 'Ответь одной естественной фразой.', model: "I'd rather take the train." },
+      delayed: { title: 'Тебе предлагают обсудить это по телефону.', body: 'Ты предпочитаешь поговорить лично.', instruction: 'Скажи: «Я бы лучше поговорил лично».', model: "I'd rather talk in person." },
+    },
+  },
+  {
+    id: 'supposed_to', name: 'По идее / должен был', category: 'Модальность', level: 'B1–B2',
+    form: 'be supposed to + verb', meaning: 'Ожидание, договорённость или правило.',
+    repair: 'Для «по идее / согласно плану» используй be supposed to.',
+    prompts: {
+      baseline: { title: 'Курьер должен был приехать к шести.', body: 'Уже семь, его нет.', instruction: 'Скажи: «Он должен был приехать к шести».', model: 'He was supposed to be here by six.' },
+      retry: { title: 'Встреча по плану начинается в девять.', body: 'Ты уточняешь время.', instruction: 'Скажи: «Мы должны начать в девять, верно?»', model: "We're supposed to start at nine, right?" },
+      transfer: { title: 'Этот файл нельзя отправлять наружу.', body: 'Таковы правила компании.', instruction: 'Скажи: «Мы не должны делиться этим файлом».', model: "We're not supposed to share this file." },
+      delayed: { title: 'По расписанию поезд приходит в 18:20.', body: 'Ты объясняешь другу.', instruction: 'Скажи: «По идее поезд должен прийти в 18:20».', model: 'The train is supposed to arrive at 6:20.' },
+    },
+  },
+  {
+    id: 'managed_to', name: 'Всё-таки удалось', category: 'Разговорные конструкции', level: 'B1–B2',
+    form: 'manage to + verb', meaning: 'Удалось сделать что-то несмотря на трудность.',
+    repair: 'Когда важна трудность и успешный результат: manage to + глагол.',
+    prompts: {
+      baseline: { title: 'Ты почти опоздал на поезд.', body: 'Но успел буквально в последнюю минуту.', instruction: 'Скажи: «Мне всё-таки удалось успеть на поезд».', model: 'I managed to catch the train.' },
+      retry: { title: 'Задача была сложной.', body: 'Но команда закончила её сегодня.', instruction: 'Скажи: «Нам удалось закончить сегодня».', model: 'We managed to finish it today.' },
+      transfer: { title: 'Она долго искала билет.', body: 'В итоге нашла один на пятницу.', instruction: 'Скажи: «Ей удалось найти билет на пятницу».', model: 'She managed to find a ticket for Friday.' },
+      delayed: { title: 'Ты не знал адрес.', body: 'Но всё-таки нашёл дом без карты.', instruction: 'Скажи: «Мне удалось найти его без карты».', model: 'I managed to find it without a map.' },
     },
   },
 ]
 
-function normalize(input: string) {
-  return input.toLowerCase().replace(/[’]/g, "'").replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim()
+function normalize(text: string) {
+  return text.toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-function scorePattern(pattern: PatternId, input: string): 0 | 1 | 2 {
-  const s = normalize(input)
-  if (!s) return 0
-
-  if (pattern === 'wish_past') {
-    const full = /\bi wish (?:i|we|you|he|she|they)(?:'d| had| hadn't| had not)\b/.test(s)
-    if (full) return 2
-    if (/\bi wish\b/.test(s) || /\b(?:had|hadn't|had not)\b/.test(s)) return 1
-    return 0
+function scoreTarget(id: PatternId, raw: string): 0 | 1 | 2 {
+  const t = normalize(raw)
+  const tests: Record<PatternId, { full: RegExp; partial: RegExp }> = {
+    wish_past: { full: /\bwish\b.*\b(had|hadn't|had not|'d)\b/, partial: /\bwish\b/ },
+    should_have: { full: /\bshould\s+(have|'ve)\b/, partial: /\bshould\b/ },
+    mixed_conditional: { full: /\bif\b.*\b(had|hadn't|had not|'d)\b.*\b(would|wouldn't|would not|'d)\b/, partial: /\bif\b.*\b(would|could)\b/ },
+    present_perfect_continuous: { full: /\b(have|has|'ve|'s)\s+been\s+[a-z]+ing\b/, partial: /\bbeen\s+[a-z]+ing\b/ },
+    used_to: { full: /\bused to\b/, partial: /\bused\b/ },
+    about_to: { full: /\b(am|is|are|was|were|'m|'s|'re)\s+(just\s+)?about to\b/, partial: /\babout to\b/ },
+    end_up: { full: /\b(end|ended|ends|ending)\s+up\s+[a-z]+ing\b/, partial: /\bend(ed|s|ing)?\s+up\b/ },
+    might_as_well: { full: /\bmight as well\b/, partial: /\bmight\b.*\bwell\b/ },
+    no_point_in: { full: /\b(no point in|there's no point in|there is no point in)\b.*\b[a-z]+ing\b/, partial: /\bno point\b/ },
+    would_rather: { full: /\b(would rather|'d rather)\b/, partial: /\brather\b/ },
+    supposed_to: { full: /\b(am|is|are|was|were|'m|'s|'re)\s+(not\s+)?supposed to\b/, partial: /\bsupposed to\b/ },
+    managed_to: { full: /\b(manage|managed|manages)\s+to\b/, partial: /\bmanage(d|s)?\b/ },
   }
-
-  if (pattern === 'end_up') {
-    const full = /\b(?:end|ends|ended|ending) up(?:\s+\w+){0,2}\s+\w+ing\b/.test(s)
-    if (full) return 2
-    if (/\b(?:end|ends|ended|ending) up\b/.test(s)) return 1
-    return 0
-  }
-
-  if (pattern === 'about_to') {
-    const full = /\b(?:am|is|are|was|were) about to\s+\w+\b/.test(s) || /\b(?:i'm|he's|she's|we're|they're|you're) about to\s+\w+\b/.test(s)
-    if (full) return 2
-    if (/\babout to\b/.test(s)) return 1
-    return 0
-  }
-
-  if (pattern === 'might_as_well') {
-    if (/\bmight as well\s+\w+\b/.test(s)) return 2
-    if (/\bmight\b/.test(s) || /\bas well\b/.test(s)) return 1
-    return 0
-  }
-
-  const pastSide = /\bif\b.*(?:\bhad\b|\bhadn't\b|\bhad not\b|(?:i|we|you|he|she|they)'d\b)/.test(s)
-  const presentResult = /\b(?:would|wouldn't|would not|could|couldn't|might)\b/.test(s) || /\b(?:i|we|you|he|she|they)'d\b/.test(s)
-  if (pastSide && presentResult) return 2
-  if (pastSide || presentResult) return 1
+  if (tests[id].full.test(t)) return 2
+  if (tests[id].partial.test(t)) return 1
   return 0
 }
 
-function scoreLabel(score: 0 | 1 | 2) {
-  if (score === 2) return 'Паттерн извлечён'
-  if (score === 1) return 'Почти: форма не собралась целиком'
-  return 'Паттерн пока не пришёл'
+function dueLabel(progress?: Progress) {
+  if (!progress) return 'Новый'
+  const due = new Date(progress.nextDueAt).getTime()
+  if (due <= Date.now()) return 'Пора повторить'
+  const days = Math.max(1, Math.ceil((due - Date.now()) / 86400000))
+  return `Через ${days} дн.`
 }
 
 export default function RetrievalLabPage() {
-  const [patternId, setPatternId] = useState<PatternId | null>(null)
+  const [view, setView] = useState<View>('library')
+  const [patternId, setPatternId] = useState<PatternId>('wish_past')
   const [stage, setStage] = useState<Stage>('baseline')
   const [attempts, setAttempts] = useState<Attempts>({})
-  const [recording, setRecording] = useState(false)
-  const [error, setError] = useState('')
+  const [progress, setProgress] = useState<ProgressMap>({})
   const [typed, setTyped] = useState('')
   const [showTyped, setShowTyped] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [error, setError] = useState('')
   const shownAtRef = useRef(Date.now())
-  const speechStartedRef = useRef<number | null>(null)
+  const speechAtRef = useRef<number | null>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
 
-  const pattern = PATTERNS.find((p) => p.id === patternId) ?? null
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) setProgress(JSON.parse(raw) as ProgressMap)
+    } catch {}
+  }, [])
 
   useEffect(() => {
     shownAtRef.current = Date.now()
-    speechStartedRef.current = null
+    speechAtRef.current = null
     setTyped('')
     setShowTyped(false)
     setError('')
     try { recognitionRef.current?.abort() } catch {}
     recognitionRef.current = null
     setRecording(false)
-  }, [stage, patternId])
+  }, [stage, patternId, view])
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const saved = JSON.parse(raw) as { patternId?: PatternId; attempts?: Attempts; nextProbeAt?: string; completed?: boolean }
-      if (saved.completed || !saved.patternId || !saved.attempts?.transfer || !saved.nextProbeAt) return
-      if (new Date(saved.nextProbeAt).getTime() <= Date.now()) {
-        setPatternId(saved.patternId)
-        setAttempts(saved.attempts)
-        setStage('delayed')
-      }
-    } catch {}
-  }, [])
+  const pattern = useMemo(() => PATTERNS.find((p) => p.id === patternId)!, [patternId])
+  const prompt = pattern.prompts[stage]
+  const attempt = attempts[stage]
+
+  function persist(next: ProgressMap) {
+    setProgress(next)
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch {}
+  }
 
   function choosePattern(id: PatternId) {
-    try { localStorage.removeItem(STORAGE_KEY) } catch {}
     setPatternId(id)
     setAttempts({})
     setStage('baseline')
+    setView('practice')
   }
 
-  function recordAttempt(transcript: string, latencyMs: number) {
-    if (!pattern || stage === 'done') return
-    const score = scorePattern(pattern.id, transcript)
-    const attempt: Attempt = { transcript, latencyMs, score }
-    const next = { ...attempts, [stage]: attempt }
-    setAttempts(next)
-
-    if (stage === 'transfer') {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          patternId: pattern.id,
-          attempts: next,
-          nextProbeAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          completed: false,
-        }))
-      } catch {}
-    }
-    if (stage === 'delayed') {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ patternId: pattern.id, attempts: next, completed: true })) } catch {}
-    }
+  function chooseRecommended() {
+    const now = Date.now()
+    const ranked = [...PATTERNS].sort((a, b) => {
+      const pa = progress[a.id], pb = progress[b.id]
+      const adue = !pa || new Date(pa.nextDueAt).getTime() <= now ? 0 : 1
+      const bdue = !pb || new Date(pb.nextDueAt).getTime() <= now ? 0 : 1
+      if (adue !== bdue) return adue - bdue
+      return (pa?.strength ?? -1) - (pb?.strength ?? -1)
+    })
+    choosePattern(ranked[0].id)
   }
 
   function startVoice() {
     setError('')
-    if (!pattern || stage === 'done') return
     const w = window as typeof window & {
       SpeechRecognition?: new () => SpeechRecognitionLike
       webkitSpeechRecognition?: new () => SpeechRecognitionLike
     }
     const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition
     if (!SR) {
-      setError('Голосовой ввод не поддерживается этим браузером. Открой в Chrome или используй текст.')
+      setError('Голосовой ввод здесь не поддерживается. Открой в Chrome или используй текст.')
       setShowTyped(true)
       return
     }
-
     try {
       const rec = new SR()
       rec.lang = 'en-US'
@@ -358,31 +311,28 @@ export default function RetrievalLabPage() {
       rec.maxAlternatives = 1
       recognitionRef.current = rec
       rec.onstart = () => setRecording(true)
-      rec.onspeechstart = () => { speechStartedRef.current = Date.now() }
+      rec.onspeechstart = () => { speechAtRef.current = Date.now() }
       rec.onresult = (event) => {
         const last = event.results[event.results.length - 1]
         const transcript = last?.[0]?.transcript?.trim()
         setRecording(false)
-        if (!transcript) {
-          setError('Не расслышал ответ. Попробуй ещё раз или напечатай.')
-          return
-        }
-        const started = speechStartedRef.current ?? Date.now()
-        recordAttempt(transcript, Math.max(0, started - shownAtRef.current))
+        if (!transcript) { setError('Не расслышал. Попробуй ещё раз.'); return }
+        submitAnswer(transcript, Math.max(0, (speechAtRef.current ?? Date.now()) - shownAtRef.current))
       }
       rec.onerror = (event) => {
         setRecording(false)
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') setError('Браузер не дал доступ к распознаванию речи. Разреши микрофон или используй текст.')
-        else if (event.error === 'no-speech') setError('Речь не услышана. Нажми ещё раз и ответь.')
-        else setError('Голосовой ввод не сработал. Можно сразу напечатать ответ.')
+        const code = event.error || ''
+        if (code === 'no-speech') setError('Речь не услышана. Нажми ещё раз и ответь.')
+        else if (code === 'not-allowed' || code === 'service-not-allowed') setError('Браузер не разрешил распознавание речи. Используй текст или разреши микрофон.')
+        else setError('Голосовой ввод не сработал. Можно пройти упражнение текстом.')
         setShowTyped(true)
       }
       rec.onend = () => setRecording(false)
       rec.start()
     } catch {
       setRecording(false)
-      setError('Не удалось запустить голосовой ввод. Можно пройти прототип текстом.')
       setShowTyped(true)
+      setError('Не удалось запустить голосовой ввод. Используй текст.')
     }
   }
 
@@ -391,182 +341,171 @@ export default function RetrievalLabPage() {
     setRecording(false)
   }
 
+  function submitAnswer(transcript: string, latencyMs: number) {
+    const score = scoreTarget(pattern.id, transcript)
+    setAttempts((prev) => ({ ...prev, [stage]: { transcript, latencyMs, score } }))
+  }
+
   function submitTyped() {
     const text = typed.trim()
-    if (!text || !pattern || stage === 'done') return
-    recordAttempt(text, Math.max(0, Date.now() - shownAtRef.current))
+    if (!text) return
+    submitAnswer(text, Math.max(0, Date.now() - shownAtRef.current))
   }
 
   function advance() {
-    if (stage === 'baseline') setStage('retry')
-    else if (stage === 'retry') setStage('transfer')
-    else if (stage === 'transfer') setStage('delayed')
-    else if (stage === 'delayed') setStage('done')
+    const index = STAGES.indexOf(stage)
+    if (index < STAGES.length - 1) {
+      setStage(STAGES[index + 1])
+      return
+    }
+    const completed = attempts.delayed ? attempts : { ...attempts }
+    const rows = STAGES.map((s) => completed[s]).filter(Boolean) as Attempt[]
+    const total = rows.reduce((sum, row) => sum + row.score, 0)
+    const avg = rows.length ? total / (rows.length * 2) : 0
+    const strength = Math.max(0, Math.min(5, Math.round(avg * 5)))
+    const bestLatencyMs = rows.length ? Math.min(...rows.map((r) => r.latencyMs)) : null
+    const days = strength <= 1 ? 1 : strength === 2 ? 2 : strength === 3 ? 3 : strength === 4 ? 7 : 14
+    const old = progress[pattern.id]
+    const next: ProgressMap = {
+      ...progress,
+      [pattern.id]: {
+        strength,
+        sessions: (old?.sessions ?? 0) + 1,
+        bestLatencyMs: old?.bestLatencyMs == null ? bestLatencyMs : bestLatencyMs == null ? old.bestLatencyMs : Math.min(old.bestLatencyMs, bestLatencyMs),
+        lastScore: total,
+        nextDueAt: new Date(Date.now() + days * 86400000).toISOString(),
+      },
+    }
+    persist(next)
+    setView('result')
   }
 
-  function restartPattern() {
+  function resetAll() {
     try { localStorage.removeItem(STORAGE_KEY) } catch {}
-    setAttempts({})
-    setStage('baseline')
+    setProgress({})
   }
 
-  function backToPatterns() {
-    try { localStorage.removeItem(STORAGE_KEY) } catch {}
-    setPatternId(null)
-    setAttempts({})
-    setStage('baseline')
-  }
-
-  if (!pattern) {
-    return <PatternChooser onChoose={choosePattern} />
-  }
-
-  if (stage === 'done') {
-    return <Result pattern={pattern} attempts={attempts} onAgain={restartPattern} onPatterns={backToPatterns} />
-  }
-
-  const current = pattern.prompts[stage]
-  const attempt = attempts[stage]
-  const progress = ({ baseline: 25, retry: 50, transfer: 75, delayed: 100 } as const)[stage]
-
-  return (
-    <main style={{ minHeight: '100vh', background: COLORS.pale, color: COLORS.ink, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '34px 20px 64px' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-          <div>
-            <div style={{ fontWeight: 850, color: COLORS.navy }}>Everyday Fluency</div>
-            <div style={{ fontSize: 13, color: COLORS.muted }}>Language Retrieval Lab · {pattern.chooser}</div>
-          </div>
-          <button onClick={backToPatterns} style={ghostButton}>Другой паттерн</button>
-        </header>
-
-        <div style={{ height: 5, background: '#eadfce', borderRadius: 99, overflow: 'hidden', marginBottom: 30 }}>
-          <div style={{ width: `${progress}%`, height: '100%', background: COLORS.amber, transition: 'width .2s' }} />
-        </div>
-
-        <p style={kicker}>{stage === 'baseline' ? '1 · Без подсказки' : stage === 'retry' ? '2 · Повторное извлечение' : stage === 'transfer' ? '3 · Новый контекст' : '4 · Blind probe'}</p>
-        <h1 style={{ fontSize: 'clamp(29px, 6vw, 43px)', lineHeight: 1.12, margin: '10px 0 18px', color: COLORS.navy }}>{current.title}</h1>
-        <p style={bodyText}>{current.body}</p>
-        <p style={{ ...bodyText, fontWeight: 780 }}>{current.instruction}</p>
-
-        {stage === 'delayed' && <div style={notice}>Сейчас это симуляция отложенной проверки. Если после TRANSFER закрыть страницу и вернуться завтра с этого же браузера, прототип поднимет этот probe автоматически.</div>}
-
-        {!attempt && (
-          <section style={{ marginTop: 28 }}>
-            <button onClick={recording ? stopVoice : startVoice} style={{ ...primaryButton, minWidth: 225, background: recording ? '#dc2626' : COLORS.navy, color: 'white' }}>
-              {recording ? '■ Остановить' : '🎙 Ответить голосом'}
-            </button>
-            {!recording && <button onClick={() => setShowTyped((v) => !v)} style={{ ...ghostButton, marginLeft: 10 }}>{showTyped ? 'Скрыть текст' : 'Или напечатать'}</button>}
-            {recording && <p style={{ color: COLORS.green, marginTop: 12, fontWeight: 750 }}>Слушаю…</p>}
-            {showTyped && <div style={{ marginTop: 16 }}><textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Say it in English…" rows={3} style={textarea} /><button onClick={submitTyped} disabled={!typed.trim()} style={{ ...primaryButton, marginTop: 10, opacity: typed.trim() ? 1 : .5 }}>Проверить</button></div>}
-            {error && <p style={{ color: COLORS.red, marginTop: 14 }}>{error}</p>}
-          </section>
-        )}
-
-        {attempt && (
-          <section style={{ marginTop: 30 }}>
-            <div style={quoteCard}><div style={smallLabel}>Ты сказал</div>“{attempt.transcript}”</div>
-            <div style={{ ...card, borderLeft: `5px solid ${attempt.score === 2 ? COLORS.green : attempt.score === 1 ? COLORS.amber : COLORS.red}` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><strong>{scoreLabel(attempt.score)}</strong><strong>{attempt.score}/2</strong></div>
-              <p style={{ margin: '10px 0 0', color: COLORS.muted, lineHeight: 1.55 }}>
-                {attempt.score === 2 ? 'Нужная конструкция появилась в самостоятельном ответе.' : attempt.score === 1 ? 'Часть конструкции появилась, но целевая форма не собралась полностью.' : 'Мысль можно было выразить, но нужная конструкция не извлеклась.'}
-              </p>
+  if (view === 'library') {
+    const completed = Object.keys(progress).length
+    return (
+      <main style={pageStyle}>
+        <div style={shellStyle}>
+          <header style={{ marginBottom: 30 }}>
+            <p style={kicker}>Everyday Fluency · Language Retrieval Lab</p>
+            <h1 style={hero}>Ты это знаешь. Теперь достань это за две секунды.</h1>
+            <p style={lead}>Прототип тренирует не правило и не «правильное поведение», а переход <b>смысл → языковая форма</b>. Сначала отвечаешь без подсказки, потом repair, новый контекст и blind probe.</p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 20 }}>
+              <button onClick={chooseRecommended} style={primaryButton}>Начать рекомендуемый паттерн →</button>
+              <button onClick={resetAll} style={ghostButton}>Сбросить прогресс</button>
             </div>
+            <p style={{ fontSize: 13, color: COLORS.muted, marginTop: 12 }}>Пройдено паттернов: {completed}/{PATTERNS.length}. Прогресс хранится только в этом браузере.</p>
+          </header>
 
-            {(stage === 'baseline' || attempt.score < 2) && (
-              <div style={{ ...card, background: '#fff7df' }}>
-                <div style={smallLabel}>Минимальный repair</div>
-                <p style={{ margin: '7px 0 8px', fontSize: 19, fontWeight: 850, color: COLORS.navy }}>{pattern.form}</p>
-                <p style={{ margin: '0 0 14px', lineHeight: 1.55 }}>{pattern.repair}</p>
-                <div style={smallLabel}>Один естественный вариант</div>
-                <p style={{ margin: '7px 0 0', fontSize: 18, fontWeight: 750 }}>“{current.model}”</p>
+          {(['Времена и aspect', 'Модальность', 'Разговорные конструкции'] as const).map((category) => (
+            <section key={category} style={{ marginTop: 30 }}>
+              <h2 style={{ color: COLORS.navy, fontSize: 20, marginBottom: 12 }}>{category}</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 12 }}>
+                {PATTERNS.filter((p) => p.category === category).map((p) => {
+                  const pr = progress[p.id]
+                  return (
+                    <button key={p.id} onClick={() => choosePattern(p.id)} style={patternCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                        <span style={{ ...chip, background: pr ? COLORS.bluePale : '#f6f1e9' }}>{dueLabel(pr)}</span>
+                        <span style={{ fontSize: 12, color: COLORS.muted }}>{p.level}</span>
+                      </div>
+                      <strong style={{ display: 'block', fontSize: 17, color: COLORS.navy, marginTop: 12 }}>{p.name}</strong>
+                      <span style={{ display: 'block', fontSize: 13, color: COLORS.muted, lineHeight: 1.45, marginTop: 6 }}>{p.meaning}</span>
+                      {pr && <span style={{ display: 'block', marginTop: 12, fontSize: 13, color: COLORS.green }}>Устойчивость {pr.strength}/5 · сессий {pr.sessions}</span>}
+                    </button>
+                  )
+                })}
               </div>
-            )}
-
-            {stage !== 'baseline' && attempt.score === 2 && <div style={notice}>Подсказка не понадобилась. На следующем экране меняется лексика и ситуация — проверяем, приходит ли конструкция снова.</div>}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 22, flexWrap: 'wrap' }}>
-              <button onClick={advance} style={primaryButton}>{stage === 'baseline' ? 'Попробовать ещё раз →' : stage === 'retry' ? 'Сменить контекст →' : stage === 'transfer' ? 'Blind probe сейчас →' : 'Показать итог →'}</button>
-              <span style={{ fontSize: 13, color: COLORS.muted }}>До начала ответа: {(attempt.latencyMs / 1000).toFixed(1)} с</span>
-            </div>
-          </section>
-        )}
-      </div>
-    </main>
-  )
-}
-
-function PatternChooser({ onChoose }: { onChoose: (id: PatternId) => void }) {
-  return (
-    <main style={{ minHeight: '100vh', background: COLORS.pale, color: COLORS.ink, fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '46px 20px 72px' }}>
-        <p style={kicker}>Language Retrieval Lab</p>
-        <h1 style={{ fontSize: 'clamp(32px, 7vw, 50px)', lineHeight: 1.08, color: COLORS.navy, margin: '10px 0 18px' }}>Не «как правильно себя вести».<br />А приходит ли нужный английский в речь.</h1>
-        <p style={{ ...bodyText, maxWidth: 680 }}>Выбери один смысл. Формулу заранее не показываем. Сначала ты говоришь сам, потом получаешь минимальный repair, переносишь конструкцию в другую ситуацию и проходишь blind probe.</p>
-        <div style={{ display: 'grid', gap: 12, marginTop: 28 }}>
-          {PATTERNS.map((p, index) => (
-            <button key={p.id} onClick={() => onChoose(p.id)} style={{ textAlign: 'left', border: `1px solid ${COLORS.line}`, background: 'white', borderRadius: 16, padding: '18px 20px', cursor: 'pointer', color: COLORS.ink, fontFamily: 'inherit' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'baseline' }}><strong style={{ fontSize: 18 }}>{index + 1}. {p.chooser}</strong><span style={{ color: COLORS.muted, fontSize: 13 }}>{p.level}</span></div>
-              <div style={{ marginTop: 6, color: COLORS.muted, fontSize: 14 }}>{index === 0 ? 'Начни с этого: быстро понятно, работает ли сама механика.' : 'Ещё один тип языкового извлечения.'}</div>
-            </button>
+            </section>
           ))}
         </div>
-      </div>
-    </main>
-  )
-}
+      </main>
+    )
+  }
 
-function Result({ pattern, attempts, onAgain, onPatterns }: { pattern: Pattern; attempts: Attempts; onAgain: () => void; onPatterns: () => void }) {
-  const rows = [
-    ['Без подсказки', attempts.baseline],
-    ['После repair', attempts.retry],
-    ['Новый контекст', attempts.transfer],
-    ['Blind probe', attempts.delayed],
-  ] as const
-  const b = attempts.baseline
-  const d = attempts.delayed
-  const delta = b && d ? (d.latencyMs - b.latencyMs) / 1000 : null
-  const immediateGain = b && d ? d.score - b.score : null
+  if (view === 'result') {
+    const rows = STAGES.map((s) => [s, attempts[s]] as const).filter(([, a]) => Boolean(a))
+    const names: Record<Stage, string> = { baseline: 'Без подсказки', retry: 'После repair', transfer: 'Новый контекст', delayed: 'Blind probe' }
+    const pr = progress[pattern.id]
+    return (
+      <main style={{ ...pageStyle, background: COLORS.navy, color: 'white' }}>
+        <div style={shellStyle}>
+          <p style={{ ...kicker, color: '#fbbf24' }}>Результат · {pattern.name}</p>
+          <h1 style={{ ...hero, color: 'white' }}>Это уже можно измерять как навык.</h1>
+          <p style={{ ...lead, color: '#cbd5e1' }}>Мы смотрели только одно: появляется ли целевая конструкция без подсказки и как быстро начинается ответ.</p>
+          <div style={{ display: 'grid', gap: 10, marginTop: 26 }}>
+            {rows.map(([s, a]) => a && <div key={s} style={{ background: '#172554', borderRadius: 14, padding: 16, display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 14 }}><span>{names[s]}</span><strong>{a.score}/2</strong><span style={{ color: '#fbbf24' }}>{(a.latencyMs / 1000).toFixed(1)} с</span></div>)}
+          </div>
+          {pr && <div style={{ marginTop: 18, padding: 18, borderRadius: 14, background: '#111c3f', border: '1px solid #334155' }}><strong>Текущее состояние: {pr.strength}/5</strong><p style={{ margin: '8px 0 0', color: '#cbd5e1' }}>Следующая проверка: {new Date(pr.nextDueAt).toLocaleDateString('ru-RU')}. Лучшее время до начала ответа: {pr.bestLatencyMs == null ? '—' : `${(pr.bestLatencyMs / 1000).toFixed(1)} с`}.</p></div>}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
+            <button onClick={() => { setAttempts({}); setStage('baseline'); setView('practice') }} style={{ ...primaryButton, background: COLORS.amber }}>Пройти этот паттерн ещё раз</button>
+            <button onClick={() => setView('library')} style={{ ...ghostButton, color: 'white', borderColor: '#64748b' }}>Вернуться к библиотеке</button>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  const stageNames: Record<Stage, string> = { baseline: '1 · Без подсказки', retry: '2 · Repair', transfer: '3 · Transfer', delayed: '4 · Blind probe' }
+  const stageIndex = STAGES.indexOf(stage)
+  const showRepair = stage === 'retry'
+  const showNoHint = stage === 'transfer' || stage === 'delayed'
 
   return (
-    <main style={{ minHeight: '100vh', background: COLORS.navy, color: 'white', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 20px 72px' }}>
-        <p style={{ ...kicker, color: '#fbbf24' }}>Итог · {pattern.chooser}</p>
-        <h1 style={{ fontSize: 'clamp(31px, 7vw, 47px)', lineHeight: 1.1, margin: '10px 0 16px' }}>Вот теперь мы измеряем именно язык.</h1>
-        <p style={{ color: '#cbd5e1', fontSize: 17, lineHeight: 1.6 }}>Цель: появилась ли конкретная конструкция без подсказки и стала ли она быстрее доступна при смене ситуации.</p>
-
-        <div style={{ margin: '28px 0', display: 'grid', gap: 10 }}>
-          {rows.map(([label, a]) => a && <div key={label} style={{ background: '#172554', borderRadius: 14, padding: '17px 18px', display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 16, alignItems: 'center' }}><span>{label}</span><strong>{a.score}/2</strong><span style={{ color: '#fbbf24' }}>{(a.latencyMs / 1000).toFixed(1)} с</span></div>)}
+    <main style={pageStyle}>
+      <div style={shellStyle}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 22 }}>
+          <button onClick={() => setView('library')} style={ghostButton}>← Библиотека</button>
+          <div style={{ textAlign: 'right' }}><div style={{ fontWeight: 800, color: COLORS.navy }}>{pattern.name}</div><div style={{ fontSize: 12, color: COLORS.muted }}>{pattern.level}</div></div>
         </div>
+        <div style={{ height: 5, background: '#eadfce', borderRadius: 9, overflow: 'hidden', marginBottom: 28 }}><div style={{ width: `${((stageIndex + 1) / 4) * 100}%`, height: '100%', background: COLORS.amber }} /></div>
+        <p style={kicker}>{stageNames[stage]}</p>
+        <h1 style={{ ...hero, fontSize: 'clamp(28px, 6vw, 42px)' }}>{prompt.title}</h1>
+        <p style={lead}>{prompt.body}</p>
+        <p style={{ ...lead, fontWeight: 750 }}>{prompt.instruction}</p>
 
-        <div style={{ background: '#111c3f', border: '1px solid #334155', borderRadius: 15, padding: 20, marginBottom: 14 }}>
-          <strong>Сигнал сегодняшней сессии</strong>
-          <p style={{ margin: '9px 0 0', color: '#cbd5e1', lineHeight: 1.55 }}>
-            {immediateGain != null && immediateGain > 0 ? `В simulated blind probe конструкция извлеклась лучше на ${immediateGain} балл(а).` : immediateGain === 0 ? 'В simulated blind probe качество извлечения не изменилось.' : 'В simulated blind probe результат стал слабее.'}
-            {delta != null ? ` Начало ответа: ${delta < 0 ? `${Math.abs(delta).toFixed(1)} с быстрее` : delta > 0 ? `${delta.toFixed(1)} с медленнее` : 'без изменения'}.` : ''}
-          </p>
-        </div>
+        {showRepair && <div style={repairCard}><div style={smallLabel}>Мини-repair</div><strong style={{ display: 'block', marginTop: 6 }}>{pattern.repair}</strong><div style={{ marginTop: 10, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 16 }}>{pattern.form}</div></div>}
+        {showNoHint && <div style={{ ...notice, background: stage === 'delayed' ? '#eef4ff' : '#fff7df' }}>{stage === 'delayed' ? 'Без формулы и без примера. Проверяем, всплывает ли конструкция сама.' : 'Формулу больше не показываем. Меняем контекст и проверяем перенос.'}</div>}
 
-        <div style={{ background: 'white', color: COLORS.ink, borderRadius: 16, padding: 22 }}>
-          <h2 style={{ margin: '0 0 10px', color: COLORS.navy }}>Что это доказывает — и чего не доказывает</h2>
-          <p style={{ lineHeight: 1.6, margin: 0 }}>Сегодня можно оценить саму механику retrieval → repair → transfer. <b>Закрепление она пока не доказывает:</b> для этого нужен настоящий blind probe завтра и через несколько дней. Именно разница между этими двумя проверками решит, есть ли здесь двигатель курса, а не просто удобное упражнение.</p>
-        </div>
+        {!attempt && <section style={{ marginTop: 26 }}>
+          <button onClick={recording ? stopVoice : startVoice} style={{ ...primaryButton, minWidth: 220, background: recording ? '#dc2626' : COLORS.navy, color: 'white' }}>{recording ? '■ Остановить' : '🎙 Ответить голосом'}</button>
+          {!recording && <button onClick={() => setShowTyped((v) => !v)} style={{ ...ghostButton, marginLeft: 10 }}>{showTyped ? 'Скрыть текст' : 'Или напечатать'}</button>}
+          {recording && <p style={{ color: COLORS.green, fontWeight: 700 }}>Слушаю…</p>}
+          {showTyped && <div style={{ marginTop: 14 }}><textarea rows={3} value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Your answer in English…" style={textarea} /><button onClick={submitTyped} disabled={!typed.trim()} style={{ ...primaryButton, marginTop: 9 }}>Проверить</button></div>}
+          {error && <p style={{ color: COLORS.red, marginTop: 12 }}>{error}</p>}
+        </section>}
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
-          <button onClick={onAgain} style={{ ...primaryButton, background: COLORS.amber, color: COLORS.navy }}>Тот же паттерн ещё раз</button>
-          <button onClick={onPatterns} style={{ ...ghostButton, borderColor: '#64748b', color: '#e2e8f0' }}>Другой паттерн</button>
-        </div>
+        {attempt && <section style={{ marginTop: 28 }}>
+          <div style={quoteCard}><div style={smallLabel}>Ты сказал</div><div style={{ marginTop: 6, fontSize: 19 }}>“{attempt.transcript}”</div></div>
+          <div style={{ ...card, borderLeft: `5px solid ${attempt.score === 2 ? COLORS.green : attempt.score === 1 ? COLORS.amber : COLORS.red}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><strong>{attempt.score === 2 ? 'Целевая конструкция появилась' : attempt.score === 1 ? 'Почти: конструкция узнаваема, но форма неполная' : 'Целевая конструкция не извлеклась'}</strong><strong>{attempt.score}/2</strong></div>
+            <p style={{ color: COLORS.muted, lineHeight: 1.55, margin: '10px 0 0' }}>До начала ответа: {(attempt.latencyMs / 1000).toFixed(1)} с</p>
+          </div>
+          {(stage === 'baseline' || attempt.score < 2) && <div style={repairCard}><div style={smallLabel}>Что забрать</div><p style={{ margin: '6px 0 8px', lineHeight: 1.55 }}>{pattern.repair}</p><div style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontWeight: 700 }}>{pattern.form}</div><p style={{ margin: '10px 0 0', fontSize: 17 }}><b>Пример:</b> “{prompt.model}”</p></div>}
+          {stage !== 'baseline' && attempt.score === 2 && <div style={{ ...notice, background: '#ecfdf3', borderColor: '#bbf7d0', color: '#166534' }}>Форма появилась без показа образца. Именно это и считаем успешным retrieval.</div>}
+          <button onClick={advance} style={{ ...primaryButton, marginTop: 18 }}>{stage === 'baseline' ? 'Сделать retry →' : stage === 'retry' ? 'Проверить transfer →' : stage === 'transfer' ? 'Blind probe →' : 'Показать результат →'}</button>
+        </section>}
       </div>
     </main>
   )
 }
 
+const pageStyle: React.CSSProperties = { minHeight: '100vh', background: COLORS.pale, color: COLORS.ink, fontFamily: 'system-ui, -apple-system, sans-serif' }
+const shellStyle: React.CSSProperties = { maxWidth: 760, margin: '0 auto', padding: '42px 20px 72px' }
 const kicker: React.CSSProperties = { margin: 0, textTransform: 'uppercase', letterSpacing: 1.4, color: COLORS.amber, fontSize: 12, fontWeight: 850 }
-const bodyText: React.CSSProperties = { fontSize: 17, lineHeight: 1.62, margin: '0 0 14px' }
-const primaryButton: React.CSSProperties = { border: 0, borderRadius: 10, background: COLORS.amber, color: COLORS.navy, padding: '13px 18px', fontWeight: 850, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit' }
-const ghostButton: React.CSSProperties = { border: '1px solid #d6d3d1', borderRadius: 10, background: 'transparent', color: COLORS.muted, padding: '9px 12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }
-const card: React.CSSProperties = { background: 'white', border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 18, marginTop: 14 }
-const quoteCard: React.CSSProperties = { background: '#fff', borderRadius: 14, padding: 18, fontSize: 18, lineHeight: 1.5, border: `1px solid ${COLORS.line}` }
+const hero: React.CSSProperties = { color: COLORS.navy, fontSize: 'clamp(34px, 7vw, 54px)', lineHeight: 1.08, margin: '10px 0 18px', letterSpacing: '-0.02em' }
+const lead: React.CSSProperties = { fontSize: 17, lineHeight: 1.62, margin: '0 0 14px' }
+const primaryButton: React.CSSProperties = { border: 0, borderRadius: 10, background: COLORS.amber, color: COLORS.navy, padding: '13px 18px', fontWeight: 800, fontSize: 15, cursor: 'pointer' }
+const ghostButton: React.CSSProperties = { border: '1px solid #d6d3d1', borderRadius: 10, background: 'transparent', color: COLORS.muted, padding: '10px 13px', fontWeight: 700, cursor: 'pointer' }
+const patternCard: React.CSSProperties = { textAlign: 'left', border: `1px solid ${COLORS.line}`, background: 'white', borderRadius: 14, padding: 16, cursor: 'pointer', fontFamily: 'inherit' }
+const chip: React.CSSProperties = { display: 'inline-block', borderRadius: 999, padding: '4px 8px', fontSize: 11, fontWeight: 800, color: COLORS.navy }
 const smallLabel: React.CSSProperties = { textTransform: 'uppercase', letterSpacing: 1, color: COLORS.muted, fontSize: 11, fontWeight: 850 }
-const notice: React.CSSProperties = { background: '#fff7df', border: '1px solid #f5d487', borderRadius: 12, padding: '13px 15px', fontSize: 14, lineHeight: 1.5, marginTop: 18 }
+const repairCard: React.CSSProperties = { marginTop: 18, background: '#fff7df', border: '1px solid #f5d487', borderRadius: 14, padding: 17, lineHeight: 1.5 }
+const notice: React.CSSProperties = { marginTop: 16, background: '#fff7df', border: '1px solid #f5d487', borderRadius: 12, padding: '13px 15px', fontSize: 14, lineHeight: 1.5 }
+const quoteCard: React.CSSProperties = { background: 'white', border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 17 }
+const card: React.CSSProperties = { background: 'white', border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 17, marginTop: 12 }
 const textarea: React.CSSProperties = { width: '100%', boxSizing: 'border-box', borderRadius: 10, border: '1px solid #d6d3d1', padding: 12, fontSize: 16, fontFamily: 'inherit', resize: 'vertical' }
