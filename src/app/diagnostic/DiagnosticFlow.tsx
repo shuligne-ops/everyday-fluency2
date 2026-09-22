@@ -13,6 +13,7 @@ type Contrast = {
 }
 type RetryAnalysis = { shifted: boolean; shift_note: string; still_present: string; residual_quote: string }
 type TransferAnalysis = { transfer_score: 0 | 1 | 2; score_label: string; what_worked: string; what_missing: string; quote: string }
+type SkillMemory = { strength: number; next_probe_at: string; last_latency_ms: number | null; best_latency_ms: number | null }
 
 type Props = {
   move: string
@@ -37,6 +38,7 @@ export default function DiagnosticFlow({ move, scenarios }: Props) {
   const [retryAnalysis, setRetryAnalysis] = useState<RetryAnalysis | null>(null)
   const [transferAnalysis, setTransferAnalysis] = useState<TransferAnalysis | null>(null)
   const [finalResult, setFinalResult] = useState<DiagnosticResultData | null>(null)
+  const [skillMemory, setSkillMemory] = useState<SkillMemory | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState('')
   // Новая загрузка страницы — новый проход. attempt_id намеренно не попадает в localStorage.
@@ -54,6 +56,19 @@ export default function DiagnosticFlow({ move, scenarios }: Props) {
     const json = await response.json()
     if (!response.ok) throw new Error(json.error || 'Не удалось разобрать ответ')
     return json.analysis
+  }
+
+  async function loadSkillMemory() {
+    const anonId = localStorage.getItem('ef_diag_anon')
+    if (!anonId) return
+    try {
+      const response = await fetch(`/api/skill-memory?user_key=${encodeURIComponent(anonId)}&move=${encodeURIComponent(move)}&attempt_id=${encodeURIComponent(attemptId)}`)
+      if (!response.ok) return
+      const json = await response.json()
+      setSkillMemory(json.skills?.[0] ?? null)
+    } catch {
+      // Prototype telemetry must never block the diagnostic.
+    }
   }
 
   async function handleTry(data: VoiceResult) {
@@ -93,6 +108,7 @@ export default function DiagnosticFlow({ move, scenarios }: Props) {
       const resultJson = await resultResponse.json()
       if (!resultResponse.ok) throw new Error(resultJson.error || 'Не удалось собрать итог')
       setFinalResult(resultJson.result as DiagnosticResultData)
+      await loadSkillMemory()
       setPhase('done')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка разбора TRANSFER')
@@ -105,7 +121,7 @@ export default function DiagnosticFlow({ move, scenarios }: Props) {
   }
 
   if (phase === 'done' && finalResult) {
-    return <DiagnosticResult result={finalResult} onStartBeta={handleStartBeta} />
+    return <DiagnosticResult result={finalResult} onStartBeta={handleStartBeta} skillMemory={skillMemory} />
   }
 
   return (
