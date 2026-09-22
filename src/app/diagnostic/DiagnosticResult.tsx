@@ -61,6 +61,8 @@ interface Props {
   onStartBeta: () => void
   /** Опционально: сколько мест осталось в потоке (из 10). Не показывать, если undefined. */
   seatsLeft?: number
+  /** Prototype longitudinal memory written after TRANSFER. */
+  skillMemory?: { strength: number; next_probe_at: string; last_latency_ms: number | null; best_latency_ms: number | null } | null
 }
 
 // ── ТЕКСТ БЛОКА 2 ПОД transferScore (три ветки, персонализуются retryLine) ───────
@@ -90,7 +92,7 @@ function changeBlock(score: 0 | 1 | 2 | null, shiftNote?: string | null) {
   }
 }
 
-export default function DiagnosticResult({ result, onStartBeta, seatsLeft }: Props) {
+export default function DiagnosticResult({ result, onStartBeta, seatsLeft, skillMemory }: Props) {
   const { tryAudioUrl, patternName, userLine, nativeReads, transferScore, shiftNote } = result
   const change = changeBlock(transferScore, shiftNote)
 
@@ -161,6 +163,21 @@ export default function DiagnosticResult({ result, onStartBeta, seatsLeft }: Pro
             Это разные вещи — и вторая требует не минут, а недель.
           </p>
         </section>
+
+        {skillMemory && (
+          <section style={{ ...card, background: NAVY_CARD, borderColor: LINE }}>
+            <p style={{ ...eyebrow, color: AMBER }}>Память навыка · прототип</p>
+            <h2 style={h2}>Следующая проверка уже запланирована.</h2>
+            <p style={{ ...body, color: INK }}>
+              Текущая устойчивость: <b>{skillMemory.strength}/5</b>.
+              {skillMemory.last_latency_ms != null && <> Время до начала ответа: <b>{(skillMemory.last_latency_ms / 1000).toFixed(1)} с</b>.</>}
+            </p>
+            <p style={{ ...small, color: MUTED }}>
+              Следующий неподсказанный probe: {new Date(skillMemory.next_probe_at).toLocaleDateString('ru-RU')}.
+              Это не оценка уровня английского — только состояние этого конкретного речевого хода.
+            </p>
+          </section>
+        )}
 
         {/* ── БЛОК 4 — Зачем 8 недель + оффер ────────────────────────────────── */}
         <section style={{ ...card, background: NAVY_CARD, borderColor: LINE }}>
