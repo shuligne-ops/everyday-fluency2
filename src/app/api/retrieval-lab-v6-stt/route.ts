@@ -40,7 +40,7 @@ async function transcribeOpenAIModel(audio: File, model: string): Promise<Provid
 
   try {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 7000)
+    const timer = setTimeout(() => controller.abort(), 12000)
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       signal: controller.signal,
@@ -66,15 +66,6 @@ async function transcribeOpenAIModel(audio: File, model: string): Promise<Provid
   }
 }
 
-async function transcribeWithOpenAI(audio: File): Promise<ProviderResult> {
-  // Prefer the current fast transcription model; keep Whisper as a compatibility fallback.
-  const modern = await transcribeOpenAIModel(audio, 'gpt-4o-mini-transcribe')
-  if (modern.transcript) return modern
-  const whisper = await transcribeOpenAIModel(audio, 'whisper-1')
-  if (whisper.transcript) return whisper
-  return { error: `${modern.error || 'openai:modern-failed'}|${whisper.error || 'openai:whisper-failed'}` }
-}
-
 async function transcribeWithElevenLabs(audio: File): Promise<ProviderResult> {
   const key = cleanKey(process.env.ELEVENLABS_API_KEY)
   if (!key) return { error: 'elevenlabs:no-key' }
@@ -88,7 +79,7 @@ async function transcribeWithElevenLabs(audio: File): Promise<ProviderResult> {
 
   try {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 7000)
+    const timer = setTimeout(() => controller.abort(), 12000)
     const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
       signal: controller.signal,
@@ -114,14 +105,38 @@ async function transcribeWithElevenLabs(audio: File): Promise<ProviderResult> {
   }
 }
 
-// Safe health check: exposes only whether server credentials are configured,
-// never their values. This is temporary but useful while stabilising preview STT.
+async function probeOpenAI() {
+  const key = cleanKey(process.env.OPENAI_API_KEY)
+  if (!key) return { configured: false, auth: 'no-key' }
+  try {
+    const response = await fetch('https://api.openai.com/v1/models/gpt-4o-mini-transcribe', {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: 'no-store',
+    })
+    return { configured: true, auth: response.ok ? 'ok' : `http-${response.status}` }
+  } catch {
+    return { configured: true, auth: 'network-error' }
+  }
+}
+
+async function probeElevenLabs() {
+  const key = cleanKey(process.env.ELEVENLABS_API_KEY)
+  if (!key) return { configured: false, auth: 'no-key' }
+  try {
+    const response = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+      headers: { 'xi-api-key': key },
+      cache: 'no-store',
+    })
+    return { configured: true, auth: response.ok ? 'ok' : `http-${response.status}` }
+  } catch {
+    return { configured: true, auth: 'network-error' }
+  }
+}
+
+// Safe health check: reveals only provider availability/status, never secret values.
 export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    openaiConfigured: Boolean(cleanKey(process.env.OPENAI_API_KEY)),
-    elevenLabsConfigured: Boolean(cleanKey(process.env.ELEVENLABS_API_KEY)),
-  }, { headers: { 'Cache-Control': 'no-store' } })
+  const [openai, elevenlabs] = await Promise.all([probeOpenAI(), probeElevenLabs()])
+  return NextResponse.json({ ok: true, openai, elevenlabs }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 export async function POST(req: NextRequest) {
@@ -137,18 +152,49 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'audio too short', code: 'audio-too-short', size: audio.size, type: audio.type }, { status: 422 })
     }
 
-    // Run independent providers in parallel. OpenAI internally tries the modern
-    // transcription model first and Whisper second.
-    const [openai, eleven] = await Promise.all([
-      transcribeWithOpenAI(audio),
+    // All STT engines start at once. Return as soon as any one succeeds;
+    // do not make a good fast transcript wait for a slower failing provider.
+    const attempts = [
+      transcribeOpenAIModel(audio, 'gpt-4o-mini-transcribe'),
+      transcribeOpenAIModel(audio, 'whisper-1'),
       transcribeWithElevenLabs(audio),
-    ])
+    ]
 
-    const winner = openai.transcript ? openai : eleven.transcript ? eleven : null
-    if (winner?.transcript) {
+    const outcome = await new Promise<{ winner?: ProviderResult; errors?: string[] }>((resolve) => {
+      let remaining = attempts.length
+      let settled = false
+      const errors: string[] = []
+
+      attempts.forEach((attempt, index) => {
+        void attempt.then((result) => {
+          if (settled) return
+          if (result.transcript) {
+            settled = true
+            resolve({ winner: result })
+            return
+          }
+          errors[index] = result.error || 'unknown'
+          remaining -= 1
+          if (remaining === 0) {
+            settled = true
+            resolve({ errors })
+          }
+        }).catch(() => {
+          if (settled) return
+          errors[index] = 'unhandled-provider-error'
+          remaining -= 1
+          if (remaining === 0) {
+            settled = true
+            resolve({ errors })
+          }
+        })
+      })
+    })
+
+    if (outcome.winner?.transcript) {
       return NextResponse.json({
-        transcript: winner.transcript,
-        provider: winner.provider,
+        transcript: outcome.winner.transcript,
+        provider: outcome.winner.provider,
       }, { headers: { 'Cache-Control': 'no-store' } })
     }
 
@@ -156,10 +202,7 @@ export async function POST(req: NextRequest) {
       error: 'transcription unavailable',
       code: 'all-providers-failed',
       audio: { size: audio.size, type: audio.type, name: audio.name },
-      providers: {
-        openai: openai.error || 'unknown',
-        elevenlabs: eleven.error || 'unknown',
-      },
+      providers: outcome.errors || [],
     }, { status: 502, headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('[retrieval-v6-stt] unexpected', error)
