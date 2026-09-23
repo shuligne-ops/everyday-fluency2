@@ -1,11 +1,12 @@
 import Link from 'next/link'
+import type { CSSProperties } from 'react'
 
 export const metadata = {
   title: 'Retrieval Lab V5 — сравнение',
   description: 'Две экспериментальные архитектуры тренажёра',
 }
 
-const box: React.CSSProperties = {
+const box: CSSProperties = {
   background: '#fff',
   border: '1px solid #e8dece',
   borderRadius: 18,
