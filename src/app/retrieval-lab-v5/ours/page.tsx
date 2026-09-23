@@ -1,4 +1,4 @@
-import Trainer from '../Trainer'
+import TrainerOurs from '../TrainerOurs'
 
 export const metadata = {
   title: 'Retrieval Lab V5 — версия A',
@@ -6,5 +6,5 @@ export const metadata = {
 }
 
 export default function Page() {
-  return <Trainer mode="ours" />
+  return <TrainerOurs />
 }
