@@ -1,10 +1,10 @@
-import Trainer from '../Trainer'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
-  title: 'Retrieval Lab V5 — версия B',
+  title: 'Retrieval Lab — версия B',
   description: 'Contrastive Activation Ladder experiment',
 }
 
 export default function Page() {
-  return <Trainer mode="colleague" />
+  redirect('/retrieval-lab-v6/colleague')
 }
