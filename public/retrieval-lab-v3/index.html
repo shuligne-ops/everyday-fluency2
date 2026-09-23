@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Language Retrieval Lab V3</title>
+<style>
+:root{--navy:#0f1b3d;--amber:#f59e0b;--pale:#fff8ed;--ink:#17213f;--muted:#667085;--green:#15803d;--red:#b42318;--line:#eadfce;--blue:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:var(--pale);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.shell{max-width:940px;margin:0 auto;padding:36px 20px 72px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center}.kicker{text-transform:uppercase;letter-spacing:1.2px;color:var(--amber);font-weight:850;font-size:12px}.hero{font-size:clamp(34px,7vw,58px);line-height:1.06;color:var(--navy);margin:10px 0 14px}.lead{font-size:17px;line-height:1.6;color:var(--muted);max-width:780px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:24px}.card{border:1px solid var(--line);background:#fff;border-radius:16px;padding:18px;text-align:left;cursor:pointer}.card strong{display:block;color:var(--navy);font-size:18px;margin-top:10px}.chip{display:inline-block;background:#eef4ff;color:var(--navy);border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800}.btn{border:0;border-radius:11px;padding:13px 18px;font-size:15px;font-weight:800;cursor:pointer}.primary{background:var(--amber);color:var(--navy)}.dark{background:var(--navy);color:#fff}.ghost{background:transparent;border:1px solid #d6d3d1;color:var(--muted)}.progress{height:7px;border-radius:99px;background:#e9dfd0;overflow:hidden;margin:22px 0 32px}.bar{height:100%;background:var(--amber)}.phase{font-size:12px;font-weight:850;color:var(--amber);text-transform:uppercase;letter-spacing:1.2px}.scenario{font-size:18px;color:var(--muted);line-height:1.55;margin-top:18px}.prompt{font-size:clamp(30px,6vw,48px);line-height:1.08;color:var(--navy);margin:12px 0 24px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:12px}.feedback{border-left:5px solid var(--green)}.warn{border-left-color:var(--amber)}.bad{border-left-color:var(--red)}.answer{font-size:20px;margin:6px 0}.model{background:#fff7df;border:1px solid #f5d487}.small{font-size:13px;color:var(--muted)}textarea{width:100%;font:inherit;border:1px solid #d6d3d1;border-radius:11px;padding:12px;resize:vertical}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:20px}.metric{background:#172554;color:#fff;border-radius:15px;padding:18px}.metric strong{display:block;font-size:28px;margin:7px 0}.metric span{font-size:13px;color:#cbd5e1}.darkpage{min-height:100vh;background:var(--navy);color:#fff}.darkpage .hero{color:#fff}.hidden{display:none}.note{margin-top:16px;padding:14px 16px;border-radius:14px;background:#eef4ff;border:1px solid #bfd3ff;line-height:1.5}.hint{margin-top:14px;padding:14px 16px;border-radius:14px;background:#fff7df;border:1px solid #f5d487;line-height:1.5}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const C={green:'#15803d',amber:'#f59e0b',red:'#b42318',blue:'#2563eb'};
+const patterns=[
+{
+ id:'used_to',level:'B1',name:'Раньше было, теперь нет',form:'used to + verb',meaning:'Прошлая привычка или состояние, которое изменилось.',
+ full:/\bused to\s+\w+/i,partial:/\bused to\b/i,
+ drills:[
+  D('u1','cold','You quit smoking five years ago. A new friend thinks you have never smoked.','Correct them naturally.',['I used to smoke.','I used to smoke, but I quit years ago.'],[/\bused to smoke\b/i],['smoke'], 'Подчеркни, что это было раньше, а сейчас уже нет.'),
+  D('u2','varied','You live in the city now, but as a child you lived near the sea.','Describe the old situation.',['I used to live by the sea.','I used to live near the coast.'],[/\bused to live .*\b(sea|coast)\b/i],['live','sea|coast'], 'Опиши прошлое состояние.'),
+  D('u3','varied','These days you drive to work. Years ago you went by bike every day.','Describe the old routine.',['I used to cycle to work.','I used to ride my bike to work.','I used to go to work by bike.'],[/\bused to (cycle|ride .*bike|go (to work|there) by bike)\b/i],['bike|cycle','work|there'], 'Подчеркни старую привычку.'),
+  D('u4','contrast','There is a supermarket here now. Ten years ago this building was a cinema.','Explain the change.',['There used to be a cinema here.','This used to be a cinema.'],[/\b(there|this) used to be .*cinema\b/i],['cinema'], 'Нужно прошлое состояние места.'),
+  D('u5','transfer','You sleep well now. In your twenties you often worked at night.','Describe the old habit.',['I used to work nights.','I used to work at night a lot.'],[/\bused to work .*\b(night|nights)\b/i],['work','night|nights'], 'Передай прежнюю регулярную привычку.'),
+  D('u6','delayed','Your friend asks if you have always worn contact lenses. You wore glasses before.','Answer naturally.',['I used to wear glasses.','I used to wear glasses before I got contacts.'],[/\bused to wear glasses\b/i],['glasses'], 'Сравни прошлое с нынешним.')
+ ]
+},
+{
+ id:'have_to',level:'A2',name:'Нужно / не обязательно',form:'have to / don’t have to + verb',meaning:'Обязанность и отсутствие необходимости.',
+ full:/\b(have|has|had) to\b|\b(don't|doesn't|didn't|do not|does not|did not) have to\b/i,partial:/\bhave to\b|\bhas to\b|\bhad to\b/i,
+ drills:[
+  D('h1','cold','The lift is broken and your office is on the 12th floor.','Tell a colleague what is necessary.',['We have to take the stairs.','We’ll have to use the stairs.'],[/\b(have to|need to|must) .*stairs\b/i],['stairs'],'Скажи, что другого варианта нет.'),
+  D('h2','varied','Tomorrow is a public holiday. The office is closed.','Tell a colleague that coming in is not necessary.',["You don't have to come in tomorrow.","You don't need to come in tomorrow."],[/\b(don't have to|don't need to|do not have to|do not need to).*come/i],['come|work','tomorrow'],'Это не запрет: просто не требуется.'),
+  D('h3','varied','Your train leaves at 6:10 a.m.','Say what you need to do.',['I have to get up early.','I need to get up early.'],[/\b(have to|need to|must) (get up|wake up).*early\b/i],['early'],'Передай необходимость раннего подъёма.'),
+  D('h4','contrast','The restaurant says jackets are optional.','Tell your friend what this means.',["You don't have to wear a jacket.","You don't need to wear a jacket."],[/\b(don't have to|don't need to|do not have to|do not need to).*jacket/i],['jacket'],'Не перепутай «не обязательно» с «нельзя».'),
+  D('h5','transfer','You promised to send the documents before lunch.','Say what you need to do this morning.',['I have to send the documents this morning.','I need to send them before lunch.'],[/\b(have to|need to|must).*send.*(documents|them|files)/i],['send','documents|them|files'],'Передай обязательство.'),
+  D('h6','delayed','Museum entry is free today. Booking online is optional.','Tell a friend booking is not necessary.',["We don't have to book online.","We don't need to book in advance."],[/\b(don't have to|don't need to|do not have to|do not need to).*book/i],['book'],'Скажи именно «не обязательно бронировать».')
+ ]
+},
+{
+ id:'ive_just',level:'A2',name:'Только что сделал',form:'have/has just + V3',meaning:'Очень недавнее завершённое действие.',
+ full:/\b(have|has|'ve|'s)\s+just\s+\w+/i,partial:/\bjust\b/i,
+ drills:[
+  D('j1','cold','Your colleague asks if the report is ready. You finished it one minute ago.','Answer naturally.',["I've just finished the report.","I've just finished it."],[/\b(i've|i have) just (finished|done|completed).*(report|it)?/i],['finish|done|completed'],'Передай: это произошло буквально минуту назад.'),
+  D('j2','varied','You walk in carrying coffee. A friend offers to buy you one.','Respond naturally.',["I've just bought one.","I've just got a coffee."],[/\b(i've|i have) just (bought|got).*(one|coffee)?/i],['bought|got','one|coffee'],'Скажи «я только что купил/взял».') ,
+  D('j3','varied','Someone calls while you are leaving the station. The train arrived moments ago.','Say what happened.',["The train has just arrived.","It's just arrived."],[/\b(train has|it's|it has) just arrived\b/i],['arrived'],'Очень недавнее событие.'),
+  D('j4','contrast','Your friend asks whether Anna knows the news. You told her seconds ago.','Answer naturally.',["I've just told her.","I've just told Anna."],[/\b(i've|i have) just told (her|anna)\b/i],['told','her|anna'],'Подчеркни «только что».') ,
+  D('j5','transfer','Your laptop battery is full now. You finished charging it moments ago.','Say what you have done.',["I've just charged it.","I've just finished charging the laptop."],[/\b(i've|i have) just (charged|finished charging).*(it|laptop)?/i],['charged|charging'],'Передай свежий результат.'),
+  D('j6','delayed','Your flatmate asks why the kitchen smells nice. You made dinner moments ago.','Answer naturally.',["I've just made dinner.","I've just cooked dinner."],[/\b(i've|i have) just (made|cooked) dinner\b/i],['dinner'],'Скажи, что это произошло совсем недавно.')
+ ]
+},
+{
+ id:'was_going_to',level:'B1',name:'Собирался, но…',form:'was/were going to + verb, but…',meaning:'План в прошлом, который изменился.',
+ full:/\b(was|were)\s+going to\s+\w+/i,partial:/\bgoing to\b/i,
+ drills:[
+  D('g1','cold','You planned to call Tom last night, but you fell asleep.','Explain what happened.',['I was going to call Tom, but I fell asleep.','I was going to phone him, but I fell asleep.'],[/\bi was going to (call tom|phone him).*but.*(fell asleep|slept)/i],['call|phone','sleep|asleep'],'Сначала план, потом причина, почему он не случился.'),
+  D('g2','varied','You planned to cook, but your friends invited you out.','Explain the change of plan.',['I was going to cook, but my friends invited me out.','I was going to make dinner, but we went out instead.'],[/\bi was going to (cook|make dinner).*but/i],['cook|dinner','friends|out'],'Передай изменение плана.'),
+  D('g3','varied','You planned to take the train, but it was cancelled.','Tell someone your original plan.',['I was going to take the train, but it was cancelled.','I was going to go by train, but it got cancelled.'],[/\bi was going to .*train.*but.*cancel/i],['train','cancel'],'Покажи несостоявшееся намерение.'),
+  D('g4','contrast','You nearly sent an angry email, but decided to wait.','Explain the plan you changed.',['I was going to send the email, but I decided to wait.','I was going to reply, but I thought better of it.'],[/\bi was going to (send|reply).*but/i],['email|reply','wait|decided'],'Не «я сделал», а «я собирался сделать».') ,
+  D('g5','transfer','You planned to buy a new phone, but repaired the old one.','Explain what changed.',['I was going to buy a new phone, but I fixed the old one.','I was going to replace my phone, but I had it repaired.'],[/\bi was going to (buy|replace).*phone.*but/i],['phone','buy|replace'],'Передай отменённый план.'),
+  D('g6','delayed','You planned to leave early, but the meeting finished late.','Explain why you stayed.',['I was going to leave early, but the meeting ran late.','I was going to go early, but the meeting finished late.'],[/\bi was going to (leave|go) early.*but/i],['early','meeting|late'],'Скажи про план, который не реализовался.')
+ ]
+},
+{
+ id:'should_have',level:'B1',name:'Надо было сделать',form:'should have + V3',meaning:'Оценка прошлого: правильнее было поступить иначе.',
+ full:/\bshould(n't| not)?\s+(have|'ve)\s+\w+/i,partial:/\bshould\b/i,
+ drills:[
+  D('s1','cold','Your phone died during a trip because you forgot to charge it.','Say what would have been better.',['I should have charged my phone before the trip.','I should’ve charged it before I left.'],[/\bshould('ve| have) charged (my phone|it)/i],['charge|charged','phone|it'],'Оцени прошлое действие.'),
+  D('s2','varied','You arrived late because you left home too late.','Say what would have been better.',['I should have left earlier.','I should’ve left home earlier.'],[/\bshould('ve| have) left .*earlier\b/i],['left|leave','earlier'],'Что следовало сделать раньше?'),
+  D('s3','varied','You bought the cheapest laptop and now regret the decision.','Say what you think you should have done.',['I should have bought the better one.','I should’ve spent a bit more.'],[/\bshould('ve| have) (bought|spent)/i],['bought|spent'],'Оцени прошлое решение.'),
+  D('s4','contrast','You told a private story to someone who repeated it.','Say what was a mistake.',["I shouldn't have told him.","I shouldn't have said anything."],[/\bshould(n't| not) have (told|said)/i],['told|said'],'Здесь нужен отрицательный вариант.'),
+  D('s5','transfer','You got soaked because you ignored the weather forecast.','Say what would have been better.',['I should have checked the forecast.','I should’ve taken an umbrella.'],[/\bshould('ve| have) (checked|taken)/i],['forecast|umbrella','checked|taken'],'Вырази правильное действие задним числом.'),
+  D('s6','delayed','You lost changes because you never saved a backup.','Say what you should have done.',['I should have saved a backup.','I should’ve made a copy.'],[/\bshould('ve| have) (saved|made)/i],['backup|copy','saved|made'],'Что следовало сделать раньше?')
+ ]
+},
+{
+ id:'wish_past',level:'B2',name:'Сожаление о прошлом',form:'wish + had + V3',meaning:'Личное сожаление о завершённом прошлом событии.',
+ full:/\bwish\b.*\b(had|hadn't|had not|'d)\b.*\w+/i,partial:/\bwish\b/i,
+ drills:[
+  D('w1','cold','You stayed up until 2 a.m., overslept and missed an interview.','Express your regret.',["I wish I'd gone to bed earlier.","I wish I hadn't stayed up so late."],[/\bi wish (i'd|i had|i hadn't|i had not).*(bed|stayed|sleep)/i],['bed|sleep|stayed','earlier|late'],'Вырази личное сожаление о прошлом.'),
+  D('w2','varied','You turned down a good job last year and now regret it.','Express that regret.',["I wish I'd taken that job.","I wish I had accepted the offer."],[/\bi wish (i'd|i had).*(taken|accepted).*(job|offer)?/i],['job|offer','taken|accepted'],'Сожаление о прошлом решении.'),
+  D('w3','varied','You sold your old car and now miss it.','Express the regret.',["I wish I hadn't sold my old car.","I wish I'd kept my old car."],[/\bi wish (i hadn't|i had not|i'd).*(sold|kept).*(car|it)?/i],['car|it','sold|kept'],'Покажи, что сейчас жалеешь о прошлом.'),
+  D('w4','contrast','You didn't learn French at school. Now you need it for work.','Express your regret.',["I wish I'd learned French at school.","I wish I had studied French when I was younger."],[/\bi wish (i'd|i had).*(learned|learnt|studied).*french/i],['french','learned|learnt|studied'],'Сожаление о том, что не сделал раньше.'),
+  D('w5','transfer','You bought a cheap laptop and now it constantly crashes.','Express the regret.',["I wish I'd bought the other laptop.","I wish I hadn't bought this one."],[/\bi wish (i'd|i had|i hadn't|i had not).*(bought|chosen).*(laptop|one)?/i],['laptop|one','bought|chosen'],'Вырази сожаление о покупке.'),
+  D('w6','delayed','You didn't take an umbrella and got soaked.','Express the regret.',["I wish I'd taken an umbrella.","I wish I hadn't left without one."],[/\bi wish (i'd|i had|i hadn't|i had not).*(umbrella|without one)/i],['umbrella|one'],'Сожаление о прошлом действии.')
+ ]
+}
+];
+function D(id,phase,scenario,prompt,models,accept,anchors,hint){return{id,phase,scenario,prompt,models,accept,anchors,hint}}
+let state={view:'library',pattern:null,index:0,attempt:0,hint:0,events:[],typed:false};
+const app=document.getElementById('app');
+function norm(s){return String(s||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim()}
+function anchorHit(d,text){const t=norm(text);let n=0;for(const g of d.anchors){const opts=g.split('|');if(opts.some(x=>t.includes(norm(x))))n++}return n}
+function evalAnswer(p,d,text){const t=norm(text);const targetFull=p.full.test(t);const targetPartial=p.partial.test(t);const accepted=d.accept.some(r=>r.test(t));const hits=anchorHit(d,text);const enoughMeaning=accepted || hits>=Math.max(1,Math.ceil(d.anchors.length*0.5));
+ if(targetFull&&enoughMeaning)return{kind:'accept',title:'Принято',body:'Нужная конструкция использована корректно, а смысл соответствует ситуации.',independent:state.attempt===0};
+ if(targetFull&&!enoughMeaning)return{kind:'accept_note',title:'Принято с оговоркой',body:'Конструкция использована правильно. Формулировка необычная для этой ситуации, но повторный круг не нужен.',independent:state.attempt===0};
+ if(enoughMeaning&&!targetFull)return{kind:'repair',title:'Смысл передан',body:'Но сейчас тренируем именно эту конструкцию. Дадим минимальную подсказку.'};
+ if(targetPartial)return{kind:'repair',title:'Конструкция появилась частично',body:'Нужно чуть поправить форму.'};
+ return{kind:'repair',title:'Пока не получилось',body:'Сначала поправим смысл и форму, не показывая готовый ответ.'};
+}
+function start(id){state={view:'practice',pattern:patterns.find(p=>p.id===id),index:0,attempt:0,hint:0,events:[],typed:false};render()}
+function submit(text,latency){const p=state.pattern,d=p.drills[state.index];const e=evalAnswer(p,d,text);e.text=text;e.latency=latency;e.drill=d.id;e.attempt=state.attempt;state.events.push(e);state.last=e;render()}
+function retry(){state.attempt++;state.hint=Math.min(2,state.hint+1);state.last=null;render()}
+function next(){state.index++;state.attempt=0;state.hint=0;state.last=null;if(state.index>=state.pattern.drills.length){state.view='result'}render()}
+function render(){if(state.view==='library')return library();if(state.view==='result')return result();practice()}
+function library(){app.innerHTML=`<main><div class="shell"><p class="kicker">Language Retrieval Lab V3</p><h1 class="hero">Тренировочный станок: только retrieval, repair и transfer.</h1><p class="lead">Новая версия учитывает накопленные случаи: естественные перефразирования принимаются, местоимения и контекст не штрафуются, правильный ответ не отправляется на лишний круг, free production убран.</p><div class="grid">${patterns.map(p=>`<button class="card" onclick="start('${p.id}')"><span class="chip">${p.level}</span><strong>${p.name}</strong><div class="small" style="margin-top:7px">${p.meaning}</div><code style="display:block;margin-top:10px">${p.form}</code></button>`).join('')}</div></div></main>`}
+function phaseLabel(ph){return ph==='cold'?'Cold retrieval':ph==='varied'?'Varied retrieval':ph==='contrast'?'Contrast':ph==='transfer'?'Blind transfer':'Delayed-in-session'}
+function practice(){const p=state.pattern,d=p.drills[state.index],last=state.last;const progress=((state.index)/p.drills.length)*100;app.innerHTML=`<main><div class="shell"><div class="top"><button class="btn ghost" onclick="state.view='library';render()">← Библиотека</button><div style="text-align:right"><b>${p.name}</b><div class="small">${state.index+1}/${p.drills.length}</div></div></div><div class="progress"><div class="bar" style="width:${progress}%"></div></div><div class="phase">${phaseLabel(d.phase)}</div><div class="scenario">${d.scenario}</div><h1 class="prompt">${d.prompt}</h1>${state.hint>0?`<div class="hint"><b>${state.hint===1?'Минимальная подсказка':'Более явная подсказка'}</b><div style="margin-top:6px">${state.hint===1?d.hint:p.form}</div></div>`:''}${!last?inputUI():feedbackUI(p,d,last)}</div></main>`;if(!last)wireVoice()}
+function inputUI(){return `<div class="actions"><button id="voice" class="btn dark">🎙 Ответить голосом</button><button class="btn ghost" onclick="state.typed=!state.typed;render()">Или напечатать</button></div>${state.typed?`<div style="margin-top:14px"><textarea id="txt" rows="3" placeholder="Your answer…"></textarea><button class="btn primary" style="margin-top:8px" onclick="const v=document.getElementById('txt').value.trim();if(v)submit(v,0)">Проверить</button></div>`:''}<div id="err" class="small" style="color:var(--red);margin-top:10px"></div>`}
+function feedbackUI(p,d,e){const ok=e.kind==='accept'||e.kind==='accept_note';const border=e.kind==='repair'?C.amber:e.kind==='accept_note'?C.blue:C.green;return `<div class="panel"><div class="small"><b>Ты сказал</b></div><div class="answer">“${escapeHtml(e.text)}”</div></div><div class="panel feedback" style="border-left-color:${border}"><b>${e.title}</b><div style="margin-top:7px;color:var(--muted)">${e.body}</div>${e.independent?`<div class="small" style="margin-top:7px">Самостоятельно, без подсказки.</div>`:''}</div>${ok?`<div class="panel model"><div class="small"><b>Ориентир после ответа</b></div><div class="answer"><b>“${d.models[0]}”</b></div>${d.models.slice(1).map(x=>`<div class="small" style="margin-top:6px">Также естественно: “${x}”</div>`).join('')}</div><div class="actions"><button class="btn primary" onclick="next()">Дальше →</button></div>`:`<div class="hint"><b>Self-repair</b><div style="margin-top:6px">${state.attempt===0?d.hint:p.form}</div></div><div class="actions"><button class="btn primary" onclick="retry()">Попробовать ещё раз →</button>${state.attempt>=1?`<button class="btn ghost" onclick="state.last={kind:'accept_note',title:'Показан ориентир',body:'Ответ не засчитываем как самостоятельный retrieval.',text:'${escapeAttr(e.text)}',independent:false};render()">Показать вариант</button>`:''}</div>`}`}
+function result(){const ev=state.events;const first=ev.filter(e=>e.attempt===0);const accepted=first.filter(e=>e.kind==='accept'||e.kind==='accept_note');const independent=first.filter(e=>e.independent);const repairs=ev.filter(e=>e.kind==='repair').length;app.innerHTML=`<main class="darkpage"><div class="shell"><p class="kicker" style="color:#fbbf24">V3 · ${state.pattern.name}</p><h1 class="hero">Короткий итог тренировки</h1><div class="result-grid"><div class="metric"><small>С первой попытки принято</small><strong>${accepted.length}/${first.length}</strong><span>без лишнего повторного круга</span></div><div class="metric"><small>Самостоятельный target</small><strong>${independent.length}/${first.length}</strong><span>конструкция появилась без подсказки</span></div><div class="metric"><small>Реальных repair</small><strong>${repairs}</strong><span>только когда была педагогическая причина</span></div></div><div class="panel" style="background:#111c3f;border-color:#334155;color:#fff;margin-top:18px"><b>Что проверяли</b><div style="color:#cbd5e1;margin-top:8px">Не монолог и не мнение, а способность быстро извлечь конкретную языковую конструкцию в шести разных ситуациях.</div></div><div class="actions"><button class="btn primary" onclick="state.view='library';render()">К библиотеке</button></div></div></main>`}
+function wireVoice(){const b=document.getElementById('voice');if(!b)return;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){b.onclick=()=>{state.typed=true;render()};return}const shown=Date.now();b.onclick=()=>{const r=new SR();r.lang='en-US';r.interimResults=false;r.continuous=false;r.maxAlternatives=1;b.textContent='■ Слушаю…';r.onresult=e=>{const a=e.results[e.results.length-1];const t=a&&a[0]&&a[0].transcript;if(t)submit(t,Date.now()-shown)};r.onerror=()=>{state.typed=true;render()};r.onend=()=>{if(document.getElementById('voice'))document.getElementById('voice').textContent='🎙 Ответить голосом'};r.start()}}
+function escapeHtml(s){return String(s).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function escapeAttr(s){return escapeHtml(s).replace(/'/g,'&#39;')}
+render();
+</script>
+</body>
+</html>
