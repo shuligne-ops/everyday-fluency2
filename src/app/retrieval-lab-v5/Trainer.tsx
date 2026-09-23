@@ -63,7 +63,8 @@ type Feedback = {
 }
 
 const css = `
-:root{--navy:#101c3f;--navy2:#1b2b60;--amber:#f59e0b;--cream:#fff8ed;--ink:#14213d;--muted:#68758d;--line:#e8dece;--green:#16803d;--red:#b42318;--blue:#2563eb}*{box-sizing:border-box}.v5{min-height:100vh;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.wrap{max-width:1080px;margin:auto;padding:30px 22px 72px}.eyebrow{font-size:12px;font-weight:900;letter-spacing:1.25px;text-transform:uppercase;color:var(--amber)}h1{font-size:clamp(38px,6.5vw,66px);line-height:1.03;margin:10px 0 14px;color:var(--navy)}h2{color:var(--navy)}.lead{font-size:18px;line-height:1.6;color:var(--muted);max-width:880px}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}.tab,.btn{border:0;border-radius:12px;padding:13px 17px;font-size:15px;font-weight:850;cursor:pointer}.tab{background:#fff;border:1px solid var(--line);color:var(--navy)}.tab.on{background:var(--navy);color:#fff}.btn.primary{background:var(--amber);color:var(--navy)}.btn.dark{background:var(--navy);color:#fff}.btn.red{background:var(--red);color:#fff}.btn.ghost{background:transparent;border:1px solid #d7d3ca;color:var(--muted)}.btn:disabled{opacity:.55;cursor:default}.section{margin-top:30px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:13px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px}.card{text-align:left;cursor:pointer}.card:hover{transform:translateY(-1px)}.chip{display:inline-block;background:#edf4ff;color:var(--navy);padding:4px 9px;border-radius:999px;font-size:11px;font-weight:900}.card strong{display:block;margin-top:10px;font-size:19px;color:var(--navy)}.small{font-size:13px;line-height:1.45;color:var(--muted)}.top{display:flex;align-items:center;justify-content:space-between;gap:14px}.badge{background:#edf4ff;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}.progress{height:8px;background:#e8dece;border-radius:999px;overflow:hidden;margin:22px 0 32px}.progress>div{height:100%;background:var(--amber)}.stage{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--amber)}.cue{font-size:20px;color:var(--muted);line-height:1.5;margin-top:14px}.prompt{font-size:clamp(28px,5vw,46px);line-height:1.1;color:var(--navy);margin:10px 0 20px}.targetbox{background:#fff4d8;border:1px solid #f4cf76;border-radius:16px;padding:16px;margin:14px 0}.targetbox b{color:var(--navy)}.form{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;margin-top:7px}.candidates{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.candidate{background:#eef4ff;border-radius:999px;padding:7px 10px;font-size:13px}.transcript{margin-top:17px;background:#f6f9ff;border:1px solid #bfd3ff;border-left:5px solid var(--blue);border-radius:16px;padding:17px;min-height:96px}.transcript b{color:var(--navy)}.transcript .heard{font-size:21px;line-height:1.45;margin-top:7px}.placeholder{color:#8b95a6}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.status{font-size:14px;font-weight:800;margin-top:9px}.status.red{color:var(--red)}.status.amber{color:#9a6700}textarea{width:100%;min-height:105px;border:1px solid #d6d3d1;border-radius:12px;padding:12px;font:inherit;background:white;resize:vertical}.feedback{margin-top:16px}.feedback.accept{border-left:5px solid var(--green)}.feedback.note{border-left:5px solid var(--blue)}.feedback.retry{border-left:5px solid var(--amber)}.feedback.technical{border-left:5px solid var(--red)}.feedback h3{margin:0 0 6px;color:var(--navy)}.models{background:#fff7df;border-color:#f4d182;margin-top:14px}.models .model{font-size:18px;line-height:1.45;margin-top:7px}.dark{min-height:100vh;background:var(--navy);color:#fff}.dark .wrap h1{color:white}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px;margin-top:22px}.metric{background:var(--navy2);border-radius:17px;padding:18px}.metric strong{display:block;font-size:34px;margin:7px 0}.metric span{color:#d7dfef;font-size:14px;line-height:1.4}.summary{margin-top:16px;border:1px solid #33456e;border-radius:17px;background:#13214c;padding:18px;line-height:1.6}.compare-note{background:#fff;border:1px solid var(--line);border-radius:17px;padding:17px;margin-top:18px}.spinner{display:inline-block;width:15px;height:15px;border:2px solid #ddd;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}
+:root{--navy:#101c3f;--navy2:#1b2b60;--amber:#f59e0b;--cream:#fff8ed;--ink:#14213d;--muted:#68758d;--line:#e8dece;--green:#16803d;--red:#b42318;--blue:#2563eb}*{box-sizing:border-box}.v5{min-height:100vh;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.wrap{max-width:1080px;margin:auto;padding:30px 22px 72px}.eyebrow{font-size:12px;font-weight:900;letter-spacing:1.25px;text-transform:uppercase;color:var(--amber)}h1{font-size:clamp(38px,6.5vw,66px);line-height:1.03;margin:10px 0 14px;color:var(--navy)}h2{color:var(--navy)}.lead{font-size:18px;line-height:1.6;color:var(--muted);max-width:880px}.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}.tab,.btn{border:0;border-radius:12px;padding:0 17px;font-size:15px;font-weight:850;cursor:pointer}.tab{height:44px;background:#fff;border:1px solid var(--line);color:var(--navy)}.tab.on{background:var(--navy);color:#fff}.btn{height:50px!important;min-height:50px!important;max-height:50px!important;width:auto!important;min-width:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;white-space:nowrap}.btn.primary{background:var(--amber);color:var(--navy)}.btn.dark{background:var(--navy);color:#fff}.btn.red{background:var(--red);color:#fff}.btn.ghost{background:transparent;border:1px solid #d7d3ca;color:var(--muted)}.btn:disabled{opacity:.55;cursor:default}.section{margin-top:30px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(275px,1fr));gap:13px;align-items:start}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px}.card{text-align:left;cursor:pointer;height:auto;min-height:0;align-self:start}.card:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(16,28,63,.06)}.chip{display:inline-block;background:#edf4ff;color:var(--navy);padding:4px 9px;border-radius:999px;font-size:11px;font-weight:900}.card strong{display:block;margin-top:10px;font-size:19px;color:var(--navy)}.small{font-size:13px;line-height:1.45;color:var(--muted)}.top{display:flex;align-items:center;justify-content:space-between;gap:14px}.badge{background:#edf4ff;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}.progress{height:7px;background:#e8dece;border-radius:999px;overflow:hidden;margin:20px 0 28px}.progress>div{height:100%;background:var(--amber)}.stage{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--amber)}.cue{font-size:20px;color:var(--muted);line-height:1.5;margin-top:14px}.prompt{font-size:clamp(28px,5vw,46px);line-height:1.1;color:var(--navy);margin:10px 0 20px}.targetbox{background:#fff4d8;border:1px solid #f4cf76;border-radius:16px;padding:16px;margin:14px 0}.targetbox b{color:var(--navy)}.form{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;margin-top:7px}.candidates{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.candidate{background:#eef4ff;border-radius:999px;padding:7px 10px;font-size:13px}.transcript{margin-top:17px;background:#f6f9ff;border:1px solid #bfd3ff;border-left:5px solid var(--blue);border-radius:16px;padding:17px;min-height:96px}.transcript b{color:var(--navy)}.transcript .heard{font-size:21px;line-height:1.45;margin-top:7px}.placeholder{color:#8b95a6}.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-top:15px;min-height:0!important}.status{font-size:14px;font-weight:800;margin-top:9px}.status.red{color:var(--red)}.status.amber{color:#9a6700}textarea{width:100%;min-height:105px;border:1px solid #d6d3d1;border-radius:12px;padding:12px;font:inherit;background:white;resize:vertical}.feedback{margin-top:16px}.feedback.accept{border-left:5px solid var(--green)}.feedback.note{border-left:5px solid var(--blue)}.feedback.retry{border-left:5px solid var(--amber)}.feedback.technical{border-left:5px solid var(--red)}.feedback h3{margin:0 0 6px;color:var(--navy)}.models{background:#fff7df;border-color:#f4d182;margin-top:14px}.models .model{font-size:18px;line-height:1.45;margin-top:7px}.dark{min-height:100vh;background:var(--navy);color:#fff}.dark .wrap h1{color:white}.scorecard{margin-top:22px;background:#172858;border:1px solid #33456e;border-radius:20px;padding:8px 20px}.scorerow{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.11)}.scorerow:last-child{border-bottom:0}.scorerow .label{font-size:16px}.scorerow .desc{font-size:13px;color:#cbd5e1;margin-top:4px;line-height:1.4}.scorerow strong{font-size:24px;white-space:nowrap}.summary{margin-top:16px;border:1px solid #33456e;border-radius:17px;background:#13214c;padding:18px;line-height:1.6}.spinner{display:inline-block;width:15px;height:15px;border:2px solid #ddd;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.wrap{padding:22px 16px 56px}h1{font-size:34px}.lead{font-size:16px}.cue{font-size:18px}.prompt{font-size:32px}.targetbox,.transcript,.panel{padding:15px;border-radius:14px}.form{font-size:18px}.transcript .heard{font-size:19px}.btn{height:48px!important;min-height:48px!important;max-height:48px!important;padding:0 14px}.scorerow{padding:14px 0}.scorerow strong{font-size:22px}}
 `
 
 function phaseLabel(step: Step, mode: Mode) {
@@ -113,7 +114,25 @@ function parseJudge(text: string): JudgeResult | null {
   }
 }
 
+function normForExactMatch(value: string) {
+  return value.toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
 async function judgeAnswer(pattern: Pattern, cue: string, models: string[], answer: string): Promise<JudgeResult> {
+  const normalizedAnswer = normForExactMatch(answer)
+  if (models.some((model) => normForExactMatch(model) === normalizedAnswer)) {
+    return {
+      meaning_ok: true,
+      target_ok: true,
+      language_ok: true,
+      naturalness: 'natural',
+      errors: [],
+      corrected_utterance: '',
+      note_ru: '',
+      evaluator_available: true,
+    }
+  }
+
   const system = `You evaluate spoken English practice. Return JSON only. Be strict about real grammar and meaning, but NEVER reject a correct synonym, anaphora (there/it/one/them), ellipsis, or a natural rephrasing merely because it differs from the model answer. Judge the learner's actual sentence, not style preference.\n\nReturn exactly this shape:\n{\n  "meaning_ok": true,\n  "target_ok": true,\n  "language_ok": true,\n  "naturalness": "natural|acceptable|marked|unacceptable",\n  "errors": [{"span":"...","correction":"...","severity":"minor|important|blocking","target_relevance":"inside_target|off_target","message_ru":"короткое объяснение по-русски"}],\n  "corrected_utterance":"...",\n  "note_ru":"..."\n}\n\nmeaning_ok means the requested communicative meaning is conveyed. target_ok means the requested target form is correctly realized. language_ok is false only for a real language error, not because another wording would be nicer.`
   const user = `TASK CUE (Russian meaning): ${cue}\nTARGET: ${pattern.form}\nTARGET FUNCTION: ${pattern.meaning}\nACCEPTABLE MODEL EXAMPLES: ${models.join(' | ')}\nLEARNER ANSWER: ${answer}`
   try {
@@ -127,17 +146,16 @@ async function judgeAnswer(pattern: Pattern, cue: string, models: string[], answ
     const parsed = parseJudge(String(payload.text || ''))
     if (parsed) return parsed
   } catch {
-    // fall through to conservative local fallback
+    // do not award credit when semantic/language evaluation is unavailable
   }
-  const structural = pattern.full.test(answer)
   return {
-    meaning_ok: true,
-    target_ok: structural,
-    language_ok: true,
+    meaning_ok: false,
+    target_ok: false,
+    language_ok: false,
     naturalness: 'acceptable',
     errors: [],
     corrected_utterance: '',
-    note_ru: 'AI-проверка временно недоступна; использована только проверка конструкции.',
+    note_ru: 'Не удалось запустить полную проверку смысла и языка.',
     evaluator_available: false,
   }
 }
@@ -168,6 +186,9 @@ export default function Trainer({ mode }: { mode: Mode }) {
   const [revealTarget, setRevealTarget] = useState(false)
   const [finished, setFinished] = useState(false)
   const recognitionRef = useRef<any>(null)
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const voiceBufferRef = useRef('')
+  const manualVoiceStopRef = useRef(false)
   const stepStartedRef = useRef(Date.now())
 
   const filteredPatterns = useMemo(() => {
@@ -178,9 +199,21 @@ export default function Trainer({ mode }: { mode: Mode }) {
   const currentStep = steps[stepIndex]
   const currentDrill = currentStep ? currentStep.pattern.drills[currentStep.drillIndex] : null
 
-  function resetInput() {
+  function clearSilenceTimer() {
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current)
+    silenceTimerRef.current = null
+  }
+
+  function stopVoiceSession() {
+    manualVoiceStopRef.current = true
+    clearSilenceTimer()
     try { recognitionRef.current?.abort?.() } catch {}
     recognitionRef.current = null
+    voiceBufferRef.current = ''
+  }
+
+  function resetInput() {
+    stopVoiceSession()
     setTranscript('')
     setInterim('')
     setVoiceState('idle')
@@ -215,7 +248,7 @@ export default function Trainer({ mode }: { mode: Mode }) {
   }
 
   function backToLibrary() {
-    try { recognitionRef.current?.abort?.() } catch {}
+    stopVoiceSession()
     setPattern(null)
     setContrastSet(null)
     setSteps([])
@@ -225,6 +258,7 @@ export default function Trainer({ mode }: { mode: Mode }) {
   }
 
   function nextStep() {
+    stopVoiceSession()
     if (stepIndex >= steps.length - 1) {
       setFinished(true)
       return
@@ -278,7 +312,7 @@ export default function Trainer({ mode }: { mode: Mode }) {
       return {
         kind: 'accept',
         title: 'Принято',
-        body: 'Нужный смысл передан, конструкция использована правильно, английский корректный.',
+        body: 'Смысл передан, конструкция использована правильно, английский корректный.',
       }
     }
 
@@ -334,6 +368,17 @@ export default function Trainer({ mode }: { mode: Mode }) {
     setVoiceState('idle')
     const structuralTarget = currentStep.pattern.full.test(answer)
     const judge = await judgeAnswer(currentStep.pattern, currentDrill.cue, currentDrill.models, answer)
+
+    if (!judge.evaluator_available) {
+      setFeedback({
+        kind: 'technical',
+        title: 'Не удалось проверить ответ',
+        body: 'Транскрипция сохранена. Попробуй проверку ещё раз — говорить заново не нужно. Этот ответ пока не засчитывается и не влияет на итог.',
+      })
+      setChecking(false)
+      return
+    }
+
     const targetOk = structuralTarget || judge.target_ok
     const fb = makeFeedback(currentStep, judge, targetOk, retryCount)
     const accepted = !fb.retryRequired
@@ -355,11 +400,12 @@ export default function Trainer({ mode }: { mode: Mode }) {
       errors: judge.errors,
     }
     setRecords((r) => [...r, record])
-    setFeedback({ ...fb, body: judge.evaluator_available ? fb.body : `${fb.body} ${judge.note_ru || ''}` })
+    setFeedback(fb)
     setChecking(false)
   }
 
   function retry() {
+    stopVoiceSession()
     setRetryCount((n) => n + 1)
     setFeedback(null)
     setTranscript('')
@@ -371,6 +417,12 @@ export default function Trainer({ mode }: { mode: Mode }) {
     stepStartedRef.current = Date.now()
   }
 
+  function recheckTranscript() {
+    if (!transcript || checking) return
+    setFeedback(null)
+    void submit(transcript)
+  }
+
   function startVoice() {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SR) {
@@ -378,41 +430,105 @@ export default function Trainer({ mode }: { mode: Mode }) {
       setTyping(true)
       return
     }
-    try { recognitionRef.current?.abort?.() } catch {}
-    const rec = new SR()
-    recognitionRef.current = rec
-    rec.lang = 'en-US'
-    rec.continuous = false
-    rec.interimResults = true
-    rec.maxAlternatives = 1
+
+    stopVoiceSession()
+    manualVoiceStopRef.current = false
+    voiceBufferRef.current = ''
     setTranscript('')
     setInterim('')
     setVoiceMessage('')
     setVoiceState('starting')
-    rec.onstart = () => setVoiceState('listening')
-    rec.onresult = (event: any) => {
-      let interimText = ''
-      let finalText = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const text = event.results[i][0]?.transcript || ''
-        if (event.results[i].isFinal) finalText += text
-        else interimText += text
+
+    const launch = () => {
+      if (manualVoiceStopRef.current) return
+      const rec = new SR()
+      recognitionRef.current = rec
+      rec.lang = 'en-US'
+      rec.continuous = true
+      rec.interimResults = true
+      rec.maxAlternatives = 1
+
+      rec.onstart = () => setVoiceState('listening')
+      rec.onresult = (event: any) => {
+        let interimText = ''
+        let finalText = ''
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const text = event.results[i][0]?.transcript || ''
+          if (event.results[i].isFinal) finalText += text
+          else interimText += text
+        }
+
+        if (interimText.trim()) {
+          clearSilenceTimer()
+          const combined = [voiceBufferRef.current, interimText.trim()].filter(Boolean).join(' ')
+          setInterim(combined)
+        }
+
+        if (finalText.trim()) {
+          clearSilenceTimer()
+          voiceBufferRef.current = [voiceBufferRef.current, finalText.trim()].filter(Boolean).join(' ').trim()
+          setTranscript(voiceBufferRef.current)
+          setInterim('')
+          silenceTimerRef.current = setTimeout(() => {
+            const complete = voiceBufferRef.current.trim()
+            manualVoiceStopRef.current = true
+            try { recognitionRef.current?.stop?.() } catch {}
+            recognitionRef.current = null
+            setVoiceState('idle')
+            if (complete) void submit(complete)
+          }, 2500)
+        }
       }
-      if (interimText) setInterim(interimText)
-      if (finalText.trim()) {
-        const finalValue = finalText.trim()
-        setTranscript(finalValue)
-        setInterim('')
+
+      rec.onerror = (event: any) => {
+        const code = event?.error
+        if (code === 'not-allowed') {
+          manualVoiceStopRef.current = true
+          clearSilenceTimer()
+          setVoiceState('idle')
+          setVoiceMessage('Нет доступа к микрофону. Разреши микрофон для этого сайта.')
+          return
+        }
+        if (code !== 'no-speech' || !voiceBufferRef.current) {
+          setVoiceMessage('Не удалось распознать речь. Попробуй ещё раз.')
+        }
+      }
+
+      rec.onend = () => {
+        if (manualVoiceStopRef.current) {
+          setVoiceState('idle')
+          return
+        }
+        if (silenceTimerRef.current && voiceBufferRef.current) {
+          setTimeout(() => {
+            if (!manualVoiceStopRef.current && silenceTimerRef.current) {
+              try { launch() } catch {}
+            }
+          }, 100)
+        } else {
+          setVoiceState('idle')
+        }
+      }
+
+      try {
+        rec.start()
+      } catch {
         setVoiceState('idle')
-        setTimeout(() => submit(finalValue), 120)
+        setVoiceMessage('Не удалось включить микрофон. Попробуй ещё раз.')
       }
     }
-    rec.onerror = (event: any) => {
-      setVoiceState('idle')
-      setVoiceMessage(event?.error === 'not-allowed' ? 'Нет доступа к микрофону. Разреши микрофон для этого сайта.' : 'Не удалось распознать речь. Попробуй ещё раз.')
-    }
-    rec.onend = () => setVoiceState('idle')
-    rec.start()
+
+    launch()
+  }
+
+  function finishVoiceNow() {
+    const complete = (voiceBufferRef.current || transcript || interim).trim()
+    manualVoiceStopRef.current = true
+    clearSilenceTimer()
+    try { recognitionRef.current?.stop?.() } catch {}
+    recognitionRef.current = null
+    setVoiceState('idle')
+    if (complete) void submit(complete)
   }
 
   if (!pattern && !contrastSet && !finished) {
@@ -421,10 +537,10 @@ export default function Trainer({ mode }: { mode: Mode }) {
         <style>{css}</style>
         <div className="wrap">
           <div className="eyebrow">{mode === 'ours' ? 'Версия A · прямой тренажёр' : 'Версия B · Contrastive Activation Ladder'}</div>
-          <h1>{mode === 'ours' ? '30 конструкций. Target виден всегда.' : '10 contrast sets. Подсказка постепенно исчезает.'}</h1>
+          <h1>{mode === 'ours' ? '30 конструкций. Формула видна сразу.' : '10 contrast sets. Подсказка постепенно исчезает.'}</h1>
           <p className="lead">
             {mode === 'ours'
-              ? 'Моя версия: ученик не угадывает педагогическое намерение. Формула показана заранее, а система тренирует быстрое и правильное построение разных фраз через неё. Реальная языковая ошибка вызывает одно исправление и повтор.'
+              ? 'Нужная конструкция показана заранее. Твоя задача — быстро построить через неё правильную и естественную фразу. Система проверяет смысл, форму и реальный английский.'
               : 'Версия по логике коллеги: сначала проверяем исходный выбор формы, затем показываем опору, после двух сборок убираем её и смешиваем соседние конструкции. Хороший английский другой формой не наказывается — это записывается как selection miss.'}
           </p>
           {mode === 'ours' ? (
@@ -457,28 +573,34 @@ export default function Trainer({ mode }: { mode: Mode }) {
   }
 
   if (finished) {
-    const lastByStep = steps.map((_, i) => [...records].reverse().find((r) => r.stepIndex === i)).filter(Boolean) as AttemptRecord[]
-    const firstTry = lastByStep.filter((r) => r.retryCount === 0 && r.accepted).length
-    const hidden = lastByStep.filter((r) => ['cold', 'fade', 'contrast', 'delayed'].includes(r.phase))
+    const firstByStep = steps.map((_, i) => records.find((r) => r.stepIndex === i && r.retryCount === 0)).filter(Boolean) as AttemptRecord[]
+    const checked = firstByStep.length
+    const denominator = checked || 1
+    const perfectFirst = firstByStep.filter((r) => r.accepted && r.meaningOk && r.targetOk && r.languageOk).length
+    const meaningFirst = firstByStep.filter((r) => r.meaningOk).length
+    const targetFirst = firstByStep.filter((r) => r.targetOk).length
+    const languageFirst = firstByStep.filter((r) => r.languageOk).length
+    const hidden = firstByStep.filter((r) => ['cold', 'fade', 'contrast', 'delayed'].includes(r.phase))
     const selection = hidden.filter((r) => r.selectionSuccess).length
-    const functional = lastByStep.filter((r) => r.meaningOk).length
-    const languageClean = lastByStep.filter((r) => r.languageOk).length
+
     return (
       <div className="v5 dark">
         <style>{css}</style>
         <div className="wrap">
-          <div className="eyebrow">Итог экспериментальной сессии</div>
+          <div className="eyebrow">Итог тренировки</div>
           <h1>{mode === 'ours' ? pattern?.name : contrastSet?.title}</h1>
-          <div className="metrics">
-            <div className="metric"><div>С первого раза</div><strong>{firstTry}/{steps.length}</strong><span>без принудительного исправления</span></div>
-            <div className="metric"><div>Смысл передан</div><strong>{functional}/{steps.length}</strong><span>коммуникативная задача выполнена</span></div>
-            <div className="metric"><div>Без языковой ошибки</div><strong>{languageClean}/{steps.length}</strong><span>по финальной попытке каждого шага</span></div>
-            {mode === 'colleague' && <div className="metric"><div>Форма выбрана без показа</div><strong>{selection}/{hidden.length || 1}</strong><span>отдельно от общей успешности фразы</span></div>}
+          <div className="scorecard">
+            <div className="scorerow"><div><div className="label">Проверено системой</div><div className="desc">задания, где удалось полноценно проверить смысл и язык</div></div><strong>{checked}/{steps.length}</strong></div>
+            <div className="scorerow"><div><div className="label">Полностью с первого раза</div><div className="desc">смысл, нужная конструкция и английский сразу без исправления</div></div><strong>{perfectFirst}/{denominator}</strong></div>
+            <div className="scorerow"><div><div className="label">Смысл с первого раза</div><div className="desc">нужная мысль была передана сразу</div></div><strong>{meaningFirst}/{denominator}</strong></div>
+            <div className="scorerow"><div><div className="label">Конструкция с первого раза</div><div className="desc">тренируемая форма была собрана правильно сразу</div></div><strong>{targetFirst}/{denominator}</strong></div>
+            <div className="scorerow"><div><div className="label">Без языковых ошибок с первого раза</div><div className="desc">реальных грамматических или лексических ошибок в первой попытке не было</div></div><strong>{languageFirst}/{denominator}</strong></div>
+            {mode === 'colleague' && <div className="scorerow"><div><div className="label">Форма выбрана без показа</div><div className="desc">нужная конструкция появилась сама в скрытых заданиях</div></div><strong>{selection}/{hidden.length || 1}</strong></div>}
           </div>
           <div className="summary">
             {mode === 'ours'
-              ? 'Эта версия измеряет execution: можешь ли ты, зная нужную конструкцию, быстро собрать через неё правильную фразу в разных контекстах.'
-              : 'Эта версия разводит functional success и selection: хорошая фраза может быть принята даже тогда, когда нужная форма сама не активировалась.'}
+              ? 'Здесь считаются именно первые попытки. Исправленный второй или третий ответ больше не превращает исходную ошибку в «10 из 10 без ошибок».'
+              : 'Здесь отдельно учитывается, удалось ли передать смысл и удалось ли самостоятельно выбрать нужную форму.'}
           </div>
           <div className="actions"><button className="btn primary" onClick={backToLibrary}>К библиотеке</button></div>
         </div>
@@ -511,7 +633,7 @@ export default function Trainer({ mode }: { mode: Mode }) {
         {mode === 'colleague' && !currentStep.targetVisible && !currentStep.candidatePatterns && !revealTarget && <div className="actions"><button className="btn ghost" onClick={() => setRevealTarget(true)}>Показать конструкцию</button></div>}
         {mode === 'colleague' && showTarget && !currentStep.targetVisible && <div className="targetbox"><b>Подсказка</b><div className="form">{currentStep.pattern.form}</div></div>}
 
-        <div className="transcript"><b>Что распознала система</b><div className={liveText ? 'heard' : 'placeholder'}>{liveText ? `“${liveText}”` : voiceState === 'starting' ? 'Подключаю микрофон… Пока не говори.' : voiceState === 'listening' ? 'Микрофон включён. Говори — текст появится здесь.' : 'После ответа здесь будет транскрипция.'}</div></div>
+        <div className="transcript"><b>Что распознала система</b><div className={liveText ? 'heard' : 'placeholder'}>{liveText ? `“${liveText}”` : voiceState === 'starting' ? 'Подключаю микрофон… Пока не говори.' : voiceState === 'listening' ? 'Микрофон включён. Говори спокойно — короткий вдох не завершит ответ.' : 'После ответа здесь будет транскрипция.'}</div></div>
 
         {checking && <div className="panel" style={{ marginTop: 14 }}><span className="spinner" />Проверяю смысл, конструкцию и английский…</div>}
 
@@ -521,7 +643,9 @@ export default function Trainer({ mode }: { mode: Mode }) {
               <h3>{feedback.title}</h3><div>{feedback.body}</div>
               {feedback.correction && <div style={{ marginTop: 9 }}><b>Исправленный вариант:</b> {feedback.correction}</div>}
             </div>
-            {feedback.retryRequired ? (
+            {feedback.kind === 'technical' ? (
+              <div className="actions"><button className="btn primary" onClick={recheckTranscript}>Проверить ещё раз</button><button className="btn ghost" onClick={nextStep}>Продолжить без зачёта</button></div>
+            ) : feedback.retryRequired ? (
               <div className="actions"><button className="btn primary" onClick={retry}>Исправить и сказать ещё раз →</button></div>
             ) : (
               <>
@@ -532,9 +656,9 @@ export default function Trainer({ mode }: { mode: Mode }) {
           </>
         ) : !checking ? (
           <>
-            <div className="actions"><button className={`btn ${voiceState === 'idle' ? 'dark' : 'red'}`} onClick={() => voiceState === 'idle' ? startVoice() : recognitionRef.current?.stop?.()}>{label}</button><button className="btn ghost" onClick={() => setTyping((v) => !v)}>Или напечатать</button></div>
+            <div className="actions"><button className={`btn ${voiceState === 'idle' ? 'dark' : 'red'}`} onClick={() => voiceState === 'idle' ? startVoice() : finishVoiceNow()}>{label}</button><button className="btn ghost" onClick={() => setTyping((v) => !v)}>Или напечатать</button></div>
             {voiceState === 'starting' && <div className="status amber">Пока не говори. Дождись «Слушаю — говори».</div>}
-            {voiceState === 'listening' && <div className="status red">Микрофон включён.</div>}
+            {voiceState === 'listening' && <div className="status red">Микрофон включён. После последней фразы система ждёт около 2,5 секунды.</div>}
             {voiceMessage && <div className="status red">{voiceMessage}</div>}
             {typing && <div style={{ marginTop: 14 }}><textarea value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Your answer…" /><div className="actions"><button className="btn primary" onClick={() => submit(typed)}>Проверить</button></div></div>}
           </>
