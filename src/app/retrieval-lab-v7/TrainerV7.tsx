@@ -37,7 +37,10 @@ export default function TrainerV7() {
   const pattern = catalog.find(p => p.id === session?.targetId)
   const phase: Phase = session?.learning ? 'learning' : task?.phase || 'hidden'
   const visible = visiblePhase(phase)
-  const voice = useVoice(text => updateSession(s => ({ ...s, answer: text, originalTranscript: text, transcriptEdited: false, result: null })))
+  const voice = useVoice(text => {
+    updateSession(s => ({ ...s, answer: text, originalTranscript: text, transcriptEdited: false, result: null }))
+    void evaluate(text, false, true)
+  })
 
   useEffect(() => {
     try {
@@ -66,8 +69,12 @@ export default function TrainerV7() {
     setStore(d => ({ ...d, history: [...d.history, ...(d.session?.attempts || [])], session: next }))
     navigate(true)
   }
-  async function evaluate() {
-    if (!session || !task || !session.answer.trim() || busy.current || voice.state !== 'idle') return
+  async function evaluate(answerOverride?: string, transcriptEditedOverride?: boolean, fromVoice = false) {
+    if (!session || !task || busy.current || (!fromVoice && voice.state !== 'idle')) return
+    const submittedAnswer = (answerOverride ?? session.answer).trim()
+    if (!submittedAnswer) return
+    const submittedEdited = transcriptEditedOverride ?? session.transcriptEdited
+    const submittedOriginalTranscript = fromVoice ? submittedAnswer : session.originalTranscript
     busy.current = true; setChecking(true)
     const captured = session, capturedTask = task, capturedPhase = phase
     const controller = new AbortController(); request.current = controller
@@ -75,7 +82,7 @@ export default function TrainerV7() {
     let result = technical()
     try {
       const res = await fetch('/api/retrieval-lab-v7-eval', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ taskId: task.id, answer: session.answer.trim(), phase, transcriptEdited: session.transcriptEdited }) })
+        body: JSON.stringify({ taskId: task.id, answer: submittedAnswer, phase, transcriptEdited: submittedEdited }) })
       const data = await res.json()
       result = res.ok ? parseEvaluation(data) || technical() : technical()
     } catch { /* An unavailable evaluator never creates success. */ }
@@ -87,9 +94,9 @@ export default function TrainerV7() {
     updateSession(s => {
       if (s.id !== captured.id || s.index !== captured.index || s.retry !== captured.retry) return s
       const record: Attempt = { taskId: capturedTask.id, targetId: s.targetId, phase: capturedPhase, targetVisible: visiblePhase(capturedPhase), cueType: capturedTask.cueType,
-        answer: captured.answer.trim(), originalTranscript: captured.originalTranscript, transcriptEdited: captured.transcriptEdited,
+        answer: submittedAnswer, originalTranscript: submittedOriginalTranscript, transcriptEdited: submittedEdited,
         retry: s.retry, firstAttempt: !s.attempts.some(r => r.taskId === capturedTask.id), timestamp: new Date().toISOString(), result }
-      return { ...s, result, attempts: [...s.attempts, record] }
+      return { ...s, answer: submittedAnswer, originalTranscript: submittedOriginalTranscript, transcriptEdited: submittedEdited, result, attempts: [...s.attempts, record] }
     })
   }
   function retry() {
@@ -137,13 +144,13 @@ export default function TrainerV7() {
       {visible && <section className={styles.support}><span>{phase === 'minimal' || phase === 'varied' ? 'Короткая опора' : 'Попробуй эту форму'}</span><strong>{phase === 'minimal' || phase === 'varied' ? pattern.form.split(' + ')[0] : pattern.form}</strong>{(phase === 'visible' || phase === 'learning') && <p>{pattern.meaning}</p>}</section>}
       <label className={styles.answerLabel} htmlFor="v7-answer">Твоя фраза</label>
       <textarea id="v7-answer" value={session.answer} maxLength={2000} disabled={disabled || (!!session.result && action !== 'technical')} placeholder="Напечатай или запиши голосом…" onChange={e => updateSession(s => ({ ...s, answer: e.target.value, transcriptEdited: s.transcriptEdited || !!s.originalTranscript && e.target.value !== s.originalTranscript, result: null }))} />
-      {session.originalTranscript && <p className={styles.hint}>{session.transcriptEdited ? 'Текст записи исправлен.' : 'Запись распознана. Можно исправить текст перед проверкой.'}</p>}
+      {session.originalTranscript && <p className={styles.hint}>{session.transcriptEdited ? 'Текст записи исправлен.' : checking ? 'Речь распознана. Уже проверяю ответ…' : 'Речь распознана автоматически.'}</p>}
       {(!session.result || action === 'technical') && <div className={styles.actions}>
         <button className={styles.mic} aria-label={voice.state === 'listening' ? 'Завершить запись' : 'Записать ответ'} disabled={checking || ['requesting', 'transcribing'].includes(voice.state)} onClick={() => { if (voice.state === 'listening') voice.stop(); else { updateSession(s => ({ ...s, answer: '', originalTranscript: '', transcriptEdited: false, result: null })); void voice.start() } }}>
           {voice.state === 'listening' ? <span aria-hidden>■</span> : <svg aria-hidden width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>}
           {voice.state === 'listening' ? 'Готово' : session.originalTranscript ? 'Записать заново' : 'Голосом'}
         </button>
-        <button className={styles.primary} disabled={disabled || !session.answer.trim()} onClick={() => void evaluate()}>{checking ? 'Проверяю…' : 'Проверить'}</button>
+        {!session.originalTranscript && <button className={styles.primary} disabled={disabled || !session.answer.trim()} onClick={() => void evaluate()}>{checking ? 'Проверяю…' : 'Проверить'}</button>}
       </div>}
       <div role="status" aria-live="polite" className={styles.hint}>{voice.state !== 'idle' ? voiceLabel : checking ? 'Проверяю смысл и английский…' : ''}</div>
       {voice.error && <p role="alert" className={styles.warning}>{voice.error}</p>}
