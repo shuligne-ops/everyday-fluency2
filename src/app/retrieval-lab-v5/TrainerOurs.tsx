@@ -177,7 +177,6 @@ export default function TrainerOurs() {
     if (stepIndex >= drills.length - 1) setFinished(true)
     else setStepIndex((n) => n + 1)
   }
-
   function makeFeedback(j: JudgeResult, targetOk: boolean): Feedback {
     const err = j.errors[0]
     const correction = j.corrected_utterance || err?.correction || ''
@@ -222,7 +221,7 @@ export default function TrainerOurs() {
       recognitionRef.current = null
       setVoiceState('idle')
       if (finalText) void submit(finalText)
-    }, 2700)
+    }, 1800)
   }
 
   function startVoice() {
@@ -323,6 +322,6 @@ export default function TrainerOurs() {
     {!checking&&feedback?<>
       <div className={`panel feedback ${feedback.kind}`}><h3>{feedback.title}</h3><div>{feedback.body}</div>{feedback.correction&&<div style={{marginTop:8}}><b>Правильно:</b> {feedback.correction}</div>}</div>
       {feedback.kind==='technical'?<div className="actions"><button className="btn primary" onClick={recheck}>Проверить ещё раз</button><button className="btn ghost" onClick={next}>Продолжить без зачёта</button></div>:feedback.retryRequired?<div className="actions"><button className="btn primary" onClick={retry}>Исправить и сказать ещё раз →</button></div>:<><div className="panel models"><b>Хороший вариант</b><div className="model">{current.models[0]}</div>{current.models[1]&&<div className="model">Также естественно: {current.models[1]}</div>}</div><div className="actions"><button className="btn primary" onClick={next}>{stepIndex===drills.length-1?'Показать итог':'Дальше →'}</button><button className="btn ghost" onClick={retry}>Распознано неверно? Записать заново</button></div></>}
-    </>:!checking?<><div className="actions"><button className={`btn ${voiceState==='idle'?'dark':'red'}`} onClick={()=>voiceState==='idle'?startVoice():finishNow()}>{label}</button><button className="btn ghost" onClick={()=>setTyping((v)=>!v)}>Или напечатать</button></div>{voiceState==='starting'&&<div className="status amber">Пока не говори. Дождись «Слушаю — говори».</div>}{voiceState==='listening'&&<div className="status red">Микрофон включён. После последней речи ждём около 2,7 секунды.</div>}{voiceMessage&&<div className="status red">{voiceMessage}</div>}{typing&&<div style={{marginTop:13}}><textarea value={typed} onChange={(e)=>setTyped(e.target.value)} placeholder="Your answer…"/><div className="actions"><button className="btn primary" onClick={()=>submit(typed)}>Проверить</button></div></div>}</>:null}
+    </>:!checking?<><div className="actions"><button className={`btn ${voiceState==='idle'?'dark':'red'}`} onClick={()=>voiceState==='idle'?startVoice():finishNow()}>{label}</button><button className="btn ghost" onClick={()=>setTyping((v)=>!v)}>Или напечатать</button></div>{voiceState==='starting'&&<div className="status amber">Пока не говори. Дождись «Слушаю — говори».</div>}{voiceState==='listening'&&<div className="status red">Микрофон включён. После последней речи ждём около 1,8 секунды.</div>}{voiceMessage&&<div className="status red">{voiceMessage}</div>}{typing&&<div style={{marginTop:13}}><textarea value={typed} onChange={(e)=>setTyped(e.target.value)} placeholder="Your answer…"/><div className="actions"><button className="btn primary" onClick={()=>submit(typed)}>Проверить</button></div></div>}</>:null}
   </div></div>
 }
