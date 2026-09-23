@@ -16,6 +16,7 @@ These principles are the design baseline for future Retrieval Lab versions and f
 12. **Real language errors should be corrected clearly.** Show the exact problem, a minimal correction and, when pedagogically justified, one retry.
 13. **Target visibility and task expectations must be explicit.** In direct-training mode, show the construction before the learner answers; do not force them to guess the pedagogical target.
 14. **A polished design pass is required before production.** If necessary, hand the interface to a dedicated design/UI tool or designer, but preserve these interaction rules.
+15. **Speech endpointing must tolerate a normal breath and short hesitation.** Do not submit on the first short silence or first final ASR chunk. Keep listening for roughly **2–3 seconds after the last detected speech** before treating the utterance as finished. A brief pause for breathing must not trigger evaluation. The learner should also be able to end the turn manually when desired.
 
 ## Acceptance test
 
