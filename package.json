@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check-clean-for-tts": "node scripts/check-clean-for-tts.mjs"
+    "check-clean-for-tts": "node scripts/check-clean-for-tts.mjs",
+    "test:v7": "tsc src/app/retrieval-lab-v7/domain.ts src/app/retrieval-lab-v7/tasks.ts src/app/retrieval-lab-v7/voice.ts --outDir work/v7-tests --module commonjs --target es2022 --skipLibCheck --esModuleInterop && node --test scripts/retrieval-v7.test.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
