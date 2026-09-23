@@ -24,6 +24,13 @@ Accept synonyms, paraphrases, and contextually clear there/it/one, pronouns and 
 Hidden/review: natural alternatives fulfilling the communicative goal have communication=ok, target=not_used and language=ok. They are successful communication; never ask to repeat them for the target. For regret, 'I should have gone to bed earlier' is a good alternative to wish + past perfect. In visible modes the target is requested, but absence of it does not itself make communication or language wrong.
 target=correct only for an actual grammatical instance of the named target with the intended grammatical function. Missing target=not_used; an attempted but malformed target=incorrect. Reserve not_required for a task explicitly requiring no target; all supplied tasks have an observed target, including hidden tasks.
 Ignore punctuation, capitalization and plausible transcription punctuation. Report real errors only. Minor article errors outside the target are language=minor and off_target; do not upgrade them to important. An error that breaks the target form is inside_target and target=incorrect, even if minor. Set language to the maximum actual error severity; important/blocking errors require correction. Do not list a missing target as a language error. marked naturalness alone is not failure.
+Calibration examples (apply these distinctions to all tasks):
+- Cue 'Они раньше жили у моря', target 'used to + verb', answer 'They used to live there.': communication=ok,target=correct,language=ok. 'there' has a clear referent from the cue.
+- Cue 'Здесь раньше был кинотеатр', target 'used to + verb', answer 'There used to be one here.': communication=ok,target=correct,language=ok. The word cinema is NOT part of the grammatical target.
+- Same first cue, answer 'They never used to live by the sea.': communication=wrong,target=correct,language=ok,naturalness=natural,errors=[]. Wrong meaning is NOT a language or target-form error.
+- Cycling cue, answer 'I used to rode my bike to work.': communication=ok,target=incorrect,language=important. The intended meaning is clear despite malformed grammar.
+- Regret buying a car, hidden wish+past-perfect task, answer "I shouldn't have bought that car.": communication=ok,target=not_used,language=ok,naturalness=natural,errors=[]. Missing the observed target is NEVER a minor language error.
+For language=minor/important/blocking, include the actual error in errors. With no actual language errors use language=ok and errors=[]. Target is a GRAMMATICAL STRUCTURE, never the nouns or adverbs from a model answer.
 If unsure, use uncertain rather than inventing a positive score. Keep corrected_utterance an appropriate natural English sentence preserving the intended meaning. In hidden mode retain a valid alternative instead of converting it to the target. Keep note_ru short (one or two sentences), kind and specific. Explain an actual error or acknowledge meaning conveyed; never call a good hidden alternative wrong. No technical architecture terms. No more than three errors.`
 
 export async function POST(req: NextRequest) {
@@ -46,7 +53,7 @@ export async function POST(req: NextRequest) {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST', signal: AbortSignal.timeout(6500),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model: 'gpt-4o-mini', temperature: 0, max_tokens: 650,
+      body: JSON.stringify({ model: 'gpt-4.1-mini', temperature: 0, max_tokens: 650,
         response_format: { type: 'json_schema', json_schema: { name: 'fluency_v7', strict: true, schema } },
         messages: [ { role: 'system', content: system }, { role: 'user', content: JSON.stringify({
           task: { cue: task.cue, meaning: task.meaning, target: pattern.form, function: pattern.meaning, mode: visiblePhase(body.phase as typeof task.phase) ? 'visible' : 'hidden', example: task.model },

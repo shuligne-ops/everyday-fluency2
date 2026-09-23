@@ -31,6 +31,7 @@ export function parseEvaluation(raw: unknown): Evaluation | null {
     // Contradictory severity cannot become a positive score.
     const severity = { ok: 0, minor: 1, important: 2, blocking: 3, uncertain: 4 }
     if (d.errors.some(e => severity[e.severity as 'minor'] > severity[d.language as keyof typeof severity])) return null
+    if (['minor', 'important', 'blocking'].includes(d.language as string) && d.errors.length === 0) return null
     return d as Evaluation
   } catch { return null }
 }
