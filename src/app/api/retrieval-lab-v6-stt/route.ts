@@ -23,19 +23,24 @@ async function canonicalizeAudio(audio: File) {
   return new File([bytes], `answer.${ext}`, { type })
 }
 
-async function transcribeWithOpenAI(audio: File) {
+type ProviderResult = {
+  transcript?: string
+  provider?: string
+  error?: string
+}
+
+async function transcribeOpenAIModel(audio: File, model: string): Promise<ProviderResult> {
   const key = cleanKey(process.env.OPENAI_API_KEY)
-  if (!key) return null
+  if (!key) return { error: 'openai:no-key' }
 
   const body = new FormData()
   body.append('file', audio, audio.name)
-  body.append('model', 'whisper-1')
+  body.append('model', model)
   body.append('language', 'en')
-  body.append('temperature', '0')
 
   try {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 6500)
+    const timer = setTimeout(() => controller.abort(), 7000)
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       signal: controller.signal,
@@ -45,22 +50,34 @@ async function transcribeWithOpenAI(audio: File) {
     clearTimeout(timer)
 
     if (!response.ok) {
-      console.warn('[retrieval-v6-stt] OpenAI', response.status, await response.text().catch(() => ''))
-      return null
+      const detail = await response.text().catch(() => '')
+      console.warn(`[retrieval-v6-stt] OpenAI ${model}`, response.status, detail)
+      return { error: `openai:${model}:${response.status}` }
     }
 
     const data = await response.json() as { text?: string }
     const transcript = data.text?.trim()
-    return transcript ? { transcript, provider: 'openai' as const } : null
+    return transcript
+      ? { transcript, provider: `openai:${model}` }
+      : { error: `openai:${model}:empty` }
   } catch (error) {
-    console.warn('[retrieval-v6-stt] OpenAI failed', error)
-    return null
+    console.warn(`[retrieval-v6-stt] OpenAI ${model} failed`, error)
+    return { error: `openai:${model}:timeout-or-network` }
   }
 }
 
-async function transcribeWithElevenLabs(audio: File) {
+async function transcribeWithOpenAI(audio: File): Promise<ProviderResult> {
+  // Prefer the current fast transcription model; keep Whisper as a compatibility fallback.
+  const modern = await transcribeOpenAIModel(audio, 'gpt-4o-mini-transcribe')
+  if (modern.transcript) return modern
+  const whisper = await transcribeOpenAIModel(audio, 'whisper-1')
+  if (whisper.transcript) return whisper
+  return { error: `${modern.error || 'openai:modern-failed'}|${whisper.error || 'openai:whisper-failed'}` }
+}
+
+async function transcribeWithElevenLabs(audio: File): Promise<ProviderResult> {
   const key = cleanKey(process.env.ELEVENLABS_API_KEY)
-  if (!key) return null
+  if (!key) return { error: 'elevenlabs:no-key' }
 
   const body = new FormData()
   body.append('file', audio, audio.name)
@@ -71,7 +88,7 @@ async function transcribeWithElevenLabs(audio: File) {
 
   try {
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 6500)
+    const timer = setTimeout(() => controller.abort(), 7000)
     const response = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
       method: 'POST',
       signal: controller.signal,
@@ -81,17 +98,30 @@ async function transcribeWithElevenLabs(audio: File) {
     clearTimeout(timer)
 
     if (!response.ok) {
-      console.warn('[retrieval-v6-stt] ElevenLabs', response.status, await response.text().catch(() => ''))
-      return null
+      const detail = await response.text().catch(() => '')
+      console.warn('[retrieval-v6-stt] ElevenLabs', response.status, detail)
+      return { error: `elevenlabs:${response.status}` }
     }
 
     const data = await response.json() as { text?: string }
     const transcript = data.text?.trim()
-    return transcript ? { transcript, provider: 'elevenlabs' as const } : null
+    return transcript
+      ? { transcript, provider: 'elevenlabs:scribe_v2' }
+      : { error: 'elevenlabs:empty' }
   } catch (error) {
     console.warn('[retrieval-v6-stt] ElevenLabs failed', error)
-    return null
+    return { error: 'elevenlabs:timeout-or-network' }
   }
+}
+
+// Safe health check: exposes only whether server credentials are configured,
+// never their values. This is temporary but useful while stabilising preview STT.
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    openaiConfigured: Boolean(cleanKey(process.env.OPENAI_API_KEY)),
+    elevenLabsConfigured: Boolean(cleanKey(process.env.ELEVENLABS_API_KEY)),
+  }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 export async function POST(req: NextRequest) {
@@ -99,37 +129,40 @@ export async function POST(req: NextRequest) {
     const form = await req.formData()
     const rawAudio = form.get('audio')
     if (!(rawAudio instanceof File)) {
-      return NextResponse.json({ error: 'audio required' }, { status: 400 })
+      return NextResponse.json({ error: 'audio required', code: 'no-audio' }, { status: 400 })
     }
 
-    // Android browsers do not always record WebM. Giving an MP4/M4A blob a generic
-    // ".audio" name can make transcription providers reject an otherwise valid file.
-    // Normalize the filename from the actual MIME type before sending it upstream.
     const audio = await canonicalizeAudio(rawAudio)
-
-    // For the experimental lab favor reliability and latency over tiny duplicate STT cost:
-    // ask both configured providers in parallel and use the first successful transcript.
-    const openAiPromise = transcribeWithOpenAI(audio)
-    const elevenPromise = transcribeWithElevenLabs(audio)
-
-    const first = await new Promise<{ transcript: string; provider: 'openai' | 'elevenlabs' } | null>((resolve) => {
-      let finished = 0
-      const settle = (result: { transcript: string; provider: 'openai' | 'elevenlabs' } | null) => {
-        if (result) return resolve(result)
-        finished += 1
-        if (finished === 2) resolve(null)
-      }
-      void openAiPromise.then(settle)
-      void elevenPromise.then(settle)
-    })
-
-    if (first) {
-      return NextResponse.json(first, { headers: { 'Cache-Control': 'no-store' } })
+    if (audio.size < 500) {
+      return NextResponse.json({ error: 'audio too short', code: 'audio-too-short', size: audio.size, type: audio.type }, { status: 422 })
     }
 
-    return NextResponse.json({ error: 'transcription unavailable' }, { status: 502 })
+    // Run independent providers in parallel. OpenAI internally tries the modern
+    // transcription model first and Whisper second.
+    const [openai, eleven] = await Promise.all([
+      transcribeWithOpenAI(audio),
+      transcribeWithElevenLabs(audio),
+    ])
+
+    const winner = openai.transcript ? openai : eleven.transcript ? eleven : null
+    if (winner?.transcript) {
+      return NextResponse.json({
+        transcript: winner.transcript,
+        provider: winner.provider,
+      }, { headers: { 'Cache-Control': 'no-store' } })
+    }
+
+    return NextResponse.json({
+      error: 'transcription unavailable',
+      code: 'all-providers-failed',
+      audio: { size: audio.size, type: audio.type, name: audio.name },
+      providers: {
+        openai: openai.error || 'unknown',
+        elevenlabs: eleven.error || 'unknown',
+      },
+    }, { status: 502, headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('[retrieval-v6-stt] unexpected', error)
-    return NextResponse.json({ error: 'stt failed' }, { status: 500 })
+    return NextResponse.json({ error: 'stt failed', code: 'server-exception' }, { status: 500 })
   }
 }
