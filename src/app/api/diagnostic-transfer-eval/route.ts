@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const supabase = createServiceClient()
     const { data: session, error: fetchError } = await supabase
-      .from('diagnostic_sessions').select('transcript, step, move').eq('id', session_id).single()
+      .from('diagnostic_sessions').select('transcript, step, move, anon_id, attempt_id, latency_ms').eq('id', session_id).single()
     if (fetchError || !session) return NextResponse.json({ error: 'TRANSFER-сессия не найдена' }, { status: 404 })
     if (session.step !== 'transfer' || !session.transcript) return NextResponse.json({ error: 'Некорректная TRANSFER-сессия' }, { status: 400 })
 
@@ -39,7 +39,24 @@ export async function POST(req: NextRequest) {
       .update({ contrast: analysis, rubric_id: rubric.id, model_used: model })
       .eq('id', session_id)
     if (saveError) console.error('[diagnostic-transfer-eval] save analysis failed:', saveError)
-    return NextResponse.json({ analysis })
+
+    // Prototype longitudinal memory. This is deliberately non-blocking: a
+    // missing migration must never break the existing diagnostic.
+    const transferScore = Number((analysis as { transfer_score?: unknown })?.transfer_score)
+    let skillMemory: unknown = null
+    if (Number.isInteger(transferScore) && transferScore >= 0 && transferScore <= 2 && session.anon_id && session.attempt_id) {
+      const { data: memory, error: memoryError } = await supabase.rpc('update_skill_memory_from_transfer', {
+        p_user_key: session.anon_id,
+        p_move_id: session.move,
+        p_attempt_id: session.attempt_id,
+        p_transfer_score: transferScore,
+        p_latency_ms: session.latency_ms ?? null,
+      })
+      if (memoryError) console.error('[diagnostic-transfer-eval] skill memory update skipped:', memoryError)
+      else skillMemory = memory
+    }
+
+    return NextResponse.json({ analysis, skill_memory: skillMemory })
   } catch (error) {
     console.error('[diagnostic-transfer-eval] unexpected:', error)
     return NextResponse.json({ error: 'Ошибка разбора TRANSFER' }, { status: 500 })
