@@ -1,16 +1,16 @@
 import type { CueType, Phase } from '../retrieval-lab-v7/domain'
 
-export type Target={id:string;name:string;form:string;meaning:string;level:string;promise:string;repair:string}
+export type Target={id:string;name:string;topic:string;form:string;meaning:string;level:string;promise:string;repair:string}
 export type Task={id:string;targetId:string;phase:Phase;cueType:CueType;title:string;context:string;intent:string;dialogue?:string;model:string}
 type Row=[string,string,string,string,string?]
 const phases:Phase[]=['hidden','visible','visible','compact','minimal','varied','varied','hidden','hidden']
 export const targets:Target[]=[
-{id:'used_to',name:'Как было раньше',form:'used to + verb',meaning:'Привычка или состояние в прошлом, которых больше нет.',level:'A2–B1',promise:'Быстро рассказывать, что раньше было иначе.',repair:'После used to нужен глагол в начальной форме: used to live, used to work.'},
-{id:'present_perfect_experience',name:'Что уже случилось',form:'have / has + V3',meaning:'Опыт, результат или действие, важное сейчас.',level:'B1',promise:'Связывать прошлое с настоящим без долгого выбора времени.',repair:'Сначала подлежащее, затем have/has и третья форма глагола.'},
-{id:'present_perfect_continuous',name:'Что длится до сих пор',form:'have / has been + -ing',meaning:'Действие началось раньше и продолжается сейчас или только что закончилось.',level:'B1–B2',promise:'Естественно говорить о длительности и текущем результате.',repair:'Нужна цепочка have/has been + глагол с -ing.'},
-{id:'should_have',name:'Что стоило сделать',form:'should have + V3',meaning:'Оценка прошлого решения: лучше было поступить иначе.',level:'B1',promise:'Быстро формулировать совет и сожаление о прошлом.',repair:'После should have нужна третья форма: should have checked, should have gone.'},
-{id:'wish_past',name:'О чём жалеешь',form:'wish + had + V3',meaning:'Желание изменить то, что уже произошло.',level:'B1–B2',promise:'Выражать сильное сожаление без перевода в голове.',repair:'После wish нужен Past Perfect: I wish I had gone / had not said.'},
-{id:'mixed_conditional',name:'Если бы тогда — сейчас было бы иначе',form:'If + had + V3 → would + verb',meaning:'Воображаемое изменение прошлого и его результат сейчас.',level:'B2',promise:'Связывать прошлую причину с нынешним результатом.',repair:'В if-части — had + V3; результат относится к настоящему: would/could + verb.'},
+{id:'used_to',name:'Как было раньше',topic:'Past habits & states · used to',form:'used to + verb',meaning:'Привычка или состояние в прошлом, которых больше нет.',level:'A2–B1',promise:'Быстро рассказывать, что раньше было иначе.',repair:'После used to нужен глагол в начальной форме: used to live, used to work.'},
+{id:'present_perfect_experience',name:'Что уже случилось',topic:'Present Perfect · experience & result',form:'have / has + V3',meaning:'Опыт, результат или действие, важное сейчас.',level:'B1',promise:'Связывать прошлое с настоящим без долгого выбора времени.',repair:'Сначала подлежащее, затем have/has и третья форма глагола.'},
+{id:'present_perfect_continuous',name:'Что длится до сих пор',topic:'Present Perfect Continuous · duration',form:'have / has been + -ing',meaning:'Действие началось раньше и продолжается сейчас или только что закончилось.',level:'B1–B2',promise:'Естественно говорить о длительности и текущем результате.',repair:'Нужна цепочка have/has been + глагол с -ing.'},
+{id:'should_have',name:'Что стоило сделать',topic:'Past modal · should have',form:'should have + V3',meaning:'Оценка прошлого решения: лучше было поступить иначе.',level:'B1',promise:'Быстро формулировать совет и сожаление о прошлом.',repair:'После should have нужна третья форма: should have checked, should have gone.'},
+{id:'wish_past',name:'О чём жалеешь',topic:'Past regret · wish + had + V3',form:'wish + had + V3',meaning:'Желание изменить то, что уже произошло.',level:'B1–B2',promise:'Выражать сильное сожаление без перевода в голове.',repair:'После wish нужен Past Perfect: I wish I had gone / had not said.'},
+{id:'mixed_conditional',name:'Если бы тогда — сейчас было бы иначе',topic:'Mixed Conditionals · past cause → present result',form:'If + had + V3 → would + verb',meaning:'Воображаемое изменение прошлого и его результат сейчас.',level:'B2',promise:'Связывать прошлую причину с нынешним результатом.',repair:'В if-части — had + V3; результат относится к настоящему: would/could + verb.'},
 ]
 export const library=targets
 export const targetById=Object.fromEntries(targets.map(t=>[t.id,t])) as Record<string,Target>
