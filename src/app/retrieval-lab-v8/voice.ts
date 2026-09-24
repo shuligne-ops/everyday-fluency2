@@ -155,7 +155,8 @@ export function useVoice(taskId: string | undefined, onTranscript: (text: string
         if (hotFrames >= 2) { speechStarted = true; lastVoice = now }
         else if (speechStarted && rms > threshold * .68) lastVoice = now
 
-        if (speechStarted && now - lastVoice >= 1800) { stop(); return }
+        // Keep the drill moving: short answers should finish quickly once the learner stops speaking.
+        if (speechStarted && now - lastVoice >= 1100) { stop(); return }
         if (!speechStarted && now - startedAt >= 12000) {
           cancel()
           setError('Не услышал речь. Попробуй ещё раз и говори сразу после «Слушаю — говори».')
